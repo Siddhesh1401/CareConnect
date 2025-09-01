@@ -115,20 +115,6 @@ export const NGODashboard: React.FC = () => {
             </h1>
             <p className="text-gray-600 mt-2">Manage your organization and track your impact</p>
           </div>
-          <div className="flex space-x-3">
-            <Link to="/ngo/events/create">
-              <Button className="bg-blue-500 hover:bg-blue-600">
-                <Plus className="mr-2 w-4 h-4" />
-                Create Event
-              </Button>
-            </Link>
-            <Link to="/ngo/campaigns/create">
-              <Button variant="outline">
-                <Target className="mr-2 w-4 h-4" />
-                New Campaign
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Stats Grid */}
