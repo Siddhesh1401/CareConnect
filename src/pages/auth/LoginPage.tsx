@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Heart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, Heart, CheckCircle, Info } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -11,8 +11,21 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'info' | 'success' | 'error'>('info');
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle incoming state message (from NGO registration)
+  useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message);
+      setMessageType(location.state.type || 'info');
+      // Clear the state to prevent message from persisting on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +40,36 @@ export const LoginPage: React.FC = () => {
       await login(email, password);
       const role = email === 'volunteer@careconnect.com' ? 'volunteer' : 'ngo_admin';
       navigate(role === 'volunteer' ? '/volunteer/dashboard' : '/ngo/dashboard');
-    } catch (err) {
-      setError('Invalid email or password');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      console.log('Error code:', err.code);
+      console.log('Error response:', err.response?.data);
+      
+      // Check if NGO has rejected documents and needs to resubmit
+      if (err.code === 'DOCUMENTS_REJECTED') {
+        console.log('Redirecting to resubmit page');
+        console.log('Rejected documents from error:', err.rejectedDocuments);
+        // Store the rejected documents info for the resubmission page
+        localStorage.setItem('rejectedDocuments', JSON.stringify(err.rejectedDocuments || {}));
+        localStorage.setItem('userEmail', email);
+        navigate('/auth/resubmit-documents');
+        return;
+      }
+      
+      // Check if NGO is pending approval and redirect to pending page
+      if (err.code === 'PENDING_APPROVAL') {
+        console.log('Redirecting to pending approval page with data:', err.data);
+        
+        // Extract organization details from error data or fallback to email parsing
+        const orgName = err.data?.organizationName || 
+                       email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const userEmail = err.data?.email || email;
+        
+        navigate(`/auth/pending-approval?orgName=${encodeURIComponent(orgName)}&email=${encodeURIComponent(userEmail)}`);
+        return;
+      }
+      
+      setError(err.message || 'Invalid email or password');
     }
   };
 
@@ -51,6 +92,23 @@ export const LoginPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                {message && (
+                  <div className={`p-4 border rounded-xl animate-fadeInDown ${
+                    messageType === 'success' ? 'bg-green-50 border-green-200 text-green-700' :
+                    messageType === 'error' ? 'bg-red-50 border-red-200 text-red-700' :
+                    'bg-blue-50 border-blue-200 text-blue-700'
+                  }`}>
+                    <div className="flex items-center">
+                      {messageType === 'success' ? (
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                      ) : (
+                        <Info className="w-5 h-5 mr-2" />
+                      )}
+                      {message}
+                    </div>
+                  </div>
+                )}
+                
                 {error && (
                   <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 animate-shake">
                     {error}

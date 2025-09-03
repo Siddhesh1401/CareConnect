@@ -7,6 +7,24 @@ export interface User {
   points?: number;
   achievements?: Achievement[];
   joinedDate: Date;
+  // Additional fields from backend
+  phone?: string;
+  location?: {
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+  skills?: string[];
+  interests?: string[];
+  organizationName?: string;
+  isVerified?: boolean;
+  isNGOVerified?: boolean;
+  verificationStatus?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface Achievement {

@@ -9,6 +9,9 @@ import { Footer } from './components/layout/Footer';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
+import EmailVerificationPage from './pages/auth/EmailVerificationPage';
+import PendingApprovalPage from './pages/auth/PendingApprovalPage';
+import { RejectionResubmitPage } from './pages/auth/RejectionResubmitPage';
 import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard';
 import { CommunityPage } from './pages/community/CommunityPage';
 import { EventsPage } from './pages/events/EventsPage';
@@ -97,7 +100,6 @@ const AppLayout: React.FC<{ children: React.ReactNode; hideFooter?: boolean }> =
   children, 
   hideFooter = false 
 }) => {
-  const { user } = useAuth();
   const isDashboard = window.location.pathname.includes('/dashboard') || 
                      window.location.pathname.includes('/community') ||
                      window.location.pathname.includes('/admin');
@@ -135,6 +137,13 @@ function App() {
           } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
+          <Route path="/auth/pending-approval" element={
+            <PendingApprovalPage />
+          } />
+          <Route path="/auth/resubmit-documents" element={
+            <RejectionResubmitPage />
+          } />
           <Route path="/demo" element={<DemoPage />} />
           <Route path="/forgot-password" element={
             <AppLayout hideFooter>

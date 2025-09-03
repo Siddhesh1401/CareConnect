@@ -92,10 +92,39 @@ export const SignupPage: React.FC = () => {
     }
 
     try {
-      await signup(formData.name, formData.email, formData.password, formData.role);
-      navigate(formData.role === 'volunteer' ? '/volunteer/dashboard' : '/ngo/dashboard');
-    } catch (err) {
-      setError('Failed to create account. Please try again.');
+      // Prepare additional data based on role
+      const additionalData: any = {};
+      
+      if (formData.role === 'ngo_admin') {
+        // For NGO admin, the "name" field represents the organization name
+        additionalData.organizationName = formData.name;
+        // Include documents for upload
+        additionalData.documents = documents;
+      }
+      
+      await signup(formData.name, formData.email, formData.password, formData.role, additionalData);
+      
+      // Handle redirect based on user role
+      if (formData.role === 'volunteer') {
+        // Volunteers need email verification
+        navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+      } else if (formData.role === 'ngo_admin') {
+        // NGOs go to pending approval page
+        navigate(`/auth/pending-approval?org=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}`);
+      }
+      
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      
+      // If it's the NGO approval message, show it as a success state
+      if (err.message && err.message.includes('Please wait for admin approval')) {
+        setError(''); // Clear any existing errors
+        // Redirect NGOs to pending approval page
+        navigate(`/auth/pending-approval?org=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}`);
+        return;
+      }
+      
+      setError(err.message || 'Failed to create account. Please try again.');
     }
   };
 
