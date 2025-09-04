@@ -12,7 +12,6 @@ export const CreateEvent: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -77,17 +76,6 @@ export const CreateEvent: React.FC = () => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setSelectedImages(prev => [...prev, ...files].slice(0, 3)); // Max 3 images
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -133,39 +121,17 @@ export const CreateEvent: React.FC = () => {
         return;
       }
 
-      // Prepare FormData for file upload
-      const formDataToSend = new FormData();
-      
-      // Add form fields
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('category', formData.category);
-      formDataToSend.append('date', formData.date);
-      formDataToSend.append('startTime', formData.startTime);
-      formDataToSend.append('endTime', formData.endTime);
-      formDataToSend.append('location', JSON.stringify(formData.location));
-      formDataToSend.append('capacity', formData.capacity);
-      formDataToSend.append('requirements', formData.requirements);
-      formDataToSend.append('whatToExpect', formData.whatToExpect);
-      formDataToSend.append('tags', JSON.stringify(formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []));
+      // Prepare data for API
+      const eventData = {
+        ...formData,
+        capacity: parseInt(formData.capacity),
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+      };
 
-      // Add images only if they exist
-      if (selectedImages.length > 0) {
-        selectedImages.forEach((image) => {
-          formDataToSend.append('images', image);
-        });
-      }
-
-      console.log('Submitting form data:', {
-        title: formData.title,
-        location: formData.location,
-        imageCount: selectedImages.length
-      });
-
-      const response = await axios.post(`${API_BASE_URL}/events/create`, formDataToSend, {
+      const response = await axios.post(`${API_BASE_URL}/events/create`, eventData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
 
@@ -266,49 +232,6 @@ export const CreateEvent: React.FC = () => {
                   ))}
                 </select>
               </div>
-            </div>
-          </Card>
-
-          {/* Event Images */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Images (Optional)</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Event Images (Max 3)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Accepted formats: JPG, PNG, GIF. Max size: 5MB per image.
-                </p>
-              </div>
-              
-              {selectedImages.length > 0 && (
-                <div className="grid grid-cols-3 gap-4">
-                  {selectedImages.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </Card>
 

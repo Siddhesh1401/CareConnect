@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users,
@@ -18,12 +18,68 @@ import {
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import api from '../../services/api';
+
+interface DashboardStats {
+  totalUsers: number;
+  totalVolunteers: number;
+  activeNGOs: number;
+  pendingNGOs: number;
+  totalNGOs: number;
+}
+
+interface RecentUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  joinedDate: string;
+}
+
+interface PendingNGO {
+  id: string;
+  organizationName: string;
+  contactPerson: string;
+  email: string;
+  submittedDate: string;
+}
 
 export const AdminDashboard: React.FC = () => {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    totalVolunteers: 0,
+    activeNGOs: 0,
+    pendingNGOs: 0,
+    totalNGOs: 0
+  });
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [pendingNGORequests, setPendingNGORequests] = useState<PendingNGO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/admin/dashboard/stats');
+      if (response.data.success) {
+        setStats(response.data.data.stats);
+        setRecentUsers(response.data.data.recentUsers);
+        setPendingNGORequests(response.data.data.pendingNGORequests);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
   const platformStats = [
     { 
       label: 'Total Users', 
-      value: '15,247', 
+      value: stats.totalUsers.toLocaleString(), 
       change: '+12%',
       icon: Users, 
       color: 'from-blue-500 to-blue-600',
@@ -32,7 +88,7 @@ export const AdminDashboard: React.FC = () => {
     },
     { 
       label: 'Active NGOs', 
-      value: '523', 
+      value: stats.activeNGOs.toString(), 
       change: '+8%',
       icon: Building, 
       color: 'from-green-500 to-green-600',
@@ -41,7 +97,7 @@ export const AdminDashboard: React.FC = () => {
     },
     { 
       label: 'Pending NGO Requests', 
-      value: '12', 
+      value: stats.pendingNGOs.toString(), 
       change: '-3%',
       icon: AlertTriangle, 
       color: 'from-orange-500 to-orange-600',
@@ -49,84 +105,28 @@ export const AdminDashboard: React.FC = () => {
       bgColor: 'bg-orange-50'
     },
     { 
-      label: 'Total Donations', 
-      value: '₹2.4M', 
+      label: 'Total Volunteers', 
+      value: stats.totalVolunteers.toLocaleString(), 
       change: '+25%',
-      icon: DollarSign, 
+      icon: UserCheck, 
       color: 'from-purple-500 to-purple-600',
       textColor: 'text-purple-600',
       bgColor: 'bg-purple-50'
     }
   ];
 
-  const pendingNGORequests = [
-    {
-      id: '1',
-      organizationName: 'Hope Foundation',
-      contactPerson: 'Rajesh Kumar',
-      submittedDate: '2025-01-20',
-      status: 'pending'
-    },
-    {
-      id: '2',
-      organizationName: 'Clean Water Initiative',
-      contactPerson: 'Priya Sharma',
-      submittedDate: '2025-01-18',
-      status: 'pending'
-    },
-    {
-      id: '3',
-      organizationName: 'Animal Rescue Society',
-      contactPerson: 'Amit Singh',
-      submittedDate: '2025-01-15',
-      status: 'pending'
-    }
-  ];
 
-  const recentUsers = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      role: 'volunteer',
-      joinedDate: '2025-01-22'
-    },
-    {
-      id: '2',
-      name: 'Rahul Kumar',
-      email: 'rahul@example.com',
-      role: 'volunteer',
-      joinedDate: '2025-01-21'
-    },
-    {
-      id: '3',
-      name: 'Green Earth Foundation',
-      email: 'contact@greenearth.org',
-      role: 'ngo_admin',
-      joinedDate: '2025-01-20'
-    }
-  ];
 
-  const recentActivities = [
-    {
-      id: '1',
-      message: 'New NGO registration request from Hope Foundation',
-      timestamp: '2 hours ago',
-      status: 'pending'
-    },
-    {
-      id: '2',
-      message: 'User Sarah Johnson completed volunteer verification',
-      timestamp: '4 hours ago',
-      status: 'completed'
-    },
-    {
-      id: '3',
-      message: 'Clean Water Initiative NGO application approved',
-      timestamp: '1 day ago',
-      status: 'approved'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -223,7 +223,7 @@ export const AdminDashboard: React.FC = () => {
                   <span>Pending NGO Requests</span>
                 </h2>
                 <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
-                  {pendingNGORequests.length} Pending
+                  {stats.pendingNGOs} Pending
                 </div>
               </div>
               
@@ -329,15 +329,15 @@ export const AdminDashboard: React.FC = () => {
             </Card>
           </div>
 
-          {/* Recent Activities */}
+          {/* System Overview */}
           <div className="animate-fade-in-right">
             <Card className="p-8 h-full bg-white/80 backdrop-blur-sm border border-green-100/50 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center space-x-3">
                   <div className="p-3 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg">
-                    <Activity className="w-6 h-6 text-white" />
+                    <TrendingUp className="w-6 h-6 text-white" />
                   </div>
-                  <span>Recent Activities</span>
+                  <span>System Overview</span>
                 </h2>
                 <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -345,44 +345,36 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
               
-              <div className="space-y-4">
-                {recentActivities.map((activity, index) => (
-                  <div key={activity.id} className={`group flex items-start space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-200/50 hover:shadow-lg transition-all duration-300 animate-fade-in-up`}
-                       style={{ animationDelay: `${index * 100}ms` }}>
-                    <div className={`w-3 h-3 rounded-full mt-2 shadow-lg ${
-                      activity.status === 'completed' ? 'bg-gradient-to-r from-green-400 to-green-500' :
-                      activity.status === 'pending' ? 'bg-gradient-to-r from-orange-400 to-orange-500' :
-                      activity.status === 'approved' ? 'bg-gradient-to-r from-blue-400 to-blue-500' :
-                      'bg-gradient-to-r from-red-400 to-red-500'
-                    } animate-pulse`} />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 mb-2">{activity.message}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
-                          <Clock className="w-3 h-3" />
-                          <span>{activity.timestamp}</span>
-                        </div>
-                        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
-                          activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          activity.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                          activity.status === 'approved' ? 'bg-blue-100 text-blue-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {activity.status}
-                        </span>
-                      </div>
-                    </div>
+              <div className="space-y-6">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100/50 border border-blue-200/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Total Users</span>
+                    <span className="text-lg font-bold text-blue-600">{stats.totalUsers}</span>
                   </div>
-                ))}
-              </div>
-              
-              <div className="mt-6">
-                <Link to="/admin/activity">
-                  <Button variant="outline" className="w-full bg-gradient-to-r from-green-50 to-green-100 border-green-200 text-green-700 hover:from-green-100 hover:to-green-200">
-                    <Activity className="w-4 h-4 mr-2" />
-                    View Full Activity Log
-                  </Button>
-                </Link>
+                  <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+                
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-green-50 to-green-100/50 border border-green-200/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Active NGOs</span>
+                    <span className="text-lg font-bold text-green-600">{stats.activeNGOs}</span>
+                  </div>
+                  <div className="w-full bg-green-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full" style={{ width: '70%' }}></div>
+                  </div>
+                </div>
+                
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-purple-100/50 border border-purple-200/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Volunteers</span>
+                    <span className="text-lg font-bold text-purple-600">{stats.totalVolunteers}</span>
+                  </div>
+                  <div className="w-full bg-purple-200 rounded-full h-2">
+                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full" style={{ width: '90%' }}></div>
+                  </div>
+                </div>
               </div>
             </Card>
           </div>
@@ -445,7 +437,7 @@ export const AdminDashboard: React.FC = () => {
                   <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-sm font-semibold text-gray-700">NGO Requests</span>
-                <div className="text-xs text-orange-600 mt-1">12 Pending</div>
+                <div className="text-xs text-orange-600 mt-1">{stats.pendingNGOs} Pending</div>
               </div>
             </Link>
             <Link to="/admin/users" className="group">
@@ -453,8 +445,8 @@ export const AdminDashboard: React.FC = () => {
                 <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                   <Users className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-sm font-semibold text-gray-700">User Management</span>
-                <div className="text-xs text-blue-600 mt-1">15.2K Users</div>
+                <span className="text-sm font-semibold text-gray-700">Volunteer Management</span>
+                <div className="text-xs text-blue-600 mt-1">{stats.totalVolunteers} Volunteers</div>
               </div>
             </Link>
             <Link to="/admin/settings" className="group">

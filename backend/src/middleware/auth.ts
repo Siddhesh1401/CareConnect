@@ -67,3 +67,40 @@ export const authorize = (...roles: string[]) => {
     next();
   };
 };
+
+// Optional authentication - continues even if no token provided
+export const optionalAuthenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      // No token provided, continue without user
+      next();
+      return;
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    try {
+      // Verify token
+      const decoded = verifyToken(token) as any;
+      
+      // Find user
+      const user = await User.findById(decoded.userId).select('-password');
+      
+      if (user && user.accountStatus === 'active') {
+        req.user = user;
+      }
+      // If user not found or inactive, continue without user (don't throw error)
+    } catch (tokenError) {
+      // Invalid token, continue without user (don't throw error)
+      console.log('Optional auth: Invalid token, continuing without user');
+    }
+
+    next();
+
+  } catch (error) {
+    // Any other error, continue without user
+    next();
+  }
+};

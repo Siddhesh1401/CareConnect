@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Send, User, Heart, Calendar, Users, Building, Search, HelpCircle, MessageCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 interface Message {
   id: string;
@@ -324,7 +325,7 @@ export const ChatBot: React.FC = () => {
     };
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
     const userMessage: Message = {
@@ -340,17 +341,82 @@ export const ChatBot: React.FC = () => {
       setInputValue('');
       setIsTyping(true);
 
-      // Simulate admin response delay
-      setTimeout(() => {
-        const adminResponse: Message = {
+      // Send to real API
+      try {
+        const token = localStorage.getItem('careconnect_token');
+        const user = localStorage.getItem('careconnect_user');
+        let response;
+
+        if (token && user) {
+          // Authenticated user
+          response = await api.post('/messages/send', {
+            subject: 'User Inquiry from ChatBot',
+            message: userMessage.text,
+            priority: 'medium',
+            category: 'support'
+          });
+        } else {
+          // Anonymous user - ask for details first if not provided
+          const userName = prompt('Please enter your name:');
+          const userEmail = prompt('Please enter your email:');
+          
+          if (!userName || !userEmail) {
+            const errorResponse: Message = {
+              id: (Date.now() + 1).toString(),
+              text: `❌ **Name and email required**\n\nTo send a message to admin, please provide your name and email address.`,
+              sender: 'bot',
+              timestamp: new Date()
+            };
+            setAdminMessages(prev => [...prev, errorResponse]);
+            setIsTyping(false);
+            return;
+          }
+
+          // Send as anonymous user
+          response = await fetch('http://localhost:5000/api/messages/send-public', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: userName,
+              email: userEmail,
+              subject: 'User Inquiry from ChatBot',
+              message: userMessage.text,
+              priority: 'medium',
+              category: 'support'
+            })
+          });
+          response = { data: await response.json() };
+        }
+
+        if (response.data.success) {
+          const adminResponse: Message = {
+            id: (Date.now() + 1).toString(),
+            text: `✅ **Message sent to admin successfully!**\n\n📧 Your message has been delivered to our admin team.\n🕐 **Expected Response Time:** Within 24 hours\n📱 **Reference ID:** #${response.data.data.message._id.slice(-6)}\n\nThank you for contacting us!`,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setAdminMessages(prev => [...prev, adminResponse]);
+        } else {
+          const errorResponse: Message = {
+            id: (Date.now() + 1).toString(),
+            text: `❌ **Error sending message:**\n\n${response.data.message}`,
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setAdminMessages(prev => [...prev, errorResponse]);
+        }
+      } catch (error) {
+        const errorResponse: Message = {
           id: (Date.now() + 1).toString(),
-          text: `📧 **Thank you for contacting admin support!**\n\nYour message: "${userMessage.text}"\n\n✅ **Message Status:** Successfully sent to admin team\n🕐 **Expected Response Time:** Within 2-4 hours\n📱 **Ticket ID:** #${Math.random().toString(36).substr(2, 8).toUpperCase()}\n\nWe'll get back to you as soon as possible. You can also check your email for updates!`,
+          text: `❌ **Network Error**\n\nFailed to send message. Please try again.`,
           sender: 'bot',
           timestamp: new Date()
         };
-        setAdminMessages(prev => [...prev, adminResponse]);
-        setIsTyping(false);
-      }, 1000);
+        setAdminMessages(prev => [...prev, errorResponse]);
+      }
+      setIsTyping(false);
     } else {
       // Handle regular chat
       setMessages(prev => [...prev, userMessage]);
@@ -387,8 +453,8 @@ export const ChatBot: React.FC = () => {
     }
 
     setInputValue(reply);
-    setTimeout(() => {
-      handleSendMessage();
+    setTimeout(async () => {
+      await handleSendMessage();
     }, 100);
   };
 

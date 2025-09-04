@@ -175,6 +175,51 @@ export const authAPI = {
     const response = await api.post('/auth/send-verification-email', { email });
     return response.data;
   },
+
+  // Send verification code for password reset
+  sendVerificationCode: async (emailData: { email: string }) => {
+    const response = await api.post('/auth/forgot-password', emailData);
+    return response.data;
+  },
+
+  // Reset password with verification code
+  resetPassword: async (resetData: { email: string; code: string; newPassword: string }) => {
+    const response = await api.post('/auth/reset-password', resetData);
+    return response.data;
+  },
+};
+
+// Messages API
+export const messagesAPI = {
+  // Send message to admin
+  send: async (messageData: { 
+    subject: string; 
+    message: string; 
+    category?: string; 
+    priority?: string;
+    userType?: string;
+  }) => {
+    const response = await api.post('/messages/send', messageData);
+    return response.data;
+  },
+
+  // Get user's messages
+  getMyMessages: async () => {
+    const response = await api.get('/messages/my-messages');
+    return response.data;
+  },
+
+  // Mark message as read
+  markAsRead: async (messageId: string) => {
+    const response = await api.patch(`/messages/${messageId}/read`);
+    return response.data;
+  },
+
+  // Reply to message
+  reply: async (messageId: string, messageData: { message: string }) => {
+    const response = await api.post(`/messages/${messageId}/reply`, messageData);
+    return response.data;
+  },
 };
 
 // Health check
@@ -183,4 +228,6 @@ export const healthCheck = async () => {
   return response.data;
 };
 
+// Export api instance both as named and default export
+export { api };
 export default api;

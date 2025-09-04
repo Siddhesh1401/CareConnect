@@ -150,6 +150,7 @@ export const RejectionResubmitPage: React.FC = () => {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${localStorage.getItem('careconnect_token')}`
           }
         }
       );

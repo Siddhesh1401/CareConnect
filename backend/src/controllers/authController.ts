@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
-import User, { IUser } from '../models/User';
-import { generateToken } from '../utils/auth';
-import { AppError } from '../utils/AppError';
+import User, { IUser } from '../models/User.js';
+import { generateToken } from '../utils/auth.js';
+import { AppError } from '../utils/AppError.js';
 import nodemailer from 'nodemailer';
 
 // Email configuration
@@ -392,10 +392,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const { email, password } = req.body;
 
-    // Find user and include password for comparison
+    // Find user by email (regardless of account status) and include password for comparison
     const user = await User.findOne({ 
-      email: email.toLowerCase(),
-      accountStatus: 'active'
+      email: email.toLowerCase()
     }).select('+password');
 
     if (!user) {
@@ -416,6 +415,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Check if account is suspended
+    if (user.accountStatus === 'suspended') {
+      res.status(403).json({
+        success: false,
+        message: 'Your account has been suspended. Please contact support for assistance.',
+        code: 'ACCOUNT_SUSPENDED'
+      });
+      return;
+    }
+
     // Check NGO verification status
     if (user.role === 'ngo_admin') {
       console.log(`🔍 NGO Login Check - User: ${user.email}, Status: ${user.verificationStatus}, NGO Verified: ${user.isNGOVerified}`);
@@ -429,24 +438,39 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         );
 
         if (hasRejectedDocs) {
-          console.log(`📋 NGO has rejected documents - ${user.email}`);
-          res.status(403).json({
-            success: false,
-            message: 'Some of your documents have been rejected. Please resubmit the required documents.',
+          console.log(`📋 NGO has rejected documents - allowing login but flagging for resubmission - ${user.email}`);
+          
+          // Update last active
+          user.lastActive = new Date();
+          await user.save();
+
+          // Generate JWT token (allow login)
+          const token = generateToken((user._id as any).toString());
+
+          // Remove password from response
+          const userResponse = user.toJSON();
+
+          res.status(200).json({
+            success: true,
+            message: 'Login successful - Document resubmission required',
             code: 'DOCUMENTS_REJECTED',
-            rejectedDocuments: {
-              registrationCertificate: user.documents?.registrationCertificate?.status === 'rejected' ? {
-                status: 'rejected',
-                rejectionReason: user.documents.registrationCertificate.rejectionReason
-              } : null,
-              taxExemptionCertificate: user.documents?.taxExemptionCertificate?.status === 'rejected' ? {
-                status: 'rejected', 
-                rejectionReason: user.documents.taxExemptionCertificate.rejectionReason
-              } : null,
-              organizationalLicense: user.documents?.organizationalLicense?.status === 'rejected' ? {
-                status: 'rejected',
-                rejectionReason: user.documents.organizationalLicense.rejectionReason
-              } : null
+            data: {
+              user: userResponse,
+              token,
+              rejectedDocuments: {
+                registrationCertificate: user.documents?.registrationCertificate?.status === 'rejected' ? {
+                  status: 'rejected',
+                  rejectionReason: user.documents.registrationCertificate.rejectionReason
+                } : null,
+                taxExemptionCertificate: user.documents?.taxExemptionCertificate?.status === 'rejected' ? {
+                  status: 'rejected', 
+                  rejectionReason: user.documents.taxExemptionCertificate.rejectionReason
+                } : null,
+                organizationalLicense: user.documents?.organizationalLicense?.status === 'rejected' ? {
+                  status: 'rejected',
+                  rejectionReason: user.documents.organizationalLicense.rejectionReason
+                } : null
+              }
             }
           });
           return;
@@ -557,7 +581,8 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       organizationName,
       organizationType,
       website,
-      description
+      description,
+      foundedYear
     } = req.body;
 
     // Update basic fields
@@ -575,6 +600,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       if (organizationType) user.organizationType = organizationType.trim();
       if (website) user.website = website.trim();
       if (description) user.description = description.trim();
+      if (foundedYear) user.foundedYear = foundedYear;
     }
 
     await user.save();

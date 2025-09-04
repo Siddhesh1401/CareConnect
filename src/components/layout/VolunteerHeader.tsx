@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Heart, User, LogOut, Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
+import { HeaderContactSupport } from '../HeaderContactSupport';
 
 export const VolunteerHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,6 +76,9 @@ export const VolunteerHeader: React.FC = () => {
 
           {/* Desktop Profile & Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Contact Support */}
+            <HeaderContactSupport userType="volunteer" />
+            
             <Link to="/notifications" className="relative group">
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 group-hover:scale-110 transition-all duration-300">
                 <Bell className="w-5 h-5" />
@@ -182,6 +186,14 @@ export const VolunteerHeader: React.FC = () => {
                 >
                   Profile Settings
                 </Link>
+                
+                {/* Mobile Support */}
+                <div className="border-t border-gray-100 pt-4 mt-4">
+                  <div className="px-3 mb-3">
+                    <HeaderContactSupport userType="volunteer" />
+                  </div>
+                </div>
+                
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 flex items-center space-x-2"

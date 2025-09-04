@@ -11,9 +11,11 @@ import {
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import api from '../../services/api';
 
 interface AdminMessage {
   id: string;
+  _id?: string; // MongoDB _id for API calls
   userId: string;
   userName: string;
   userEmail: string;
@@ -45,93 +47,42 @@ export const AdminMessagesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isResponding, setIsResponding] = useState(false);
 
-  // Load messages from localStorage and merge with mock data
+  // Load messages from API
   useEffect(() => {
-    const loadMessages = () => {
-      const storedMessages = JSON.parse(localStorage.getItem('adminMessages') || '[]');
-      const parsedStoredMessages = storedMessages.map((msg: any) => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp),
-        responseTimestamp: msg.responseTimestamp ? new Date(msg.responseTimestamp) : undefined,
-        conversation: {
-          ...msg.conversation,
-          messages: msg.conversation.messages.map((m: any) => ({
-            ...m,
-            timestamp: new Date(m.timestamp)
-          }))
-        }
-      }));
-
-      const mockMessages: AdminMessage[] = [
-        {
-          id: '1',
-          userId: 'user123',
-          userName: 'Rajesh Kumar',
-          userEmail: 'rajesh.kumar@email.com',
-          userPhone: '+91 98765 43210',
-          subject: 'Partnership Inquiry - Education NGO',
-          message: 'Hello Admin,\n\nI am representing an education-focused NGO called "Bright Future Foundation". We are interested in partnering with CareConnect to organize educational events for underprivileged children. We have been working in rural areas for the past 5 years and have successfully impacted over 2000 children.\n\nCould you please provide information about partnership opportunities and the process to get started?\n\nBest regards,\nRajesh Kumar\nDirector, Bright Future Foundation',
-          timestamp: new Date('2025-01-22T10:30:00'),
-          status: 'unread',
-          priority: 'high',
-          category: 'partnership',
-          conversation: {
-            id: 'conv1',
-            messages: [
-              {
-                id: 'msg1',
-                sender: 'user',
-                message: 'Hello Admin,\n\nI am representing an education-focused NGO called "Bright Future Foundation". We are interested in partnering with CareConnect to organize educational events for underprivileged children. We have been working in rural areas for the past 5 years and have successfully impacted over 2000 children.\n\nCould you please provide information about partnership opportunities and the process to get started?\n\nBest regards,\nRajesh Kumar\nDirector, Bright Future Foundation',
-                timestamp: new Date('2025-01-22T10:30:00')
-              }
-            ]
+    const loadMessages = async () => {
+      try {
+        const token = localStorage.getItem('careconnect_token');
+        const response = await api.get('/admin/messages', {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-        },
-        {
-          id: '2',
-          userId: 'user456',
-          userName: 'Priya Sharma',
-          userEmail: 'priya.sharma@email.com',
-          subject: 'Technical Issue - Cannot Register for Events',
-          message: 'Hi,\n\nI am trying to register for a volunteer event but keep getting an error message saying "Invalid session". I have tried clearing my browser cache, using different browsers, and even different devices, but the issue persists.\n\nCan you please help me resolve this issue? I really want to participate in the "Clean City Drive" event this weekend.\n\nThank you,\nPriya',
-          timestamp: new Date('2025-01-21T15:45:00'),
-          status: 'read',
-          priority: 'urgent',
-          category: 'technical',
-          adminResponse: 'Hello Priya,\n\nThank you for reporting this issue. This sounds like a session management problem. I have checked your account and it appears there was a temporary issue with our authentication system.\n\nI have reset your session and cleared the error. Please try logging in again and registering for the event. If you still encounter any issues, please let me know.\n\nBest regards,\nAdmin Team',
-          responseTimestamp: new Date('2025-01-21T16:15:00'),
-          conversation: {
-            id: 'conv2',
-            messages: [
-              {
-                id: 'msg2',
-                sender: 'user',
-                message: 'Hi,\n\nI am trying to register for a volunteer event but keep getting an error message saying "Invalid session". I have tried clearing my browser cache, using different browsers, and even different devices, but the issue persists.\n\nCan you please help me resolve this issue? I really want to participate in the "Clean City Drive" event this weekend.\n\nThank you,\nPriya',
-                timestamp: new Date('2025-01-21T15:45:00')
-              },
-              {
-                id: 'msg3',
-                sender: 'admin',
-                message: 'Hello Priya,\n\nThank you for reporting this issue. This sounds like a session management problem. I have checked your account and it appears there was a temporary issue with our authentication system.\n\nI have reset your session and cleared the error. Please try logging in again and registering for the event. If you still encounter any issues, please let me know.\n\nBest regards,\nAdmin Team',
-                timestamp: new Date('2025-01-21T16:15:00')
-              }
-            ]
-          }
+        });
+        if (response.data.success) {
+          const apiMessages = response.data.data.messages.map((msg: any) => ({
+            ...msg,
+            id: msg._id,
+            _id: msg._id, // Keep original _id for API calls
+            timestamp: new Date(msg.createdAt),
+            responseTimestamp: msg.responseTimestamp ? new Date(msg.responseTimestamp) : undefined,
+            conversation: {
+              ...msg.conversation,
+              messages: msg.conversation.messages.map((m: any) => ({
+                ...m,
+                timestamp: new Date(m.timestamp)
+              }))
+            }
+          }));
+          setMessages(apiMessages);
         }
-      ];
-
-      // Combine stored messages with mock data, avoiding duplicates
-      const allMessages = [...mockMessages, ...parsedStoredMessages.filter((stored: AdminMessage) =>
-        !mockMessages.some(mock => mock.id === stored.id)
-      )];
-
-      setMessages(allMessages);
+      } catch (error) {
+        console.error('Failed to load messages:', error);
+      }
     };
 
     loadMessages();
 
-    // Set up polling to check for new messages every 5 seconds
-    const interval = setInterval(loadMessages, 5000);
+    // Set up polling to check for new messages every 10 seconds
+    const interval = setInterval(loadMessages, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -157,63 +108,74 @@ export const AdminMessagesPage: React.FC = () => {
 
     setIsResponding(true);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      const updatedMessage: AdminMessage = {
-        ...selectedMessage,
-        status: 'replied',
-        adminResponse: responseText,
-        responseTimestamp: new Date(),
-        conversation: {
-          ...selectedMessage.conversation,
-          messages: [
-            ...selectedMessage.conversation.messages,
-            {
-              id: `admin-${Date.now()}`,
-              sender: 'admin',
-              message: responseText,
-              timestamp: new Date()
-            }
-          ]
+    try {
+      const token = localStorage.getItem('careconnect_token');
+      const messageId = selectedMessage._id || selectedMessage.id;
+      console.log('Sending response to message ID:', messageId);
+      console.log('Response text:', responseText);
+      
+      const response = await api.patch(`/admin/messages/${messageId}/respond`, {
+        response: responseText
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      };
+      });
 
-      setMessages(prev =>
-        prev.map(msg => msg.id === selectedMessage.id ? updatedMessage : msg)
-      );
+      console.log('API Response:', response.data);
 
-      // Update in localStorage
-      const storedMessages = JSON.parse(localStorage.getItem('adminMessages') || '[]');
-      const updatedStoredMessages = storedMessages.map((msg: any) =>
-        msg.id === selectedMessage.id ? {
-          ...msg,
+      if (response.data.success) {
+        const updatedMessage: AdminMessage = {
+          ...selectedMessage,
           status: 'replied',
           adminResponse: responseText,
-          responseTimestamp: new Date().toISOString(),
-          conversation: updatedMessage.conversation
-        } : msg
-      );
-      localStorage.setItem('adminMessages', JSON.stringify(updatedStoredMessages));
+          responseTimestamp: new Date(),
+          conversation: {
+            ...selectedMessage.conversation,
+            messages: [
+              ...selectedMessage.conversation.messages,
+              {
+                id: `admin-${Date.now()}`,
+                sender: 'admin',
+                message: responseText,
+                timestamp: new Date()
+              }
+            ]
+          }
+        };
 
-      setSelectedMessage(updatedMessage);
-      setResponseText('');
+        setMessages(prev =>
+          prev.map(msg => msg.id === selectedMessage.id ? updatedMessage : msg)
+        );
+
+        setSelectedMessage(updatedMessage);
+        setResponseText('');
+        alert('Response sent successfully!');
+      }
+    } catch (error: any) {
+      console.error('Failed to send response:', error);
+      console.error('Error response:', error.response?.data);
+      // Show user-friendly error message
+      alert(`Failed to send response: ${error.response?.data?.message || error.message || 'Unknown error'}`);
+    } finally {
       setIsResponding(false);
-    }, 1000);
+    }
   };
 
-  const markAsRead = (messageId: string) => {
-    setMessages(prev =>
-      prev.map(msg =>
-        msg.id === messageId ? { ...msg, status: 'read' as const } : msg
-      )
-    );
+  const markAsRead = async (messageId: string) => {
+    try {
+      await api.patch(`/admin/messages/${messageId}/status`, {
+        status: 'read'
+      });
 
-    // Update in localStorage
-    const storedMessages = JSON.parse(localStorage.getItem('adminMessages') || '[]');
-    const updatedStoredMessages = storedMessages.map((msg: any) =>
-      msg.id === messageId ? { ...msg, status: 'read' } : msg
-    );
-    localStorage.setItem('adminMessages', JSON.stringify(updatedStoredMessages));
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === messageId ? { ...msg, status: 'read' as const } : msg
+        )
+      );
+    } catch (error) {
+      console.error('Failed to mark message as read:', error);
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -437,52 +399,56 @@ export const AdminMessagesPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Response Form */}
-                {selectedMessage.status !== 'replied' && (
-                  <div className="border-t border-blue-200/50 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                      <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
-                        <Send className="w-4 h-4 text-white" />
-                      </div>
-                      <span>Send Response</span>
-                    </h3>
-                    <div className="space-y-4">
-                      <textarea
-                        value={responseText}
-                        onChange={(e) => setResponseText(e.target.value)}
-                        placeholder="Type your response to the user..."
-                        className="w-full px-4 py-3 border border-blue-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/80 backdrop-blur-sm"
-                        rows={6}
-                      />
-                      <div className="flex justify-end space-x-3">
-                        <Button
-                          variant="outline"
-                          onClick={() => setResponseText('')}
-                          className="border-blue-200/50 text-gray-700 hover:bg-blue-50 bg-white/80"
-                        >
-                          Clear
-                        </Button>
-                        <Button
-                          onClick={handleSendResponse}
-                          disabled={!responseText.trim() || isResponding}
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 shadow-lg"
-                        >
-                          {isResponding ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4 mr-2" />
-                              Send Response
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                {/* Enhanced Response Form - Always show to allow continued conversation */}
+                <div className="border-t border-blue-200/50 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                    <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
+                      <Send className="w-4 h-4 text-white" />
+                    </div>
+                    <span>
+                      {selectedMessage.status === 'replied' ? 'Continue Conversation' : 'Send Response'}
+                    </span>
+                  </h3>
+                  <div className="space-y-4">
+                    <textarea
+                      value={responseText}
+                      onChange={(e) => setResponseText(e.target.value)}
+                      placeholder={
+                        selectedMessage.status === 'replied' 
+                          ? "Continue the conversation..." 
+                          : "Type your response to the user..."
+                      }
+                      className="w-full px-4 py-3 border border-blue-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/80 backdrop-blur-sm"
+                      rows={4}
+                    />
+                    <div className="flex justify-end space-x-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setResponseText('')}
+                        className="border-blue-200/50 text-gray-700 hover:bg-blue-50 bg-white/80"
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        onClick={handleSendResponse}
+                        disabled={!responseText.trim() || isResponding}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 shadow-lg"
+                      >
+                        {isResponding ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            {selectedMessage.status === 'replied' ? 'Send Reply' : 'Send Response'}
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
-                )}
+                </div>
               </Card>
             ) : (
               <Card className="p-12 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl text-center">

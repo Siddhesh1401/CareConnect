@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Building, User, LogOut, Plus, Calendar, Target, Mail, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
+import { HeaderContactSupport } from '../HeaderContactSupport';
 
 export const NGOHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,6 +76,9 @@ export const NGOHeader: React.FC = () => {
 
           {/* Desktop Actions & Profile */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Contact Support */}
+            <HeaderContactSupport userType="ngo_admin" />
+            
             <div className="relative">
               <Button 
                 size="sm" 
@@ -243,6 +247,13 @@ export const NGOHeader: React.FC = () => {
                   <MessageSquare className="w-4 h-4 mr-3" />
                   Create Post
                 </Link>
+              </div>
+
+              {/* Mobile Support */}
+              <div className="border-t border-blue-100 pt-4 mt-4">
+                <div className="px-3 mb-3">
+                  <HeaderContactSupport userType="ngo_admin" />
+                </div>
               </div>
               
               <div className="border-t border-blue-100 pt-4 mt-4">

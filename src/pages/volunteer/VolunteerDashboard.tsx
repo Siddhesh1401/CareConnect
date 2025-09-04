@@ -1,102 +1,166 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Award, 
-  Calendar, 
-  Users, 
-  Heart, 
-  Clock, 
-  MapPin, 
+import {
+  Award,
+  Calendar,
+  Users,
+  Heart,
+  Clock,
+  MapPin,
   Star,
   ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
+interface DashboardData {
+  stats: {
+    totalHours: number;
+    eventsJoined: number;
+    completedEvents: number;
+    upcomingEvents: number;
+    totalPoints: number;
+  };
+  recentEvents: Array<{
+    _id: string;
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    ngo: string;
+    status: 'upcoming' | 'completed';
+    registrationDate?: string;
+  }>;
+  upcomingEvents: Array<{
+    _id: string;
+    title: string;
+    ngo: string;
+    date: string;
+    location: string;
+  }>;
+  achievements: Array<{
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    earnedDate: string;
+    points: number;
+  }>;
+}
 
 export const VolunteerDashboard: React.FC = () => {
   const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('careconnect_token');
+
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/dashboard/volunteer`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data.success) {
+          setDashboardData(response.data.data);
+        }
+      } catch (error: any) {
+        console.error('Error fetching dashboard data:', error);
+        setError(error.response?.data?.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const stats = [
-    { label: 'Total Hours', value: '45', icon: Clock, color: 'text-blue-600 bg-blue-50' },
-    { label: 'Events Joined', value: '12', icon: Calendar, color: 'text-blue-600 bg-blue-50' },
-    { label: 'Donations Made', value: '₹5,250', icon: Heart, color: 'text-blue-600 bg-blue-50' },
-    { label: 'Community Posts', value: '8', icon: Users, color: 'text-blue-600 bg-blue-50' }
-  ];
-
-  const recentEvents = [
     {
-      id: '1',
-      title: 'Beach Cleanup Drive',
-      ngo: 'Green Earth Foundation',
-      date: '2025-01-25',
-      time: '9:00 AM',
-      location: 'Juhu Beach, Mumbai',
-      status: 'upcoming'
+      label: 'Total Hours',
+      value: dashboardData?.stats.totalHours.toString() || '0',
+      icon: Clock,
+      color: 'text-blue-600 bg-blue-50'
     },
     {
-      id: '2',
-      title: 'Tree Plantation',
-      ngo: 'EcoWarriors',
-      date: '2025-01-20',
-      time: '7:00 AM', 
-      location: 'Aarey Forest, Mumbai',
-      status: 'completed'
+      label: 'Events Joined',
+      value: dashboardData?.stats.eventsJoined.toString() || '0',
+      icon: Calendar,
+      color: 'text-blue-600 bg-blue-50'
     },
     {
-      id: '3',
-      title: 'Food Distribution',
-      ngo: 'Hope Foundation',
-      date: '2025-01-15',
-      time: '6:00 PM',
-      location: 'Dharavi, Mumbai',
-      status: 'completed'
+      label: 'Completed',
+      value: dashboardData?.stats.completedEvents.toString() || '0',
+      icon: Award,
+      color: 'text-blue-600 bg-blue-50'
+    },
+    {
+      label: 'Upcoming',
+      value: dashboardData?.stats.upcomingEvents.toString() || '0',
+      icon: Star,
+      color: 'text-blue-600 bg-blue-50'
     }
   ];
 
-  const achievements = [
-    {
-      id: '1',
-      title: 'First Steps',
-      description: 'Completed your first volunteer activity',
-      icon: '🏆',
-      earnedDate: '2025-01-15',
-      points: 100
-    },
-    {
-      id: '2',
-      title: 'Community Builder',
-      description: 'Made 10 posts in community discussions',
-      icon: '🌟',
-      earnedDate: '2025-01-20',
-      points: 200
-    },
-    {
-      id: '3',
-      title: 'Environmental Champion',
-      description: 'Participated in 5 environmental events',
-      icon: '🌱',
-      earnedDate: '2025-01-22',
-      points: 300
-    }
-  ];
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
 
-  const upcomingEvents = [
-    {
-      id: '4',
-      title: 'Educational Workshop',
-      ngo: 'Hope for Children',
-      date: '2025-01-28',
-      location: 'Bandra Community Center'
-    },
-    {
-      id: '5',
-      title: 'Senior Care Program',
-      ngo: 'Community Care',
-      date: '2025-02-02',
-      location: 'Bandra West'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-32 bg-gray-200 rounded-2xl mb-8"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="h-96 bg-gray-200 rounded-xl"></div>
+              <div className="h-96 bg-gray-200 rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-16">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 sm:p-6 lg:p-8">
@@ -116,7 +180,7 @@ export const VolunteerDashboard: React.FC = () => {
           
           <div className="relative z-10 flex items-center space-x-6 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
             <div className="text-right">
-              <div className="text-3xl font-bold text-white">{user?.points || 1250}</div>
+              <div className="text-3xl font-bold text-white">{dashboardData?.stats.totalPoints || 0}</div>
               <div className="text-sm text-blue-100">Total Points</div>
             </div>
             <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
@@ -163,7 +227,7 @@ export const VolunteerDashboard: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {achievements.map((achievement) => (
+            {dashboardData?.achievements.map((achievement) => (
               <div key={achievement.id} className="group bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-6 border border-blue-200/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="text-3xl group-hover:scale-110 transition-transform duration-300">{achievement.icon}</div>
@@ -173,7 +237,7 @@ export const VolunteerDashboard: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">{new Date(achievement.earnedDate).toLocaleDateString()}</span>
+                  <span className="text-gray-500">{formatDate(achievement.earnedDate)}</span>
                   <div className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-1 rounded-full">
                     <Star className="w-4 h-4" />
                     <span className="font-medium">{achievement.points} pts</span>
@@ -204,8 +268,8 @@ export const VolunteerDashboard: React.FC = () => {
               </div>
               
               <div className="space-y-6">
-                {recentEvents.map((event) => (
-                  <div key={event.id} className="group bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border border-gray-200/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                {dashboardData?.recentEvents.map((event) => (
+                  <div key={event._id} className="group bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border border-gray-200/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 mb-2 text-lg group-hover:text-blue-600 transition-colors duration-300">{event.title}</h3>
@@ -213,7 +277,7 @@ export const VolunteerDashboard: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center space-x-2">
                             <Calendar className="w-4 h-4" />
-                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                            <span>{formatDate(event.date)}</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Clock className="w-4 h-4" />
@@ -252,21 +316,21 @@ export const VolunteerDashboard: React.FC = () => {
               </div>
               
               <div className="space-y-6">
-                {upcomingEvents.map((event) => (
-                  <div key={event.id} className="group bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-6 border border-blue-200/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                {dashboardData?.upcomingEvents.map((event) => (
+                  <div key={event._id} className="group bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-6 border border-blue-200/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                     <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">{event.title}</h3>
                     <p className="text-blue-600 font-medium mb-4">{event.ngo}</p>
                     <div className="space-y-2 text-sm text-gray-500 mb-6">
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.date).toLocaleDateString()}</span>
+                        <span>{formatDate(event.date)}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <MapPin className="w-4 h-4" />
                         <span>{event.location}</span>
                       </div>
                     </div>
-                    <Link to={`/events/${event.id}`}>
+                    <Link to={`/events/${event._id}`}>
                       <Button size="sm" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                         Register Now
                       </Button>

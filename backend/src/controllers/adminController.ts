@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import User, { IUser } from '../models/User';
-import { AppError } from '../utils/AppError';
+import User, { IUser } from '../models/User.js';
+import Message from '../models/Message.js';
+import { AppError } from '../utils/AppError.js';
 import nodemailer from 'nodemailer';
 
 // Email configuration
@@ -185,6 +186,86 @@ const sendAdminNGONotification = async (
     return true;
   } catch (error) {
     console.error(`❌ Failed to send admin notification:`, error);
+    return false;
+  }
+};
+
+// Send response email to user
+const sendResponseEmail = async (
+  userEmail: string,
+  userName: string,
+  originalSubject: string,
+  originalMessage: string,
+  adminResponse: string
+): Promise<boolean> => {
+  try {
+    if (process.env.EMAIL_DEV_MODE === 'true') {
+      console.log('📧 [DEV MODE] Admin Response Email:');
+      console.log(`   To: ${userEmail}`);
+      console.log(`   User: ${userName}`);
+      console.log(`   Response: ${adminResponse}`);
+      return true;
+    }
+
+    const mailOptions = {
+      from: `"CareConnect Support" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: `Re: ${originalSubject}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Admin Response - CareConnect</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }
+            .original-message { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 15px 0; }
+            .admin-response { background: #e8f5e8; padding: 15px; border-left: 4px solid #4caf50; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h2>Response from CareConnect Admin</h2>
+            </div>
+            <div class="content">
+              <p>Hello ${userName},</p>
+              <p>Thank you for contacting CareConnect. We have reviewed your message and here is our response:</p>
+              
+              <div class="original-message">
+                <h4>Your Original Message:</h4>
+                <p><strong>Subject:</strong> ${originalSubject}</p>
+                <p>${originalMessage.replace(/\n/g, '<br>')}</p>
+              </div>
+              
+              <div class="admin-response">
+                <h4>Our Response:</h4>
+                <p>${adminResponse.replace(/\n/g, '<br>')}</p>
+              </div>
+              
+              <p>If you have any further questions, please don't hesitate to contact us again through our website.</p>
+              
+              <p>Best regards,<br>CareConnect Support Team</p>
+            </div>
+            <div class="footer">
+              <p>This email was sent in response to your inquiry on CareConnect platform.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Response email sent successfully to: ${userEmail}`);
+    return true;
+
+  } catch (error) {
+    console.error(`❌ Failed to send response email to ${userEmail}:`, error);
     return false;
   }
 };
@@ -538,6 +619,373 @@ export const updateNGOStatus = async (req: AuthRequest, res: Response): Promise<
 
   } catch (error) {
     console.error('Update NGO status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Get all volunteers only
+export const getAllUsers = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { page = 1, limit = 10, search = '', status = '' } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const searchQuery: any = {
+      role: 'volunteer' // Only show volunteers
+    };
+
+    if (status && ['active', 'suspended'].includes(status as string)) {
+      searchQuery.accountStatus = status;
+    }
+
+    if (search) {
+      searchQuery.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(searchQuery)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await User.countDocuments(searchQuery);
+
+    const stats = await User.aggregate([
+      {
+        $match: { role: 'volunteer' } // Only count volunteers
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: { $sum: { $cond: [{ $ne: ['$accountStatus', 'suspended'] }, 1, 0] } },
+          suspended: { $sum: { $cond: [{ $eq: ['$accountStatus', 'suspended'] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: 'Users retrieved successfully',
+      data: {
+        users,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          pages: Math.ceil(total / Number(limit))
+        },
+        stats: stats[0] || {
+          total: 0,
+          active: 0,
+          suspended: 0
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Toggle user status (active/suspended)
+export const toggleUserStatus = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+      return;
+    }
+
+    // Toggle status
+    const newStatus = user.accountStatus === 'suspended' ? 'active' : 'suspended';
+    const oldStatus = user.accountStatus;
+    user.accountStatus = newStatus;
+    await user.save();
+
+    // Log the admin activity
+    console.log(`🔧 Admin action: User ${user.name} (${user.email}) status changed from ${oldStatus} to ${newStatus} by admin ${req.user?.email}`);
+
+    res.status(200).json({
+      success: true,
+      message: `User ${newStatus === 'suspended' ? 'suspended' : 'activated'} successfully`,
+      data: {
+        user: user.toJSON()
+      }
+    });
+
+  } catch (error) {
+    console.error('Toggle user status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Get dashboard statistics
+export const getDashboardStats = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const [userStats, ngoStats, recentUsers, recentNGOs] = await Promise.all([
+      // User statistics
+      User.aggregate([
+        {
+          $group: {
+            _id: '$role',
+            count: { $sum: 1 },
+            active: { $sum: { $cond: [{ $ne: ['$accountStatus', 'suspended'] }, 1, 0] } }
+          }
+        }
+      ]),
+      
+      // NGO statistics
+      User.aggregate([
+        {
+          $match: { role: 'ngo_admin' }
+        },
+        {
+          $group: {
+            _id: '$verificationStatus',
+            count: { $sum: 1 }
+          }
+        }
+      ]),
+      
+      // Recent users (last 5)
+      User.find({ role: 'volunteer' })
+        .select('name email role createdAt')
+        .sort({ createdAt: -1 })
+        .limit(5),
+        
+      // Recent NGO requests (last 3 pending)
+      User.find({ role: 'ngo_admin', verificationStatus: 'pending' })
+        .select('name organizationName email createdAt')
+        .sort({ createdAt: -1 })
+        .limit(3)
+    ]);
+
+    // Process user stats
+    const processedUserStats = userStats.reduce((acc, stat) => {
+      acc[stat._id] = stat;
+      return acc;
+    }, {} as any);
+
+    // Process NGO stats
+    const processedNGOStats = ngoStats.reduce((acc, stat) => {
+      acc[stat._id] = stat.count;
+      return acc;
+    }, {} as any);
+
+    const totalUsers = (processedUserStats.volunteer?.count || 0) + (processedUserStats.ngo_admin?.count || 0);
+    const totalNGOs = (processedNGOStats.approved || 0) + (processedNGOStats.pending || 0) + (processedNGOStats.rejected || 0);
+
+    res.status(200).json({
+      success: true,
+      message: 'Dashboard statistics retrieved successfully',
+      data: {
+        stats: {
+          totalUsers,
+          totalVolunteers: processedUserStats.volunteer?.count || 0,
+          activeNGOs: processedNGOStats.approved || 0,
+          pendingNGOs: processedNGOStats.pending || 0,
+          totalNGOs
+        },
+        recentUsers: recentUsers.map(user => ({
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          joinedDate: user.createdAt
+        })),
+        pendingNGORequests: recentNGOs.map(ngo => ({
+          id: ngo._id,
+          organizationName: ngo.organizationName || ngo.name,
+          contactPerson: ngo.name,
+          email: ngo.email,
+          submittedDate: ngo.createdAt
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('Get dashboard stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Get all messages for admin
+export const getAllMessages = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { page = 1, limit = 10, status = '', priority = '', category = '', search = '' } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const query: any = {};
+    if (status) query.status = status;
+    if (priority) query.priority = priority;
+    if (category) query.category = category;
+    if (search) {
+      query.$or = [
+        { userName: { $regex: search, $options: 'i' } },
+        { subject: { $regex: search, $options: 'i' } },
+        { message: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const messages = await Message.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Message.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      message: 'Messages retrieved successfully',
+      data: {
+        messages,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          pages: Math.ceil(total / Number(limit))
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get messages error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Send response to message
+export const respondToMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { messageId } = req.params;
+    const { response } = req.body;
+
+    if (!response || response.trim().length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Response message is required'
+      });
+      return;
+    }
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      res.status(404).json({
+        success: false,
+        message: 'Message not found'
+      });
+      return;
+    }
+
+    // Add admin response to conversation
+    message.conversation.messages.push({
+      id: `admin-${Date.now()}`,
+      sender: 'admin',
+      message: response.trim(),
+      timestamp: new Date()
+    });
+
+    message.adminResponse = response.trim();
+    message.responseTimestamp = new Date();
+    message.status = 'replied';
+
+    await message.save();
+
+    // Send email notification to user
+    try {
+      await sendResponseEmail(
+        message.userEmail,
+        message.userName,
+        message.subject,
+        message.message,
+        response.trim()
+      );
+      console.log(`📧 Response email sent to: ${message.userEmail}`);
+    } catch (emailError) {
+      console.error('Failed to send response email:', emailError);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Response sent successfully',
+      data: { message }
+    });
+
+  } catch (error) {
+    console.error('Respond to message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Update message status
+export const updateMessageStatus = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { messageId } = req.params;
+    const { status } = req.body;
+
+    if (!['unread', 'read', 'replied', 'closed'].includes(status)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid status'
+      });
+      return;
+    }
+
+    const message = await Message.findByIdAndUpdate(
+      messageId,
+      { status },
+      { new: true }
+    );
+
+    if (!message) {
+      res.status(404).json({
+        success: false,
+        message: 'Message not found'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Message status updated successfully',
+      data: { message }
+    });
+
+  } catch (error) {
+    console.error('Update message status error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

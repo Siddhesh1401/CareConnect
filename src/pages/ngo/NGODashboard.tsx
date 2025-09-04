@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Calendar, 
@@ -17,92 +17,156 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
+interface NGODashboardData {
+  stats: {
+    totalVolunteers: number;
+    activeEvents: number;
+    totalEvents: number;
+    upcomingEvents: number;
+    totalDonations: string;
+    impactScore: string;
+  };
+  recentEvents: Array<{
+    _id: string;
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    volunteers: number;
+    capacity: number;
+    status: string;
+  }>;
+  recentVolunteers: Array<{
+    _id: string;
+    name: string;
+    avatar: string;
+    joinedDate: string;
+    eventsJoined: number;
+  }>;
+  campaigns: any[];
+}
 
 export const NGODashboard: React.FC = () => {
   const { user } = useAuth();
+  const [dashboardData, setDashboardData] = useState<NGODashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('careconnect_token');
+
+        if (!token) {
+          setError('Authentication required');
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/dashboard/ngo`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data.success) {
+          setDashboardData(response.data.data);
+        }
+      } catch (error: any) {
+        console.error('Error fetching NGO dashboard data:', error);
+        setError(error.response?.data?.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const stats = [
-    { label: 'Total Volunteers', value: '1,248', icon: Users, color: 'text-blue-600 bg-blue-50', change: '+12%' },
-    { label: 'Active Events', value: '24', icon: Calendar, color: 'text-blue-600 bg-blue-50', change: '+3' },
-    { label: 'Total Donations', value: '₹2.4L', icon: Heart, color: 'text-blue-600 bg-blue-50', change: '+18%' },
-    { label: 'Impact Score', value: '4.8', icon: Star, color: 'text-blue-600 bg-blue-50', change: '+0.2' }
-  ];
-
-  const recentEvents = [
-    {
-      id: '1',
-      title: 'Beach Cleanup Drive',
-      date: '2025-01-25',
-      time: '9:00 AM',
-      location: 'Juhu Beach, Mumbai',
-      volunteers: 45,
-      capacity: 100,
-      status: 'upcoming'
+    { 
+      label: 'Total Volunteers', 
+      value: dashboardData?.stats.totalVolunteers.toString() || '0', 
+      icon: Users, 
+      color: 'text-blue-600 bg-blue-50', 
+      change: '+12%' 
     },
-    {
-      id: '2',
-      title: 'Tree Plantation',
-      date: '2025-01-20',
-      time: '7:00 AM',
-      location: 'Aarey Forest, Mumbai',
-      volunteers: 89,
-      capacity: 150,
-      status: 'completed'
+    { 
+      label: 'Active Events', 
+      value: dashboardData?.stats.activeEvents.toString() || '0', 
+      icon: Calendar, 
+      color: 'text-blue-600 bg-blue-50', 
+      change: '+3' 
     },
-    {
-      id: '3',
-      title: 'Educational Workshop',
-      date: '2025-01-15',
-      time: '2:00 PM',
-      location: 'Community Center',
-      volunteers: 32,
-      capacity: 50,
-      status: 'completed'
+    { 
+      label: 'Total Donations', 
+      value: dashboardData?.stats.totalDonations || '₹0L', 
+      icon: Heart, 
+      color: 'text-blue-600 bg-blue-50', 
+      change: '+18%' 
+    },
+    { 
+      label: 'Impact Score', 
+      value: dashboardData?.stats.impactScore || '0.0', 
+      icon: Star, 
+      color: 'text-blue-600 bg-blue-50', 
+      change: '+0.2' 
     }
   ];
 
-  const campaigns = [
-    {
-      id: '1',
-      title: 'Clean Water Initiative',
-      target: 500000,
-      raised: 325000,
-      donors: 156,
-      daysLeft: 12
-    },
-    {
-      id: '2',
-      title: 'Education Support Fund',
-      target: 300000,
-      raised: 180000,
-      donors: 89,
-      daysLeft: 25
-    }
-  ];
+  const recentEvents = dashboardData?.recentEvents || [];
+  const recentVolunteers = dashboardData?.recentVolunteers || [];
+  const campaigns = dashboardData?.campaigns || [];
 
-  const recentVolunteers = [
-    {
-      id: '1',
-      name: 'Priya Sharma',
-      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=50',
-      joinedDate: '2025-01-20',
-      eventsJoined: 3
-    },
-    {
-      id: '2',
-      name: 'Rahul Kumar',
-      avatar: 'https://images.pexels.com/photos/697509/pexels-photo-697509.jpeg?auto=compress&cs=tinysrgb&w=50',
-      joinedDate: '2025-01-18',
-      eventsJoined: 2
-    },
-    {
-      id: '3',
-      name: 'Sneha Patel',
-      avatar: 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=50',
-      joinedDate: '2025-01-15',
-      eventsJoined: 5
-    }
-  ];
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-20 bg-gray-200 rounded-xl mb-8"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 h-96 bg-gray-200 rounded-xl"></div>
+              <div className="h-96 bg-gray-200 rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-16">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
@@ -114,6 +178,20 @@ export const NGODashboard: React.FC = () => {
               Welcome, {user?.name}! 🏢
             </h1>
             <p className="text-gray-600 mt-2">Manage your organization and track your impact</p>
+          </div>
+          <div className="flex gap-3">
+            <Link to="/ngo/profile/edit">
+              <Button variant="outline" className="flex items-center space-x-2">
+                <Edit className="w-4 h-4" />
+                <span>Edit Profile</span>
+              </Button>
+            </Link>
+            <Link to={`/ngos/${user?.id}`}>
+              <Button variant="outline" className="flex items-center space-x-2">
+                <Eye className="w-4 h-4" />
+                <span>View Public Profile</span>
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -161,14 +239,14 @@ export const NGODashboard: React.FC = () => {
               
               <div className="space-y-4">
                 {recentEvents.map((event) => (
-                  <div key={event.id} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                  <div key={event._id} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900 mb-1">{event.title}</h3>
                         <div className="flex items-center space-x-4 text-sm text-gray-500 mb-2">
                           <div className="flex items-center space-x-1">
                             <Calendar className="w-4 h-4" />
-                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                            <span>{formatDate(event.date)}</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Clock className="w-4 h-4" />
@@ -261,7 +339,7 @@ export const NGODashboard: React.FC = () => {
               
               <div className="space-y-3">
                 {recentVolunteers.map((volunteer) => (
-                  <div key={volunteer.id} className="flex items-center space-x-3">
+                  <div key={volunteer._id} className="flex items-center space-x-3">
                     <img
                       src={volunteer.avatar}
                       alt={volunteer.name}
@@ -270,7 +348,7 @@ export const NGODashboard: React.FC = () => {
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">{volunteer.name}</div>
                       <div className="text-sm text-gray-500">
-                        Joined {new Date(volunteer.joinedDate).toLocaleDateString()}
+                        Joined {formatDate(volunteer.joinedDate)}
                       </div>
                     </div>
                     <div className="text-sm text-blue-600">

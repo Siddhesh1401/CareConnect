@@ -8,6 +8,10 @@ import { fileURLToPath } from 'url';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import messageRoutes from './routes/messages.js';
+import eventRoutes from './routes/events.js';
+import dashboardRoutes from './routes/dashboard.js';
+import ngoRoutes from './routes/ngos.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 
@@ -52,6 +56,10 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/ngos', ngoRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

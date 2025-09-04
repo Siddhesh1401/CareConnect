@@ -5,14 +5,20 @@ import {
   approveNGO, 
   rejectNGO, 
   getNGODetails,
-  updateNGOStatus
-} from '../controllers/adminController';
+  updateNGOStatus,
+  getAllUsers,
+  toggleUserStatus,
+  getDashboardStats,
+  getAllMessages,
+  respondToMessage,
+  updateMessageStatus
+} from '../controllers/adminController.js';
 import {
   approveDocument,
   rejectDocument,
   getDocumentStatus
-} from '../controllers/documentController';
-import { authenticate } from '../middleware/auth';
+} from '../controllers/documentController.js';
+import { authenticate } from '../middleware/auth.js';
 import { isAdmin } from '../middleware/roleAuth.js';
 
 const router = express.Router();
@@ -33,5 +39,17 @@ router.patch('/ngos/:ngoId/status', updateNGOStatus);  // Update NGO status
 router.patch('/ngos/:ngoId/documents/:documentType/approve', approveDocument);  // Approve specific document
 router.patch('/ngos/:ngoId/documents/:documentType/reject', rejectDocument);    // Reject specific document
 router.get('/ngos/:ngoId/documents', getDocumentStatus);                        // Get document status
+
+// User Management Routes
+router.get('/users', getAllUsers);                          // Get all users with filtering
+router.patch('/users/:userId/toggle-status', toggleUserStatus);  // Toggle user active/suspended status
+
+// Dashboard Routes
+router.get('/dashboard/stats', getDashboardStats);          // Get dashboard statistics
+
+// Message Management Routes
+router.get('/messages', getAllMessages);                    // Get all messages with filtering
+router.patch('/messages/:messageId/respond', respondToMessage); // Send response to message
+router.patch('/messages/:messageId/status', updateMessageStatus); // Update message status
 
 export default router;

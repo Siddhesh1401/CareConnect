@@ -4,11 +4,13 @@ import { authAPI } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
   signup: (name: string, email: string, password: string, role: 'volunteer' | 'ngo_admin', additionalData?: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isAdmin: () => boolean;
+  sendVerificationCode: (email: string) => Promise<void>;
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,10 +64,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      console.log('AuthContext: Starting login for:', email);
       const response = await authAPI.login({ email, password });
+      console.log('AuthContext: Raw response from API:', response);
       
       if (response.success) {
         const { user: userData, token } = response.data;
+        console.log('AuthContext: User data received:', userData);
+        console.log('AuthContext: Response code:', response.code);
         
         // Convert backend user data to frontend User type
         const user: User = {
@@ -94,6 +100,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(user);
         localStorage.setItem('careconnect_user', JSON.stringify(user));
         localStorage.setItem('careconnect_token', token);
+
+        // Check if login was successful but with document rejection warning
+        if (response.code === 'DOCUMENTS_REJECTED') {
+          console.log('AuthContext: Documents rejected but login allowed, preparing navigation');
+          console.log('Rejected docs:', response.data.rejectedDocuments);
+          
+          // Create a custom success response with rejection details
+          const customSuccess = {
+            success: true,
+            code: 'DOCUMENTS_REJECTED',
+            message: response.message,
+            rejectedDocuments: response.data.rejectedDocuments
+          };
+          
+          // Return the custom response so the calling component can handle navigation
+          return customSuccess;
+        }
+
+        return response;
       } else {
         throw new Error(response.message || 'Login failed');
       }
@@ -110,15 +135,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       if (error.response?.data?.code === 'REGISTRATION_REJECTED') {
         throw new Error('Your NGO registration has been rejected. Please contact support.');
-      }
-      if (error.response?.data?.code === 'DOCUMENTS_REJECTED') {
-        // Pass the error details for the login page to handle
-        console.log('AuthContext: Documents rejected, preparing error');
-        console.log('Rejected docs:', error.response.data.rejectedDocuments);
-        const customError = new Error('Some of your documents have been rejected. Please resubmit the required documents.');
-        (customError as any).code = 'DOCUMENTS_REJECTED';
-        (customError as any).rejectedDocuments = error.response.data.rejectedDocuments;
-        throw customError;
       }
       
       throw new Error(error.response?.data?.message || error.message || 'Login failed');
@@ -209,8 +225,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user?.role === 'admin';
   };
 
+  const sendVerificationCode = async (email: string) => {
+    try {
+      await authAPI.sendVerificationCode({ email });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || error.message || 'Failed to send verification code');
+    }
+  };
+
+  const resetPassword = async (email: string, code: string, newPassword: string) => {
+    try {
+      await authAPI.resetPassword({ email, code, newPassword });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || error.message || 'Failed to reset password');
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, isAdmin }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      signup, 
+      logout, 
+      isLoading, 
+      isAdmin, 
+      sendVerificationCode, 
+      resetPassword 
+    }}>
       {children}
     </AuthContext.Provider>
   );

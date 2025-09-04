@@ -37,24 +37,43 @@ export const LoginPage: React.FC = () => {
     }
 
     try {
-      await login(email, password);
-      const role = email === 'volunteer@careconnect.com' ? 'volunteer' : 'ngo_admin';
-      navigate(role === 'volunteer' ? '/volunteer/dashboard' : '/ngo/dashboard');
-    } catch (err: any) {
-      console.error('Login error:', err);
-      console.log('Error code:', err.code);
-      console.log('Error response:', err.response?.data);
+      console.log('LoginPage: Starting login attempt for:', email);
+      const loginResult = await login(email, password);
+      console.log('LoginPage: Login result received:', loginResult);
       
-      // Check if NGO has rejected documents and needs to resubmit
-      if (err.code === 'DOCUMENTS_REJECTED') {
-        console.log('Redirecting to resubmit page');
-        console.log('Rejected documents from error:', err.rejectedDocuments);
+      // Check if login was successful but with document rejection warning
+      if (loginResult && loginResult.code === 'DOCUMENTS_REJECTED') {
+        console.log('Login successful but documents rejected - redirecting to resubmit page');
+        console.log('Rejected documents from result:', loginResult.rejectedDocuments);
         // Store the rejected documents info for the resubmission page
-        localStorage.setItem('rejectedDocuments', JSON.stringify(err.rejectedDocuments || {}));
+        localStorage.setItem('rejectedDocuments', JSON.stringify(loginResult.rejectedDocuments || {}));
         localStorage.setItem('userEmail', email);
         navigate('/auth/resubmit-documents');
         return;
       }
+      
+      // Normal successful login - redirect to dashboard based on user role
+      if (loginResult && loginResult.data && loginResult.data.user) {
+        const userRole = loginResult.data.user.role;
+        if (userRole === 'volunteer') {
+          navigate('/volunteer/dashboard');
+        } else if (userRole === 'ngo_admin') {
+          navigate('/ngo/dashboard');
+        } else if (userRole === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          // Fallback
+          navigate('/dashboard');
+        }
+      } else {
+        // Fallback role detection for older response format
+        const role = email === 'volunteer@careconnect.com' ? 'volunteer' : 'ngo_admin';
+        navigate(role === 'volunteer' ? '/volunteer/dashboard' : '/ngo/dashboard');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      console.log('Error code:', err.code);
+      console.log('Error response:', err.response?.data);
       
       // Check if NGO is pending approval and redirect to pending page
       if (err.code === 'PENDING_APPROVAL') {
@@ -66,6 +85,12 @@ export const LoginPage: React.FC = () => {
         const userEmail = err.data?.email || email;
         
         navigate(`/auth/pending-approval?orgName=${encodeURIComponent(orgName)}&email=${encodeURIComponent(userEmail)}`);
+        return;
+      }
+
+      // Check if account is suspended
+      if (err.code === 'ACCOUNT_SUSPENDED') {
+        setError('Your account has been suspended. Please contact support for assistance.');
         return;
       }
       

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, MapPin, Users, FileText, Tag, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -8,11 +8,14 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-export const CreateEvent: React.FC = () => {
+export const EditEvent: React.FC = () => {
   const navigate = useNavigate();
+  const { eventId } = useParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -49,16 +52,61 @@ export const CreateEvent: React.FC = () => {
     'Tamil Nadu',
     'Gujarat',
     'Rajasthan',
-    'West Bengal',
     'Uttar Pradesh',
+    'West Bengal',
     'Madhya Pradesh',
     'Andhra Pradesh',
     'Telangana',
     'Kerala',
-    'Odisha',
     'Punjab',
     'Haryana'
   ];
+
+  // Fetch event data
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const token = localStorage.getItem('careconnect_token');
+        if (!token) {
+          navigate('/auth/login');
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/events/${eventId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data.success) {
+          const event = response.data.data.event;
+          setFormData({
+            title: event.title,
+            description: event.description,
+            category: event.category,
+            date: event.date.split('T')[0], // Format for date input
+            startTime: event.startTime,
+            endTime: event.endTime,
+            location: event.location,
+            capacity: event.capacity.toString(),
+            requirements: event.requirements || '',
+            whatToExpect: event.whatToExpect || '',
+            tags: event.tags ? event.tags.join(', ') : ''
+          });
+          setExistingImages(event.images || []);
+        }
+      } catch (error: any) {
+        console.error('Error fetching event:', error);
+        setError('Failed to load event data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (eventId) {
+      fetchEvent();
+    }
+  }, [eventId, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -84,8 +132,12 @@ export const CreateEvent: React.FC = () => {
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeNewImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,28 +146,20 @@ export const CreateEvent: React.FC = () => {
     setError('');
 
     try {
-      // Validate required fields
-      if (!formData.title || !formData.description || !formData.category || 
-          !formData.date || !formData.startTime || !formData.endTime ||
+      // Validation
+      if (!formData.title.trim() || !formData.description.trim() || !formData.category || 
+          !formData.date || !formData.startTime || !formData.endTime || 
           !formData.location.address || !formData.location.city || !formData.location.state ||
           !formData.capacity) {
-        setError('Please fill in all required fields');
+        setError('All required fields must be filled');
         setIsSubmitting(false);
         return;
       }
 
       // Validate capacity
       const capacity = parseInt(formData.capacity);
-      if (isNaN(capacity) || capacity < 1) {
-        setError('Capacity must be a valid number greater than 0');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validate date (should be in future)
-      const eventDate = new Date(formData.date);
-      if (eventDate <= new Date()) {
-        setError('Event date must be in the future');
+      if (isNaN(capacity) || capacity <= 0) {
+        setError('Capacity must be a positive number');
         setIsSubmitting(false);
         return;
       }
@@ -148,21 +192,14 @@ export const CreateEvent: React.FC = () => {
       formDataToSend.append('requirements', formData.requirements);
       formDataToSend.append('whatToExpect', formData.whatToExpect);
       formDataToSend.append('tags', JSON.stringify(formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []));
+      formDataToSend.append('existingImages', JSON.stringify(existingImages));
 
-      // Add images only if they exist
-      if (selectedImages.length > 0) {
-        selectedImages.forEach((image) => {
-          formDataToSend.append('images', image);
-        });
-      }
-
-      console.log('Submitting form data:', {
-        title: formData.title,
-        location: formData.location,
-        imageCount: selectedImages.length
+      // Add new images
+      selectedImages.forEach((image) => {
+        formDataToSend.append('images', image);
       });
 
-      const response = await axios.post(`${API_BASE_URL}/events/create`, formDataToSend, {
+      const response = await axios.put(`${API_BASE_URL}/events/${eventId}`, formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -170,46 +207,55 @@ export const CreateEvent: React.FC = () => {
       });
 
       if (response.data.success) {
-        alert('🎉 Event created successfully! It is now live and visible to volunteers.');
+        alert('Event updated successfully!');
         navigate('/ngo/events');
       }
+
     } catch (error: any) {
-      console.error('Error creating event:', error);
+      console.error('Update event error:', error);
       if (error.response?.status === 401) {
-        localStorage.removeItem('careconnect_token');
         navigate('/auth/login');
-      } else if (error.response?.status === 403) {
-        setError('Only verified NGOs can create events. Please ensure your organization is approved.');
       } else {
-        setError(error.response?.data?.message || 'Failed to create event. Please try again.');
+        setError(error.response?.data?.message || 'Failed to update event. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading event data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Event</h1>
-            <p className="text-gray-600 mt-2">Fill in the details to create a volunteer event</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)}
+              className="text-gray-600 hover:text-blue-600"
+            >
+              <ArrowLeft className="mr-2 w-4 h-4" />
+              Back
+            </Button>
+            <h1 className="text-3xl font-bold text-gray-900">Edit Event</h1>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <Card className="p-4 bg-red-50 border border-red-200">
-            <div className="flex items-center space-x-2 text-red-700">
+          <Card className="p-4 mb-6 bg-red-50 border border-red-200">
+            <div className="flex items-center space-x-2 text-red-800">
               <AlertCircle className="w-5 h-5" />
               <span className="font-medium">{error}</span>
             </div>
@@ -239,26 +285,25 @@ export const CreateEvent: React.FC = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
+                  placeholder="Describe your event and its purpose"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={4}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Describe your event, its purpose, and what volunteers will do"
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Tag className="w-4 h-4 inline mr-1" />
                   Category *
                 </label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
-                  <option value="">Select a category</option>
+                  <option value="">Select Category</option>
                   {categories.map((category) => (
                     <option key={category} value={category}>
                       {category}
@@ -269,13 +314,38 @@ export const CreateEvent: React.FC = () => {
             </div>
           </Card>
 
-          {/* Event Images */}
+          {/* Current Images */}
+          {existingImages.length > 0 && (
+            <Card className="p-6 bg-white border border-blue-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Images</h3>
+              <div className="grid grid-cols-3 gap-4">
+                {existingImages.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={`http://localhost:5000${image}`}
+                      alt={`Current ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Add New Images */}
           <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Images (Optional)</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Images (Optional)</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Event Images (Max 3)
+                  Upload Additional Images (Max 3 total)
                 </label>
                 <input
                   type="file"
@@ -295,12 +365,12 @@ export const CreateEvent: React.FC = () => {
                     <div key={index} className="relative">
                       <img
                         src={URL.createObjectURL(image)}
-                        alt={`Preview ${index + 1}`}
+                        alt={`New ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg border"
                       />
                       <button
                         type="button"
-                        onClick={() => removeImage(index)}
+                        onClick={() => removeNewImage(index)}
                         className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
                       >
                         ×
@@ -324,9 +394,7 @@ export const CreateEvent: React.FC = () => {
                 onChange={handleInputChange}
                 leftIcon={<Calendar className="w-5 h-5" />}
                 required
-                min={new Date().toISOString().split('T')[0]}
               />
-
               <Input
                 label="Start Time *"
                 name="startTime"
@@ -336,7 +404,6 @@ export const CreateEvent: React.FC = () => {
                 leftIcon={<Clock className="w-5 h-5" />}
                 required
               />
-
               <Input
                 label="End Time *"
                 name="endTime"
@@ -358,21 +425,19 @@ export const CreateEvent: React.FC = () => {
                 name="location.address"
                 value={formData.location.address}
                 onChange={handleInputChange}
-                placeholder="Street address, building name, etc."
+                placeholder="Enter full address"
                 leftIcon={<MapPin className="w-5 h-5" />}
                 required
               />
-              
               <div className="grid md:grid-cols-2 gap-4">
                 <Input
                   label="City *"
                   name="location.city"
                   value={formData.location.city}
                   onChange={handleInputChange}
-                  placeholder="City"
+                  placeholder="Enter city"
                   required
                 />
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     State *
@@ -381,10 +446,10 @@ export const CreateEvent: React.FC = () => {
                     name="location.state"
                     value={formData.location.state}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
-                    <option value="">Select state</option>
+                    <option value="">Select State</option>
                     {states.map((state) => (
                       <option key={state} value={state}>
                         {state}
@@ -396,9 +461,9 @@ export const CreateEvent: React.FC = () => {
             </div>
           </Card>
 
-          {/* Event Details */}
+          {/* Capacity and Additional Information */}
           <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
             <div className="space-y-4">
               <Input
                 label="Volunteer Capacity *"
@@ -414,52 +479,45 @@ export const CreateEvent: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Requirements (Optional)
+                  Requirements
                 </label>
                 <textarea
                   name="requirements"
                   value={formData.requirements}
                   onChange={handleInputChange}
+                  placeholder="What volunteers need to bring or any special requirements"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Any specific skills, experience, or items volunteers should bring"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What to Expect (Optional)
+                  What to Expect
                 </label>
                 <textarea
                   name="whatToExpect"
                   value={formData.whatToExpect}
                   onChange={handleInputChange}
+                  placeholder="What volunteers can expect from this event"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="What volunteers can expect during the event"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags (Optional)
-                </label>
-                <Input
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="Enter tags separated by commas (e.g., cleanup, outdoor, family-friendly)"
-                  leftIcon={<Tag className="w-5 h-5" />}
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Tags help volunteers find your event more easily
-                </p>
-              </div>
+              <Input
+                label="Tags"
+                name="tags"
+                value={formData.tags}
+                onChange={handleInputChange}
+                placeholder="Enter tags separated by commas (e.g., environment, cleanup, community)"
+                leftIcon={<Tag className="w-5 h-5" />}
+              />
             </div>
           </Card>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6">
+          {/* Submit Button */}
+          <div className="flex justify-end space-x-4">
             <Button
               type="button"
               variant="outline"
@@ -471,15 +529,15 @@ export const CreateEvent: React.FC = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 min-w-[200px]"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Creating Event...</span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Updating Event...</span>
                 </div>
               ) : (
-                'Create Event'
+                'Update Event'
               )}
             </Button>
           </div>

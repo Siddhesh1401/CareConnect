@@ -10,9 +10,9 @@ import {
   Users, 
   Clock,
   Search,
-  CheckCircle,
-  BarChart3,
-  Ban
+  Filter,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -151,45 +151,11 @@ export const EventManagement: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error deleting event:', error);
-      if (error.response?.status === 400 && error.response?.data?.data?.canCancel) {
-        const volunteersCount = error.response.data.data.registeredVolunteers;
-        const shouldCancel = window.confirm(
-          `Cannot delete event with ${volunteersCount} registered volunteer(s). Would you like to cancel the event instead? This will mark it as cancelled and notify volunteers.`
-        );
-        
-        if (shouldCancel) {
-          handleCancelEvent(eventId);
-        }
+      if (error.response?.status === 400) {
+        alert('Cannot delete event with registered volunteers. Please cancel the event instead.');
       } else {
-        alert(error.response?.data?.message || 'Failed to delete event. Please try again.');
+        alert('Failed to delete event. Please try again.');
       }
-    }
-  };
-
-  const handleCancelEvent = async (eventId: string) => {
-    try {
-      const token = localStorage.getItem('careconnect_token');
-      
-      if (!token) {
-        navigate('/auth/login');
-        return;
-      }
-
-      const response = await axios.patch(`${API_BASE_URL}/events/${eventId}/cancel`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.data.success) {
-        const volunteersCount = response.data.data.registeredVolunteers;
-        alert(`Event cancelled successfully. ${volunteersCount} registered volunteers will be notified.`);
-        fetchEvents(); // Refresh the list
-        fetchStats(); // Refresh stats
-      }
-    } catch (error: any) {
-      console.error('Error cancelling event:', error);
-      alert(error.response?.data?.message || 'Failed to cancel event. Please try again.');
     }
   };
 
@@ -221,20 +187,12 @@ export const EventManagement: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">Event Management</h1>
             <p className="text-gray-600 mt-2">Create and manage your organization's events</p>
           </div>
-          <div className="flex gap-3">
-            <Link to="/ngo/events/analytics">
-              <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
-                <BarChart3 className="mr-2 w-4 h-4" />
-                View Analytics
-              </Button>
-            </Link>
-            <Link to="/ngo/events/create">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="mr-2 w-4 h-4" />
-                Create New Event
-              </Button>
-            </Link>
-          </div>
+          <Link to="/ngo/events/create">
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="mr-2 w-4 h-4" />
+              Create New Event
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Cards */}
@@ -387,35 +345,14 @@ export const EventManagement: React.FC = () => {
                         <Eye className="w-4 h-4" />
                       </Button>
                     </Link>
-                    <Link to={`/ngo/events/${event._id}/volunteers`}>
-                      <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700 hover:border-blue-300">
-                        <Users className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                    <Link to={`/ngo/events/edit/${event._id}`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                    
-                    {event.status !== 'cancelled' && event.registeredVolunteers?.length > 0 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleCancelEvent(event._id)}
-                        className="text-orange-600 hover:text-orange-700 hover:border-orange-300"
-                        title="Cancel Event"
-                      >
-                        <Ban className="w-4 h-4" />
-                      </Button>
-                    )}
-                    
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleDeleteEvent(event._id)}
                       className="text-red-600 hover:text-red-700 hover:border-red-300"
-                      title="Delete Event"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

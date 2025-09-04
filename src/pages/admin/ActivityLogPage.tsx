@@ -34,6 +34,205 @@ interface ActivityLogEntry {
   category: 'auth' | 'user' | 'ngo' | 'event' | 'system' | 'admin';
 }
 
+// Enhanced mock data with more comprehensive activities
+const mockLogs: ActivityLogEntry[] = [
+  {
+    id: '1',
+    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+    user: 'Admin User',
+    userId: 'admin-1',
+    action: 'LOGIN',
+    resource: 'Admin Panel',
+    details: 'Successful admin login from dashboard',
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    status: 'success',
+    category: 'auth'
+  },
+  {
+    id: '2',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
+    user: 'Sarah Johnson',
+    userId: 'vol-123',
+    action: 'EVENT_REGISTRATION',
+    resource: 'Beach Cleanup Drive',
+    details: 'Volunteer registered for event successfully',
+    ipAddress: '203.192.12.45',
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)',
+    status: 'success',
+    category: 'event'
+  },
+  {
+    id: '3',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+    user: 'Green Earth Foundation',
+    userId: 'ngo-456',
+    action: 'EVENT_CREATED',
+    resource: 'Tree Plantation Drive',
+    details: 'New event created and published to platform',
+    ipAddress: '157.48.23.67',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    status: 'success',
+    category: 'event'
+  },
+  {
+    id: '4',
+    timestamp: new Date(Date.now() - 1000 * 60 * 90), // 1.5 hours ago
+    user: 'System',
+    userId: 'system',
+    action: 'BACKUP_COMPLETED',
+    resource: 'Database',
+    details: 'Automated daily database backup completed successfully',
+    ipAddress: '127.0.0.1',
+    userAgent: 'System Process',
+    status: 'success',
+    category: 'system'
+  },
+  {
+    id: '5',
+    timestamp: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
+    user: 'Unknown User',
+    userId: 'unknown',
+    action: 'LOGIN_FAILED',
+    resource: 'Admin Panel',
+    details: 'Failed login attempt with invalid credentials',
+    ipAddress: '45.123.67.89',
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+    status: 'error',
+    category: 'auth'
+  },
+  {
+    id: '6',
+    timestamp: new Date(Date.now() - 1000 * 60 * 180), // 3 hours ago
+    user: 'Hope Foundation',
+    userId: 'ngo-789',
+    action: 'NGO_REGISTRATION',
+    resource: 'NGO Application',
+    details: 'New NGO registration submitted for approval',
+    ipAddress: '198.51.100.42',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    status: 'info',
+    category: 'ngo'
+  },
+  {
+    id: '7',
+    timestamp: new Date(Date.now() - 1000 * 60 * 240), // 4 hours ago
+    user: 'Admin User',
+    userId: 'admin-1',
+    action: 'USER_SUSPENDED',
+    resource: 'User Account',
+    details: 'User account suspended for policy violation',
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    status: 'warning',
+    category: 'admin'
+  },
+  {
+    id: '8',
+    timestamp: new Date(Date.now() - 1000 * 60 * 300), // 5 hours ago
+    user: 'Rahul Kumar',
+    userId: 'vol-456',
+    action: 'DONATION_MADE',
+    resource: 'Clean Water Initiative',
+    details: 'Donation of ₹1,000 made to campaign',
+    ipAddress: '203.192.45.78',
+    userAgent: 'Mozilla/5.0 (Android 11; Mobile)',
+    status: 'success',
+    category: 'event'
+  },
+  {
+    id: '9',
+    timestamp: new Date(Date.now() - 1000 * 60 * 360), // 6 hours ago
+    user: 'Admin User',
+    userId: 'admin-1',
+    action: 'NGO_APPROVED',
+    resource: 'Green Earth Foundation',
+    details: 'NGO registration approved and account activated',
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    status: 'success',
+    category: 'admin'
+  },
+  {
+    id: '10',
+    timestamp: new Date(Date.now() - 1000 * 60 * 420), // 7 hours ago
+    user: 'Priya Sharma',
+    userId: 'vol-789',
+    action: 'PROFILE_UPDATED',
+    resource: 'User Profile',
+    details: 'User updated profile information and skills',
+    ipAddress: '203.192.67.12',
+    userAgent: 'Mozilla/5.0 (iPad; CPU OS 14_7_1 like Mac OS X)',
+    status: 'success',
+    category: 'user'
+  },
+  {
+    id: '11',
+    timestamp: new Date(Date.now() - 1000 * 60 * 480), // 8 hours ago
+    user: 'System',
+    userId: 'system',
+    action: 'EMAIL_SENT',
+    resource: 'Notification System',
+    details: 'Bulk email notification sent to 150 volunteers',
+    ipAddress: '127.0.0.1',
+    userAgent: 'System Process',
+    status: 'success',
+    category: 'system'
+  },
+  {
+    id: '12',
+    timestamp: new Date(Date.now() - 1000 * 60 * 540), // 9 hours ago
+    user: 'Admin User',
+    userId: 'admin-1',
+    action: 'MESSAGE_REPLIED',
+    resource: 'Support Ticket #123',
+    details: 'Admin replied to user support message',
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    status: 'success',
+    category: 'admin'
+  },
+  {
+    id: '13',
+    timestamp: new Date(Date.now() - 1000 * 60 * 600), // 10 hours ago
+    user: 'Mumbai NGO Network',
+    userId: 'ngo-101',
+    action: 'CAMPAIGN_CREATED',
+    resource: 'Education for All',
+    details: 'New donation campaign created with ₹50,000 target',
+    ipAddress: '157.48.89.34',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    status: 'success',
+    category: 'event'
+  },
+  {
+    id: '14',
+    timestamp: new Date(Date.now() - 1000 * 60 * 660), // 11 hours ago
+    user: 'System',
+    userId: 'system',
+    action: 'SECURITY_ALERT',
+    resource: 'Login System',
+    details: 'Multiple failed login attempts detected from IP 45.123.67.89',
+    ipAddress: '127.0.0.1',
+    userAgent: 'System Process',
+    status: 'warning',
+    category: 'system'
+  },
+  {
+    id: '15',
+    timestamp: new Date(Date.now() - 1000 * 60 * 720), // 12 hours ago
+    user: 'Admin User',
+    userId: 'admin-1',
+    action: 'SETTINGS_UPDATED',
+    resource: 'System Configuration',
+    details: 'Updated email notification settings',
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    status: 'success',
+    category: 'admin'
+  }
+];
+
 export default function ActivityLogPage() {
   const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<ActivityLogEntry[]>([]);
@@ -44,114 +243,6 @@ export default function ActivityLogPage() {
   const [dateFilter, setDateFilter] = useState('today');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
-
-  // Mock data - in real app this would come from API
-  const mockLogs: ActivityLogEntry[] = [
-    {
-      id: '1',
-      timestamp: new Date('2025-01-23T10:30:00'),
-      user: 'Admin User',
-      userId: 'admin-1',
-      action: 'LOGIN',
-      resource: 'Admin Panel',
-      details: 'Successful admin login',
-      ipAddress: '192.168.1.100',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      status: 'success',
-      category: 'auth'
-    },
-    {
-      id: '2',
-      timestamp: new Date('2025-01-23T10:25:00'),
-      user: 'Sarah Johnson',
-      userId: 'vol-123',
-      action: 'EVENT_REGISTRATION',
-      resource: 'Beach Cleanup Drive',
-      details: 'Volunteer registered for event',
-      ipAddress: '203.192.12.45',
-      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)',
-      status: 'success',
-      category: 'event'
-    },
-    {
-      id: '3',
-      timestamp: new Date('2025-01-23T10:20:00'),
-      user: 'Green Earth Foundation',
-      userId: 'ngo-456',
-      action: 'EVENT_CREATED',
-      resource: 'Tree Plantation Drive',
-      details: 'New event created and published',
-      ipAddress: '157.48.23.67',
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-      status: 'success',
-      category: 'event'
-    },
-    {
-      id: '4',
-      timestamp: new Date('2025-01-23T10:15:00'),
-      user: 'System',
-      userId: 'system',
-      action: 'BACKUP_COMPLETED',
-      resource: 'Database',
-      details: 'Daily database backup completed successfully',
-      ipAddress: '127.0.0.1',
-      userAgent: 'System Process',
-      status: 'success',
-      category: 'system'
-    },
-    {
-      id: '5',
-      timestamp: new Date('2025-01-23T10:10:00'),
-      user: 'Unknown User',
-      userId: 'unknown',
-      action: 'LOGIN_FAILED',
-      resource: 'Admin Panel',
-      details: 'Failed login attempt with invalid credentials',
-      ipAddress: '45.123.67.89',
-      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
-      status: 'error',
-      category: 'auth'
-    },
-    {
-      id: '6',
-      timestamp: new Date('2025-01-23T09:45:00'),
-      user: 'Hope Foundation',
-      userId: 'ngo-789',
-      action: 'NGO_REGISTRATION',
-      resource: 'NGO Application',
-      details: 'New NGO registration submitted for approval',
-      ipAddress: '198.51.100.42',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-      status: 'info',
-      category: 'ngo'
-    },
-    {
-      id: '7',
-      timestamp: new Date('2025-01-23T09:30:00'),
-      user: 'Admin User',
-      userId: 'admin-1',
-      action: 'USER_SUSPENDED',
-      resource: 'User Account',
-      details: 'User account suspended for policy violation',
-      ipAddress: '192.168.1.100',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-      status: 'warning',
-      category: 'admin'
-    },
-    {
-      id: '8',
-      timestamp: new Date('2025-01-23T09:15:00'),
-      user: 'Rahul Kumar',
-      userId: 'vol-456',
-      action: 'DONATION_MADE',
-      resource: 'Clean Water Initiative',
-      details: 'Donation of ₹1,000 made to campaign',
-      ipAddress: '203.192.45.78',
-      userAgent: 'Mozilla/5.0 (Android 11; Mobile)',
-      status: 'success',
-      category: 'user'
-    }
-  ];
 
   useEffect(() => {
     fetchLogs();
@@ -164,9 +255,42 @@ export default function ActivityLogPage() {
   const fetchLogs = async () => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setLogs(mockLogs);
+      // In a real app, this would be an API call
+      // For now, we'll simulate loading the mock data
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      
+      // Add some recent activities to make it more dynamic
+      const recentActivities: ActivityLogEntry[] = [
+        {
+          id: 'recent-1',
+          timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+          user: 'Admin User',
+          userId: 'admin-1',
+          action: 'PAGE_VIEW',
+          resource: 'Activity Log',
+          details: 'Viewed activity log page',
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          status: 'info',
+          category: 'admin'
+        },
+        {
+          id: 'recent-2',
+          timestamp: new Date(Date.now() - 1000 * 60 * 10), // 10 minutes ago
+          user: 'System',
+          userId: 'system',
+          action: 'CACHE_CLEARED',
+          resource: 'Application Cache',
+          details: 'Application cache cleared automatically',
+          ipAddress: '127.0.0.1',
+          userAgent: 'System Process',
+          status: 'success',
+          category: 'system'
+        }
+      ];
+
+      setLogs([...recentActivities, ...mockLogs]);
+      setFilteredLogs([...recentActivities, ...mockLogs]);
     } catch (error) {
       console.error('Failed to fetch activity logs:', error);
     } finally {

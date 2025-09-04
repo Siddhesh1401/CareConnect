@@ -18,11 +18,16 @@ import { EventsPage } from './pages/events/EventsPage';
 import { EventRegistrationPage } from './pages/events/EventRegistrationPage';
 import { DonationPage } from './pages/donation/DonationPage';
 import { NGODashboard } from './pages/ngo/NGODashboard';
+import { NGOProfileEditPage } from './pages/ngo/NGOProfileEditPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { NGOsPage } from './pages/ngos/NGOsPage';
+import { NGOProfilePage } from './pages/ngos/NGOProfilePage';
 import { AboutPage } from './pages/about/AboutPage';
 import { EventManagement } from './pages/ngo/EventManagement';
 import { CreateEvent } from './pages/ngo/CreateEvent';
+import { EditEvent } from './pages/ngo/EditEvent';
+import { EventAnalytics } from './pages/ngo/EventAnalytics';
+import { EventVolunteers } from './pages/ngo/EventVolunteers';
 import { CampaignManagement } from './pages/ngo/CampaignManagement';
 import { CreateCampaign } from './pages/ngo/CreateCampaign';
 import { VolunteerManagement } from './pages/ngo/VolunteerManagement';
@@ -160,6 +165,11 @@ function App() {
               <NGOsPage />
             </AppLayout>
           } />
+          <Route path="/ngos/:id" element={
+            <AppLayout>
+              <NGOProfilePage />
+            </AppLayout>
+          } />
           
           {/* Protected Routes */}
           <Route path="/profile" element={
@@ -182,6 +192,14 @@ function App() {
             <ProtectedRoute>
               <AppLayout hideFooter>
                 <NGODashboard />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ngo/profile/edit" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <NGOProfileEditPage />
               </AppLayout>
             </ProtectedRoute>
           } />
@@ -235,6 +253,30 @@ function App() {
             <ProtectedRoute>
               <AppLayout hideFooter>
                 <CreateEvent />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ngo/events/edit/:eventId" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <EditEvent />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ngo/events/analytics" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <EventAnalytics />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ngo/events/:eventId/volunteers" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <EventVolunteers />
               </AppLayout>
             </ProtectedRoute>
           } />
