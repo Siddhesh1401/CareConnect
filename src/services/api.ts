@@ -189,6 +189,112 @@ export const authAPI = {
   },
 };
 
+// Event API endpoints
+export const eventAPI = {
+  // Get all events
+  getAllEvents: async (filters?: {
+    category?: string;
+    location?: string;
+    date?: string;
+    search?: string;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+      });
+    }
+    const response = await api.get(`/events?${params.toString()}`);
+    return response.data;
+  },
+
+  // Get event by ID
+  getEventById: async (eventId: string) => {
+    const response = await api.get(`/events/${eventId}`);
+    return response.data;
+  },
+
+  // Create event (NGO only)
+  createEvent: async (eventData: FormData) => {
+    const response = await api.post('/events/create', eventData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Get NGO's events
+  getNGOEvents: async () => {
+    const response = await api.get('/events/ngo/my-events');
+    return response.data;
+  },
+
+  // Get NGO's volunteers
+  getNGOVolunteers: async () => {
+    const response = await api.get('/events/ngo/volunteers');
+    return response.data;
+  },
+
+  // Register for event
+  registerForEvent: async (eventId: string) => {
+    const response = await api.post(`/events/${eventId}/register`);
+    return response.data;
+  },
+
+  // Unregister from event
+  unregisterFromEvent: async (eventId: string) => {
+    const response = await api.delete(`/events/${eventId}/register`);
+    return response.data;
+  },
+
+  // Get volunteer's registered events
+  getVolunteerEvents: async () => {
+    const response = await api.get('/events/volunteer/my-events');
+    return response.data;
+  },
+
+  // Update event (NGO only)
+  updateEvent: async (eventId: string, eventData: FormData) => {
+    const response = await api.put(`/events/${eventId}`, eventData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Delete event (NGO only)
+  deleteEvent: async (eventId: string) => {
+    const response = await api.delete(`/events/${eventId}`);
+    return response.data;
+  },
+
+  // Cancel event (NGO only)
+  cancelEvent: async (eventId: string) => {
+    const response = await api.patch(`/events/${eventId}/cancel`);
+    return response.data;
+  },
+
+  // Get event statistics (NGO only)
+  getEventStats: async () => {
+    const response = await api.get('/events/ngo/stats');
+    return response.data;
+  },
+
+  // Get event analytics (NGO only)
+  getEventAnalytics: async () => {
+    const response = await api.get('/events/ngo/analytics');
+    return response.data;
+  },
+
+  // Get volunteers for specific event (NGO only)
+  getEventVolunteers: async (eventId: string) => {
+    const response = await api.get(`/events/${eventId}/volunteers`);
+    return response.data;
+  },
+};
+
 // Messages API
 export const messagesAPI = {
   // Send message to admin
@@ -226,6 +332,205 @@ export const messagesAPI = {
 export const healthCheck = async () => {
   const response = await api.get('/health');
   return response.data;
+};
+
+// Campaign API endpoints
+export const campaignAPI = {
+  // Get all campaigns (for volunteers)
+  getAllCampaigns: async (params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    status?: string;
+  }) => {
+    const response = await api.get('/campaigns', { params });
+    return response.data;
+  },
+
+  // Get single campaign by ID
+  getCampaignById: async (id: string) => {
+    const response = await api.get(`/campaigns/${id}`);
+    return response.data;
+  },
+
+  // Get campaign categories
+  getCategories: async () => {
+    const response = await api.get('/campaigns/categories');
+    return response.data;
+  },
+
+  // NGO specific endpoints
+  getMyCampaigns: async (params?: { status?: string; page?: number; limit?: number }) => {
+    const response = await api.get('/campaigns/ngo/my-campaigns', { params });
+    return response.data;
+  },
+
+  getCampaignStats: async () => {
+    const response = await api.get('/campaigns/ngo/stats');
+    return response.data;
+  },
+
+  createCampaign: async (campaignData: {
+    title: string;
+    description: string;
+    category: string;
+    target: number;
+    location: string;
+    endDate: string;
+    image?: string;
+    tags?: string[];
+  }) => {
+    const response = await api.post('/campaigns', campaignData);
+    return response.data;
+  },
+
+  updateCampaign: async (id: string, campaignData: Partial<{
+    title: string;
+    description: string;
+    category: string;
+    target: number;
+    location: string;
+    endDate: string;
+    image?: string;
+    tags?: string[];
+    status: string;
+  }>) => {
+    const response = await api.put(`/campaigns/${id}`, campaignData);
+    return response.data;
+  },
+
+  deleteCampaign: async (id: string) => {
+    const response = await api.delete(`/campaigns/${id}`);
+    return response.data;
+  },
+
+  addCampaignUpdate: async (id: string, updateData: {
+    title: string;
+    content: string;
+    images?: string[];
+  }) => {
+    const response = await api.post(`/campaigns/${id}/updates`, updateData);
+    return response.data;
+  },
+
+  donateToCampaign: async (id: string, donationData: {
+    amount: number;
+    message?: string;
+  }) => {
+    const response = await api.post(`/campaigns/${id}/donate`, donationData);
+    return response.data;
+  },
+
+  getCampaignDonors: async (id: string) => {
+    const response = await api.get(`/campaigns/${id}/donors`);
+    return response.data;
+  },
+};
+
+// Story API endpoints
+export const storyAPI = {
+  // Get all stories (for public viewing)
+  getAllStories: async (params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    status?: string;
+  }) => {
+    const response = await api.get('/stories', { params });
+    return response.data;
+  },
+
+  // Get single story by ID
+  getStoryById: async (id: string) => {
+    const response = await api.get(`/stories/${id}`);
+    return response.data;
+  },
+
+  // Get story categories
+  getCategories: async () => {
+    const response = await api.get('/stories/categories');
+    return response.data;
+  },
+
+  // Create new story
+  createStory: async (storyData: {
+    title: string;
+    excerpt: string;
+    content: string;
+    image?: string;
+    category: string;
+    tags?: string[];
+    status?: 'draft' | 'published';
+  }) => {
+    const response = await api.post('/stories', storyData);
+    return response.data;
+  },
+
+  // Update story
+  updateStory: async (id: string, storyData: Partial<{
+    title: string;
+    excerpt: string;
+    content: string;
+    image?: string;
+    category: string;
+    tags?: string[];
+    status: 'draft' | 'published';
+  }>) => {
+    const response = await api.put(`/stories/${id}`, storyData);
+    return response.data;
+  },
+
+  // Delete story
+  deleteStory: async (id: string) => {
+    const response = await api.delete(`/stories/${id}`);
+    return response.data;
+  },
+
+  // Get user's stories
+  getUserStories: async (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/stories/user/my-stories', { params });
+    return response.data;
+  },
+
+  // Get my stories (alias for getUserStories)
+  getMyStories: async (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/stories/user/my-stories', { params });
+    return response.data;
+  },
+
+  // Admin: Get all stories
+  getAllStoriesAdmin: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+  }) => {
+    const response = await api.get('/stories/admin/all', { params });
+    return response.data;
+  },
+
+  // Admin: Update story status
+  updateStoryStatus: async (id: string, data: {
+    status: 'draft' | 'published' | 'pending_review';
+    featured?: boolean;
+  }) => {
+    const response = await api.patch(`/stories/admin/${id}/status`, data);
+    return response.data;
+  },
 };
 
 // Export api instance both as named and default export

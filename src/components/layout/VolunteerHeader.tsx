@@ -16,10 +16,10 @@ export const VolunteerHeader: React.FC = () => {
   const navigation = [
     { name: 'Dashboard', href: '/volunteer/dashboard' },
     { name: 'Find Events', href: '/events' },
+    { name: 'Campaigns', href: '/campaigns' },
     { name: 'Community', href: '/community' },
     { name: 'NGOs', href: '/ngos' },
     { name: 'Stories', href: '/stories' },
-    { name: 'Donate', href: '/donate' },
   ];
 
   const isActiveLink = (path: string) => location.pathname === path;

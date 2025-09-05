@@ -16,7 +16,6 @@ import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard';
 import { CommunityPage } from './pages/community/CommunityPage';
 import { EventsPage } from './pages/events/EventsPage';
 import { EventRegistrationPage } from './pages/events/EventRegistrationPage';
-import { DonationPage } from './pages/donation/DonationPage';
 import { NGODashboard } from './pages/ngo/NGODashboard';
 import { NGOProfileEditPage } from './pages/ngo/NGOProfileEditPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
@@ -30,10 +29,14 @@ import { EventAnalytics } from './pages/ngo/EventAnalytics';
 import { EventVolunteers } from './pages/ngo/EventVolunteers';
 import { CampaignManagement } from './pages/ngo/CampaignManagement';
 import { CreateCampaign } from './pages/ngo/CreateCampaign';
+import { EditCampaign } from './pages/ngo/EditCampaign';
 import { VolunteerManagement } from './pages/ngo/VolunteerManagement';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { StoriesPage } from './pages/stories/StoriesPage';
+import { CreateStory } from './pages/stories/CreateStory';
+import { StoryDetailPage } from './pages/stories/StoryDetailPage';
+import { EditStoryPage } from './pages/stories/EditStoryPage';
 import { NGORequestsPage } from './pages/admin/NGORequestsPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -41,6 +44,9 @@ import { DemoPage } from './pages/auth/DemoPage';
 import { SystemSettingsPage } from './pages/admin/SystemSettingsPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
+import { AdminStoriesPage } from './pages/admin/AdminStoriesPage';
+import { CampaignsPage } from './pages/campaigns/CampaignsPage';
+import { CampaignDetailsPage } from './pages/campaigns/CampaignDetailsPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -225,18 +231,43 @@ function App() {
               </AppLayout>
             </ProtectedRoute>
           } />
-          
-          <Route path="/donate" element={
-            <ProtectedRoute>
-              <AppLayout>
-                <DonationPage />
-              </AppLayout>
-            </ProtectedRoute>
-          } />
 
           <Route path="/stories" element={
             <AppLayout>
               <StoriesPage />
+            </AppLayout>
+          } />
+
+          <Route path="/stories/create" element={
+            <AppLayout>
+              <CreateStory />
+            </AppLayout>
+          } />
+
+          <Route path="/stories/:id/edit" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <EditStoryPage />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/stories/:id" element={
+            <AppLayout>
+              <StoryDetailPage />
+            </AppLayout>
+          } />
+          
+          {/* Campaign Routes */}
+          <Route path="/campaigns" element={
+            <AppLayout>
+              <CampaignsPage />
+            </AppLayout>
+          } />
+          
+          <Route path="/campaigns/:id" element={
+            <AppLayout>
+              <CampaignDetailsPage />
             </AppLayout>
           } />
           
@@ -297,6 +328,14 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/ngo/campaigns/:id/edit" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <EditCampaign />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
           <Route path="/ngo/volunteers" element={
             <ProtectedRoute>
               <AppLayout hideFooter>
@@ -349,6 +388,14 @@ function App() {
             <AdminRoute>
               <AppLayout hideFooter>
                 <AdminMessagesPage />
+              </AppLayout>
+            </AdminRoute>
+          } />
+
+          <Route path="/admin/stories" element={
+            <AdminRoute>
+              <AppLayout hideFooter>
+                <AdminStoriesPage />
               </AppLayout>
             </AdminRoute>
           } />

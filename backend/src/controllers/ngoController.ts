@@ -21,8 +21,6 @@ export const getNGOs = async (req: Request, res: Response) => {
       // Removed isActive and accountStatus filters to be less restrictive
     };
 
-    console.log('NGO query:', query);
-
     // Search filter
     if (search) {
       query.$or = [
@@ -78,7 +76,6 @@ export const getNGOs = async (req: Request, res: Response) => {
         .sort(sort)
         .skip(skip)
         .limit(Number(limit));
-      console.log('Database query successful');
     } catch (dbError) {
       console.error('Database query error:', dbError);
       return res.status(500).json({
@@ -88,28 +85,13 @@ export const getNGOs = async (req: Request, res: Response) => {
       });
     }
 
-    console.log('Simple query NGOs found:', ngos.length);
-    if (ngos.length > 0) {
-      console.log('First NGO ID:', ngos[0]._id);
-    }
-
-    console.log('NGOs found:', ngos.length);
-    if (ngos.length > 0) {
-      console.log('First NGO ID:', ngos[0]._id);
-      console.log('First NGO data:', ngos[0]);
-    }
-
     // Get total count for pagination
     const totalNGOs = await User.countDocuments(query);
     const totalPages = Math.ceil(totalNGOs / Number(limit));
 
-    console.log('Total NGOs in database:', totalNGOs);
-
     // Transform data to match frontend expectations
     const transformedNGOs = ngos.map(ngo => {
-      console.log('Transforming NGO:', ngo._id, ngo.organizationName || ngo.name);
       const ngoId = ngo._id ? ngo._id.toString() : 'undefined';
-      console.log('NGO ID after conversion:', ngoId);
       return {
         id: ngoId,
         name: ngo.organizationName || ngo.name,
@@ -123,16 +105,11 @@ export const getNGOs = async (req: Request, res: Response) => {
         totalEvents: 0, // Placeholder since we don't have this from simple query
         totalDonations: 0, // Placeholder since we don't have this from simple query
         founded: ngo.foundedYear?.toString() || '2020',
-        impact: generateImpactText(ngo.organizationType, 0, 0),
+        impact: generateImpactText(ngo.organizationType || 'community', 0, 0),
         website: ngo.website,
         joinedDate: ngo.joinedDate
       };
     });
-
-    console.log('Transformed NGOs:', transformedNGOs.length);
-    if (transformedNGOs.length > 0) {
-      console.log('First transformed NGO ID:', transformedNGOs[0].id);
-    }
 
     res.status(200).json({
       success: true,
@@ -203,7 +180,7 @@ export const getNGODetails = async (req: Request, res: Response) => {
     }
 
     // Get NGO's events (simplified for now)
-    let ngoEvents = [];
+    let ngoEvents: any[] = [];
     try {
       ngoEvents = await Event.find({ organizerId: id });
     } catch (eventError) {

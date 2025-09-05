@@ -20,6 +20,7 @@ export const NGOHeader: React.FC = () => {
     { name: 'Campaigns', href: '/ngo/campaigns' },
     { name: 'Volunteers', href: '/ngo/volunteers' },
     { name: 'Community', href: '/community' },
+    { name: 'Stories', href: '/stories' },
   ];
 
   const isActiveLink = (path: string) => location.pathname === path;

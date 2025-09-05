@@ -1142,7 +1142,7 @@ export const getEventVolunteers = async (req: AuthRequest, res: Response): Promi
 
     // Combine volunteer details with registration info
     const volunteersWithRegistration = event.registeredVolunteers.map(registration => {
-      const volunteer = volunteers.find(v => v._id.toString() === registration.userId.toString());
+      const volunteer = volunteers.find(v => (v._id as mongoose.Types.ObjectId).toString() === registration.userId.toString());
       return {
         ...registration,
         volunteer: volunteer ? {
@@ -1151,7 +1151,7 @@ export const getEventVolunteers = async (req: AuthRequest, res: Response): Promi
           phone: volunteer.phone,
           profilePicture: volunteer.profilePicture,
           verificationStatus: volunteer.verificationStatus,
-          joinedDate: volunteer.createdAt
+          joinedDate: volunteer.joinedDate || new Date()
         } : null
       };
     });
@@ -1173,6 +1173,133 @@ export const getEventVolunteers = async (req: AuthRequest, res: Response): Promi
 
   } catch (error) {
     console.error('Get event volunteers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Get all volunteers for NGO (across all events)
+export const getNGOVolunteers = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.role !== 'ngo_admin') {
+      res.status(403).json({
+        success: false,
+        message: 'Only NGO administrators can access this endpoint'
+      });
+      return;
+    }
+
+    // Get all events organized by this NGO
+    const events = await Event.find({
+      organizerId: req.user.id
+    }).select('registeredVolunteers title date');
+
+    if (!events || events.length === 0) {
+      res.status(200).json({
+        success: true,
+        message: 'No events found for this NGO',
+        data: {
+          volunteers: [],
+          stats: {
+            totalVolunteers: 0,
+            activeVolunteers: 0,
+            totalHours: 0,
+            avgHoursPerVolunteer: 0
+          }
+        }
+      });
+      return;
+    }
+
+    // Collect all unique volunteer IDs and their registration data
+    const volunteerMap = new Map();
+
+    events.forEach(event => {
+      event.registeredVolunteers.forEach(registration => {
+        const volunteerId = registration.userId.toString();
+        
+        if (!volunteerMap.has(volunteerId)) {
+          volunteerMap.set(volunteerId, {
+            userId: registration.userId,
+            registrations: [],
+            totalEvents: 0,
+            confirmedEvents: 0,
+            totalHours: 0 // We'll calculate this based on event duration
+          });
+        }
+
+        const volunteerData = volunteerMap.get(volunteerId);
+        volunteerData.registrations.push({
+          eventId: event._id,
+          eventTitle: event.title,
+          eventDate: event.date,
+          registrationDate: registration.registrationDate,
+          status: registration.status
+        });
+        
+        volunteerData.totalEvents += 1;
+        if (registration.status === 'confirmed') {
+          volunteerData.confirmedEvents += 1;
+          // Estimate hours based on typical event duration (this could be improved)
+          volunteerData.totalHours += 4; // Default 4 hours per event
+        }
+      });
+    });
+
+    // Get detailed volunteer information
+    const volunteerIds = Array.from(volunteerMap.keys());
+    const volunteers = await User.find({
+      _id: { $in: volunteerIds },
+      role: 'volunteer'
+    }).select('name email phone profilePicture skills interests points level createdAt lastActive isActive');
+
+    // Combine data
+    const volunteersWithDetails = volunteers.map(volunteer => {
+      const volunteerData = volunteerMap.get((volunteer._id as mongoose.Types.ObjectId).toString());
+      
+      return {
+        id: volunteer._id,
+        name: volunteer.name,
+        email: volunteer.email,
+        phone: volunteer.phone,
+        avatar: volunteer.profilePicture || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100',
+        joinedDate: volunteer.joinedDate || new Date(),
+        lastActivity: volunteer.lastActive || volunteer.joinedDate || new Date(),
+        totalHours: volunteerData.totalHours,
+        eventsJoined: volunteerData.confirmedEvents,
+        status: volunteer.isActive ? 'active' : 'inactive',
+        skills: volunteer.skills || [],
+        interests: volunteer.interests || [],
+        points: volunteer.points || 0,
+        level: volunteer.level || 1,
+        registrations: volunteerData.registrations
+      };
+    });
+
+    // Calculate stats
+    const activeVolunteers = volunteersWithDetails.filter(v => v.status === 'active');
+    const totalHours = volunteersWithDetails.reduce((sum, v) => sum + v.totalHours, 0);
+    const avgHoursPerVolunteer = volunteersWithDetails.length > 0 ? Math.round(totalHours / volunteersWithDetails.length) : 0;
+
+    res.status(200).json({
+      success: true,
+      message: 'NGO volunteers retrieved successfully',
+      data: {
+        volunteers: volunteersWithDetails,
+        stats: {
+          totalVolunteers: volunteersWithDetails.length,
+          activeVolunteers: activeVolunteers.length,
+          totalHours: totalHours,
+          avgHoursPerVolunteer: avgHoursPerVolunteer
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get NGO volunteers error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { 
   Calendar, 
   Users, 
-  TrendingUp, 
   Heart, 
   Plus, 
   Edit,
@@ -75,7 +74,27 @@ export const NGODashboard: React.FC = () => {
         });
 
         if (response.data.success) {
-          setDashboardData(response.data.data);
+          const data = response.data.data;
+          // Deduplicate arrays to prevent duplicate keys
+          if (data.recentVolunteers) {
+            const uniqueVolunteers = data.recentVolunteers.filter((volunteer: any, index: number, arr: any[]) => 
+              arr.findIndex((v: any) => v._id === volunteer._id) === index
+            );
+            data.recentVolunteers = uniqueVolunteers;
+          }
+          if (data.recentEvents) {
+            const uniqueEvents = data.recentEvents.filter((event: any, index: number, arr: any[]) => 
+              arr.findIndex((e: any) => e._id === event._id) === index
+            );
+            data.recentEvents = uniqueEvents;
+          }
+          if (data.campaigns) {
+            const uniqueCampaigns = data.campaigns.filter((campaign: any, index: number, arr: any[]) => 
+              arr.findIndex((c: any) => c.id === campaign.id) === index
+            );
+            data.campaigns = uniqueCampaigns;
+          }
+          setDashboardData(data);
         }
       } catch (error: any) {
         console.error('Error fetching NGO dashboard data:', error);
@@ -192,13 +211,19 @@ export const NGODashboard: React.FC = () => {
                 <span>View Public Profile</span>
               </Button>
             </Link>
+            <Link to="/stories/create">
+              <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 flex items-center space-x-2 px-4 py-2 rounded-lg font-medium">
+                <Heart className="w-4 h-4" />
+                <span>Share Story</span>
+              </Button>
+            </Link>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
-            <Card key={index} className="p-6 hover:shadow-md transition-shadow">
+            <Card key={`stat-${stat.label}-${index}`} className="p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-lg ${stat.color}`}>
                   <stat.icon className="w-6 h-6" />
@@ -238,8 +263,8 @@ export const NGODashboard: React.FC = () => {
               </div>
               
               <div className="space-y-4">
-                {recentEvents.map((event) => (
-                  <div key={event._id} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                {recentEvents.map((event, index) => (
+                  <div key={`event-${event._id}-${index}`} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900 mb-1">{event.title}</h3>
@@ -302,8 +327,8 @@ export const NGODashboard: React.FC = () => {
               </div>
               
               <div className="space-y-4">
-                {campaigns.map((campaign) => (
-                  <div key={campaign.id} className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                {campaigns.map((campaign, index) => (
+                  <div key={`campaign-${campaign.id}-${index}`} className="bg-blue-50 rounded-lg p-4 border border-blue-100">
                     <h4 className="font-medium text-gray-900 mb-2">{campaign.title}</h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
@@ -338,8 +363,8 @@ export const NGODashboard: React.FC = () => {
               </div>
               
               <div className="space-y-3">
-                {recentVolunteers.map((volunteer) => (
-                  <div key={volunteer._id} className="flex items-center space-x-3">
+                {recentVolunteers.map((volunteer, index) => (
+                  <div key={`volunteer-${volunteer._id}-${index}`} className="flex items-center space-x-3">
                     <img
                       src={volunteer.avatar}
                       alt={volunteer.name}
@@ -367,6 +392,39 @@ export const NGODashboard: React.FC = () => {
                 </Link>
               </div>
             </Card>
+
+            {/* Stories Section */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Your Stories</h3>
+                <Heart className="w-5 h-5 text-green-600" />
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Share your impact stories and inspire others in the community.
+              </p>
+              
+              <div className="space-y-3">
+                <Link to="/stories/create">
+                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                    <Plus className="mr-2 w-4 h-4" />
+                    Create New Story
+                  </Button>
+                </Link>
+                <Link to="/stories?tab=my">
+                  <Button variant="outline" className="w-full">
+                    <Edit className="mr-2 w-4 h-4" />
+                    My Stories
+                  </Button>
+                </Link>
+                <Link to="/stories">
+                  <Button variant="outline" className="w-full">
+                    <Eye className="mr-2 w-4 h-4" />
+                    View All Stories
+                  </Button>
+                </Link>
+              </div>
+            </Card>
           </div>
         </div>
 
@@ -386,16 +444,16 @@ export const NGODashboard: React.FC = () => {
                 <span>Start Campaign</span>
               </Button>
             </Link>
+            <Link to="/stories/create">
+              <Button variant="outline" className="w-full p-4 h-auto flex-col">
+                <Heart className="w-6 h-6 mb-2" />
+                <span>Share Story</span>
+              </Button>
+            </Link>
             <Link to="/ngo/volunteers">
               <Button variant="outline" className="w-full p-4 h-auto flex-col">
                 <Users className="w-6 h-6 mb-2" />
                 <span>Manage Volunteers</span>
-              </Button>
-            </Link>
-            <Link to="/ngo/reports">
-              <Button variant="outline" className="w-full p-4 h-auto flex-col">
-                <TrendingUp className="w-6 h-6 mb-2" />
-                <span>View Reports</span>
               </Button>
             </Link>
           </div>

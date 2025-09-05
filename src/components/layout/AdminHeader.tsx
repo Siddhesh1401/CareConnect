@@ -38,6 +38,7 @@ export const AdminHeader: React.FC = () => {
     { name: 'Dashboard', href: '/admin/dashboard' },
     { name: 'NGO Requests', href: '/admin/ngo-requests' },
     { name: 'User Management', href: '/admin/users' },
+    { name: 'Stories', href: '/admin/stories' },
     { name: 'System Settings', href: '/admin/settings' },
     { name: 'Activity Log', href: '/admin/activity' },
   ];

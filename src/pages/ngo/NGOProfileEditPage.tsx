@@ -6,9 +6,6 @@ import {
   Upload,
   MapPin,
   Globe,
-  Phone,
-  Building,
-  Calendar,
   Loader2,
   AlertCircle,
   CheckCircle
@@ -34,7 +31,7 @@ interface NGOProfile {
   };
   phone: string;
   website: string;
-  foundedYear: number;
+  foundedYear: number | undefined;
   profilePicture: string;
 }
 

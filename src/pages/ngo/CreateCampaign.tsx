@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Target, DollarSign, Calendar, FileText, Image } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { campaignAPI } from '../../services/api';
 
 export const CreateCampaign: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<{ value: string; label: string }[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -18,16 +21,34 @@ export const CreateCampaign: React.FC = () => {
     images: [] as string[]
   });
 
-  const categories = [
-    'Education',
-    'Healthcare',
-    'Environment',
-    'Disaster Relief',
-    'Community Development',
-    'Women Empowerment',
-    'Child Welfare',
-    'Animal Welfare'
-  ];
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await campaignAPI.getCategories();
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        // Fallback to hardcoded categories if API fails
+        setCategories([
+          { value: 'education', label: 'Education' },
+          { value: 'healthcare', label: 'Healthcare' },
+          { value: 'environment', label: 'Environment' },
+          { value: 'poverty', label: 'Poverty Alleviation' },
+          { value: 'disaster-relief', label: 'Disaster Relief' },
+          { value: 'animal-welfare', label: 'Animal Welfare' },
+          { value: 'children', label: 'Children' },
+          { value: 'elderly', label: 'Elderly Care' },
+          { value: 'disability', label: 'Disability Support' },
+          { value: 'other', label: 'Other' }
+        ]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -38,12 +59,30 @@ export const CreateCampaign: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const campaignData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        target: parseInt(formData.targetAmount),
+        location: 'Mumbai, Maharashtra', // This could be made dynamic
+        endDate: new Date(Date.now() + parseInt(formData.duration) * 24 * 60 * 60 * 1000).toISOString(),
+        tags: [] // Could be added to form
+      };
 
-    console.log('Creating campaign:', formData);
-    setIsSubmitting(false);
-    navigate('/ngo/campaigns');
+      const response = await campaignAPI.createCampaign(campaignData);
+      
+      if (response.success) {
+        navigate('/ngo/campaigns');
+      } else {
+        alert('Failed to create campaign: ' + response.message);
+      }
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      alert('Failed to create campaign. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,11 +143,14 @@ export const CreateCampaign: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  disabled={loadingCategories}
                 >
-                  <option value="">Select a category</option>
+                  <option value="">
+                    {loadingCategories ? 'Loading categories...' : 'Select a category'}
+                  </option>
                   {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                    <option key={category.value} value={category.value}>
+                      {category.label}
                     </option>
                   ))}
                 </select>

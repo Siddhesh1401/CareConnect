@@ -15,12 +15,14 @@ export const Header: React.FC = () => {
   const navigation = user ? [
     { name: 'Dashboard', href: user.role === 'volunteer' ? '/volunteer/dashboard' : '/ngo/dashboard' },
     { name: 'Events', href: '/events' },
+    { name: 'Campaigns', href: '/campaigns' },
     { name: 'Community', href: '/community' },
     { name: 'NGOs', href: '/ngos' },
     { name: 'Stories', href: '/stories' },
     { name: 'Notifications', href: '/notifications' },
   ] : [
     { name: 'Events', href: '/events' },
+    { name: 'Campaigns', href: '/campaigns' },
     { name: 'NGOs', href: '/ngos' },
     { name: 'Stories', href: '/stories' },
     { name: 'About', href: '/about' },
@@ -83,6 +85,18 @@ export const Header: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-10 transition-all duration-300 rounded-lg group-hover:animate-pulse"></div>
               </Link>
             ))}
+            
+            {/* Stories Action Button */}
+            {user && (
+              <Link to="/stories/create">
+                <Button 
+                  className="ml-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
+                >
+                  <Heart className="w-4 h-4" />
+                  <span>Share Story</span>
+                </Button>
+              </Link>
+            )}
           </nav>
 
           {/* Section 3: Auth/Profile Actions */}
@@ -207,6 +221,14 @@ export const Header: React.FC = () => {
               
               {user ? (
                 <div className="border-t border-gray-200 pt-6 mt-6">
+                  {/* Stories Button for Mobile */}
+                  <Link to="/stories/create" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full justify-center bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg rounded-xl py-3 mb-4 flex items-center space-x-2">
+                      <Heart className="w-5 h-5" />
+                      <span>Share Story</span>
+                    </Button>
+                  </Link>
+                  
                   <div className="flex items-center px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl mb-4">
                     {user.avatar ? (
                       <img

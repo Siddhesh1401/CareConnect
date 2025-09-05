@@ -12,6 +12,8 @@ import messageRoutes from './routes/messages.js';
 import eventRoutes from './routes/events.js';
 import dashboardRoutes from './routes/dashboard.js';
 import ngoRoutes from './routes/ngos.js';
+import campaignRoutes from './routes/campaigns.js';
+import storyRoutes from './routes/stories.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 
@@ -42,16 +44,23 @@ app.use(helmet()); // Security headers
 app.use(limiter); // Apply rate limiting
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Add request logging
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next();
-});
+// Add request logging (only in development)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    // Only log important requests, not every single one
+    if (req.method !== 'GET' || req.path.includes('/api/auth/') || req.path.includes('/api/admin/')) {
+      console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    }
+    next();
+  });
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -60,17 +69,84 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ngos', ngoRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/stories', storyRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'CareConnect API is running!',
-    timestamp: new Date().toISOString()
-  });
+// Enhanced Health check routes
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check database connection
+    const mongoose = require('mongoose');
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    
+    const healthStatus = {
+      success: true,
+      message: 'CareConnect API is running!',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      database: {
+        status: dbStatus,
+        name: mongoose.connection.name || 'N/A'
+      },
+      environment: process.env.NODE_ENV || 'development',
+      version: process.env.npm_package_version || '1.0.0'
+    };
+
+    res.status(200).json(healthStatus);
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      message: 'Health check failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Simple ping endpoint for load balancers
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Database health check endpoint
+app.get('/api/health/db', async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database not connected',
+        status: 'unhealthy'
+      });
+    }
+
+    // Try to perform a simple database operation
+    await mongoose.connection.db.admin().ping();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Database is healthy',
+      status: 'healthy',
+      connection: {
+        readyState: mongoose.connection.readyState,
+        name: mongoose.connection.name,
+        host: mongoose.connection.host,
+        port: mongoose.connection.port
+      }
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      message: 'Database health check failed',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      status: 'unhealthy'
+    });
+  }
 });
 
 // Error handling middleware

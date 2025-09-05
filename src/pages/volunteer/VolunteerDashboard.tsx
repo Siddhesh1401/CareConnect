@@ -8,7 +8,8 @@ import {
   Clock,
   MapPin,
   Star,
-  ArrowRight
+  ArrowRight,
+  Edit
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
@@ -339,7 +340,19 @@ export const VolunteerDashboard: React.FC = () => {
                 ))}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-blue-200">
+              <div className="mt-8 pt-6 border-t border-blue-200 space-y-4">
+                <Link to="/stories/create">
+                  <Button className="w-full group bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Heart className="mr-2 w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                    Share Your Story
+                  </Button>
+                </Link>
+                <Link to="/stories?tab=my">
+                  <Button variant="outline" className="w-full group border-blue-200 hover:border-blue-300 hover:bg-blue-50">
+                    <Edit className="mr-2 w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+                    My Stories
+                  </Button>
+                </Link>
                 <Link to="/community" className="block">
                   <Button variant="outline" className="w-full group border-blue-200 hover:border-blue-300 hover:bg-blue-50">
                     <Users className="mr-2 w-4 h-4 group-hover:scale-110 transition-transform duration-200" />

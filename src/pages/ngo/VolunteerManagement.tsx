@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Search, 
@@ -15,65 +15,68 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { eventAPI } from '../../services/api';
+
+interface Volunteer {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar: string;
+  joinedDate: string;
+  lastActivity: string;
+  totalHours: number;
+  eventsJoined: number;
+  status: 'active' | 'inactive';
+  skills: string[];
+  interests?: string[];
+  points?: number;
+  level?: number;
+}
+
+interface VolunteerStats {
+  totalVolunteers: number;
+  activeVolunteers: number;
+  totalHours: number;
+  avgHoursPerVolunteer: number;
+}
 
 export const VolunteerManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [stats, setStats] = useState<VolunteerStats>({
+    totalVolunteers: 0,
+    activeVolunteers: 0,
+    totalHours: 0,
+    avgHoursPerVolunteer: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const volunteers = [
-    {
-      id: '1',
-      name: 'Priya Sharma',
-      email: 'priya.sharma@email.com',
-      phone: '+91 98765 43210',
-      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100',
-      joinedDate: '2024-12-15',
-      totalHours: 45,
-      eventsJoined: 8,
-      status: 'active',
-      skills: ['Event Management', 'Community Outreach'],
-      lastActivity: '2025-01-22'
-    },
-    {
-      id: '2',
-      name: 'Rahul Kumar',
-      email: 'rahul.kumar@email.com',
-      phone: '+91 87654 32109',
-      avatar: 'https://images.pexels.com/photos/697509/pexels-photo-697509.jpeg?auto=compress&cs=tinysrgb&w=100',
-      joinedDate: '2024-11-20',
-      totalHours: 72,
-      eventsJoined: 12,
-      status: 'active',
-      skills: ['Teaching', 'Digital Literacy'],
-      lastActivity: '2025-01-21'
-    },
-    {
-      id: '3',
-      name: 'Sneha Patel',
-      email: 'sneha.patel@email.com',
-      phone: '+91 76543 21098',
-      avatar: 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=100',
-      joinedDate: '2024-10-10',
-      totalHours: 28,
-      eventsJoined: 5,
-      status: 'inactive',
-      skills: ['Healthcare', 'First Aid'],
-      lastActivity: '2025-01-10'
-    },
-    {
-      id: '4',
-      name: 'Amit Singh',
-      email: 'amit.singh@email.com',
-      phone: '+91 65432 10987',
-      avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100',
-      joinedDate: '2024-09-05',
-      totalHours: 96,
-      eventsJoined: 15,
-      status: 'active',
-      skills: ['Environmental Conservation', 'Project Management'],
-      lastActivity: '2025-01-23'
+  useEffect(() => {
+    fetchVolunteers();
+  }, []);
+
+  const fetchVolunteers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await eventAPI.getNGOVolunteers();
+      
+      if (response.success) {
+        setVolunteers(response.data.volunteers);
+        setStats(response.data.stats);
+      } else {
+        setError(response.message || 'Failed to fetch volunteers');
+      }
+    } catch (err) {
+      console.error('Error fetching volunteers:', err);
+      setError('Failed to load volunteers. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const filteredVolunteers = volunteers.filter(volunteer => {
     const matchesSearch = volunteer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -111,13 +114,46 @@ export const VolunteerManagement: React.FC = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <Card className="p-12 text-center bg-blue-50 border border-blue-100">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading volunteers...</p>
+          </Card>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <Card className="p-6 bg-red-50 border border-red-100">
+            <div className="flex items-center space-x-3">
+              <div className="text-red-600">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-red-800 font-medium">Error loading volunteers</p>
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+              <Button
+                onClick={fetchVolunteers}
+                size="sm"
+                className="ml-auto bg-red-600 hover:bg-red-700"
+              >
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Stats Cards */}
+        {!loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="p-6 bg-white border border-blue-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Volunteers</p>
-                <p className="text-2xl font-bold text-blue-600">{volunteers.length}</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.totalVolunteers}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Users className="w-6 h-6 text-blue-600" />
@@ -129,9 +165,7 @@ export const VolunteerManagement: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Active Volunteers</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {volunteers.filter(v => v.status === 'active').length}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{stats.activeVolunteers}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <UserCheck className="w-6 h-6 text-blue-600" />
@@ -143,9 +177,7 @@ export const VolunteerManagement: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Hours</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {volunteers.reduce((sum, v) => sum + v.totalHours, 0)}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{stats.totalHours}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Clock className="w-6 h-6 text-blue-600" />
@@ -157,9 +189,7 @@ export const VolunteerManagement: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Avg. Hours/Volunteer</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {Math.round(volunteers.reduce((sum, v) => sum + v.totalHours, 0) / volunteers.length)}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{stats.avgHoursPerVolunteer}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Award className="w-6 h-6 text-blue-600" />
@@ -167,36 +197,39 @@ export const VolunteerManagement: React.FC = () => {
             </div>
           </Card>
         </div>
+        )}
 
         {/* Search and Filters */}
-        <Card className="p-6 bg-blue-50 border border-blue-100">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search volunteers by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="w-5 h-5" />}
-                className="bg-white"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </Card>
+        {!loading && !error && (
+          <>
+            <Card className="p-6 bg-blue-50 border border-blue-100">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search volunteers by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    leftIcon={<Search className="w-5 h-5" />}
+                    className="bg-white"
+                  />
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </Card>
 
-        {/* Volunteers List */}
-        <div className="grid gap-6">
-          {filteredVolunteers.map((volunteer) => (
-            <Card key={volunteer.id} className="p-6 bg-white border border-blue-100">
-              <div className="flex items-start justify-between">
+            {/* Volunteers List */}
+            <div className="grid gap-6">
+              {filteredVolunteers.map((volunteer) => (
+                <Card key={volunteer.id} className="p-6 bg-white border border-blue-100">
+                  <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-4 flex-1">
                   <img
                     src={volunteer.avatar}
@@ -287,17 +320,19 @@ export const VolunteerManagement: React.FC = () => {
               </div>
             </Card>
           ))}
-        </div>
+            </div>
 
-        {/* Empty State */}
-        {filteredVolunteers.length === 0 && (
-          <Card className="p-12 text-center bg-blue-50 border border-blue-100">
-            <Users className="w-16 h-16 text-blue-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No volunteers found</h3>
-            <p className="text-gray-600 mb-6">
-              {searchTerm ? 'Try adjusting your search criteria' : 'No volunteers have joined your organization yet'}
-            </p>
-          </Card>
+            {/* Empty State */}
+            {filteredVolunteers.length === 0 && (
+              <Card className="p-12 text-center bg-blue-50 border border-blue-100">
+                <Users className="w-16 h-16 text-blue-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No volunteers found</h3>
+                <p className="text-gray-600 mb-6">
+                  {searchTerm ? 'Try adjusting your search criteria' : 'No volunteers have joined your organization yet'}
+                </p>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </div>

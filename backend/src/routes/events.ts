@@ -12,7 +12,8 @@ import {
   cancelEvent,
   getEventStats,
   getEventAnalytics,
-  getEventVolunteers
+  getEventVolunteers,
+  getNGOVolunteers
 } from '../controllers/eventController.js';
 import { authenticate, optionalAuthenticate } from '../middleware/auth.js';
 import { uploadEventImages } from '../middleware/upload.js';
@@ -34,6 +35,7 @@ router.get('/volunteer/my-events', getVolunteerEvents);   // Get volunteer's reg
 // NGO routes
 router.post('/create', uploadEventImages.array('images', 3), createEvent);  // Create new event with images (NGO only)
 router.get('/ngo/my-events', getNGOEvents);        // Get NGO's events
+router.get('/ngo/volunteers', getNGOVolunteers);   // Get all volunteers for NGO
 router.put('/:eventId', uploadEventImages.array('images', 3), updateEvent); // Update event with images (NGO only)
 router.patch('/:eventId/cancel', cancelEvent);     // Cancel event (NGO only)
 router.delete('/:eventId', deleteEvent);           // Delete event (NGO only)
