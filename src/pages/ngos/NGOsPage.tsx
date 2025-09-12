@@ -126,11 +126,11 @@ export const NGOsPage: React.FC = () => {
   const filteredNGOs = ngos;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-6 animate-fade-in">
+          <h1 className="text-4xl lg:text-5xl font-bold text-primary-700 mb-6 animate-fade-in">
             Partner Organizations
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in-up">
@@ -139,7 +139,7 @@ export const NGOsPage: React.FC = () => {
         </div>
 
         {/* Search and Filters */}
-        <Card className="p-8 mb-12 bg-gradient-to-r from-white to-blue-50/50 border border-blue-100/50 shadow-xl backdrop-blur-sm">
+        <Card className="p-8 mb-12 bg-white border-primary-200">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Search */}
             <div className="flex-1">

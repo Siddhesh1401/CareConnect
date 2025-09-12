@@ -9,16 +9,13 @@ import {
   Calendar,
   FileText,
   AlertTriangle,
-  Search,
   ExternalLink,
-  Upload,
   Clock,
   ThumbsUp,
   ThumbsDown
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import axios from 'axios';
 
@@ -63,8 +60,11 @@ interface NGORequest {
 }
 
 export const NGORequestsPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('pending');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<{
+    status?: string[];
+    category?: string[];
+  }>({});
   const [ngoRequests, setNGORequests] = useState<NGORequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusCounts, setStatusCounts] = useState({
@@ -105,8 +105,8 @@ export const NGORequestsPage: React.FC = () => {
 
       const response = await axios.get(`${API_BASE_URL}/admin/ngos`, {
         params: {
-          status: statusFilter === 'all' ? '' : statusFilter,
-          search: searchTerm
+          status: filters.status && filters.status.length > 0 ? filters.status.join(',') : '',
+          search: searchQuery
         },
         headers: {
           Authorization: `Bearer ${token}`
@@ -129,7 +129,7 @@ export const NGORequestsPage: React.FC = () => {
 
   useEffect(() => {
     fetchNGORequests();
-  }, [statusFilter, searchTerm]);
+  }, [searchQuery, filters]);
 
   // Approve NGO
   const handleApprove = async (ngoId: string) => {
@@ -277,16 +277,25 @@ export const NGORequestsPage: React.FC = () => {
     }
   };
 
-  // Filter requests based on search and status
+  // Filter requests based on search and filters
   const filteredRequests = (ngoRequests || []).filter(request => {
     if (!request) return false;
-    
-    const matchesSearch = 
-      request.organizationName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || request.verificationStatus === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    const matchesSearch =
+      request.organizationName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.organizationType?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Status filter
+    const matchesStatus = !filters.status || filters.status.length === 0 ||
+      filters.status.includes(request.verificationStatus);
+
+    // Organization type filter
+    const matchesType = !filters.category || filters.category.length === 0 ||
+      filters.category.includes(request.organizationType || '');
+
+    return matchesSearch && matchesStatus && matchesType;
   });
 
   if (loading) {
@@ -303,7 +312,7 @@ export const NGORequestsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+    <div className="min-h-screen bg-primary-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -311,193 +320,193 @@ export const NGORequestsPage: React.FC = () => {
           <p className="text-xl text-gray-600">Review and manage NGO registration applications</p>
         </div>
 
-        {/* Statistics Cards - Now Clickable */}
+        {/* Statistics Cards */}
         <div className="grid md:grid-cols-3 gap-6">
-          <Card 
-            className={`p-6 bg-white/70 backdrop-blur-sm border shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
-              statusFilter === 'pending' ? 'border-orange-400 ring-2 ring-orange-200' : 'border-orange-200/50'
-            }`}
-            onClick={() => setStatusFilter('pending')}
-          >
+          <Card className="p-6 bg-white border border-orange-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Pending Review</p>
                 <p className="text-2xl font-bold text-orange-600">{statusCounts.pending}</p>
                 <p className="text-xs text-gray-500 mt-1">Awaiting approval</p>
               </div>
-              <div className="p-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
-                <AlertTriangle className="w-6 h-6 text-white" />
+              <div className="p-3 bg-orange-100 rounded-lg">
+                <AlertTriangle className="w-6 h-6 text-orange-600" />
               </div>
             </div>
           </Card>
-          
-          <Card 
-            className={`p-6 bg-white/70 backdrop-blur-sm border shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
-              statusFilter === 'approved' ? 'border-green-400 ring-2 ring-green-200' : 'border-green-200/50'
-            }`}
-            onClick={() => setStatusFilter('approved')}
-          >
+
+          <Card className="p-6 bg-white border border-green-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Approved NGOs</p>
                 <p className="text-2xl font-bold text-green-600">{statusCounts.approved}</p>
                 <p className="text-xs text-gray-500 mt-1">Active organizations</p>
               </div>
-              <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-white" />
+              <div className="p-3 bg-green-100 rounded-lg">
+                <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </Card>
-          
-          <Card 
-            className={`p-6 bg-white/70 backdrop-blur-sm border shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
-              statusFilter === 'all' ? 'border-blue-400 ring-2 ring-blue-200' : 'border-blue-200/50'
-            }`}
-            onClick={() => setStatusFilter('all')}
-          >
+
+          <Card className="p-6 bg-white border border-primary-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Requests</p>
-                <p className="text-2xl font-bold text-blue-600">{statusCounts.pending + statusCounts.approved + statusCounts.rejected}</p>
+                <p className="text-2xl font-bold text-primary-600">{statusCounts.pending + statusCounts.approved + statusCounts.rejected}</p>
                 <p className="text-xs text-gray-500 mt-1">All time registrations</p>
               </div>
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-                <Building className="w-6 h-6 text-white" />
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <Building className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
+        </div>        {/* Search and Filters */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-primary-200">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            {/* Search Input */}
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search by organization name, contact person, email, or type..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Status Filter Dropdown */}
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-gray-700">Status:</label>
+              <select
+                value={filters.status?.[0] || ''}
+                onChange={(e) => setFilters({
+                  ...filters,
+                  status: e.target.value ? [e.target.value] : []
+                })}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            {/* Organization Type Filter Dropdown */}
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-gray-700">Type:</label>
+              <select
+                value={filters.category?.[0] || ''}
+                onChange={(e) => setFilters({
+                  ...filters,
+                  category: e.target.value ? [e.target.value] : []
+                })}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">All Types</option>
+                <option value="education">Education</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="environment">Environment</option>
+                <option value="poverty">Poverty Alleviation</option>
+                <option value="disaster">Disaster Relief</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {/* Clear Filters Button */}
+            {((filters.status && filters.status.length > 0) || (filters.category && filters.category.length > 0)) && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setFilters({})}
+                className="text-primary-600 hover:text-primary-800"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* Search and Status Tabs */}
-        <div className="space-y-6">
-          {/* Search Bar */}
-          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl">
-            <Input
-              placeholder="Search by organization name, contact person, or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              leftIcon={<Search className="w-5 h-5" />}
-              className="bg-white/80 backdrop-blur-sm border-blue-200/50"
-            />
-          </Card>
-
-          {/* Status Filter Tabs */}
-          <Card className="p-2 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl">
-            <div className="flex flex-wrap gap-2">
-              {[
-                { 
-                  value: 'all', 
-                  label: 'All Requests', 
-                  count: statusCounts.pending + statusCounts.approved + statusCounts.rejected,
-                  color: 'blue',
-                  icon: Building
-                },
-                { 
-                  value: 'pending', 
-                  label: 'Pending Review', 
-                  count: statusCounts.pending,
-                  color: 'orange',
-                  icon: Clock
-                },
-                { 
-                  value: 'approved', 
-                  label: 'Approved', 
-                  count: statusCounts.approved,
-                  color: 'green',
-                  icon: CheckCircle
-                },
-                { 
-                  value: 'rejected', 
-                  label: 'Rejected', 
-                  count: statusCounts.rejected,
-                  color: 'red',
-                  icon: X
-                }
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const isActive = statusFilter === tab.value;
-                
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => setStatusFilter(tab.value)}
-                    className={`
-                      flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 flex-1 min-w-fit
-                      ${isActive 
-                        ? `bg-gradient-to-r ${
-                            tab.color === 'blue' ? 'from-blue-500 to-blue-600' :
-                            tab.color === 'orange' ? 'from-orange-500 to-orange-600' :
-                            tab.color === 'green' ? 'from-green-500 to-green-600' :
-                            'from-red-500 to-red-600'
-                          } text-white shadow-lg transform scale-105` 
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-                      }
-                    `}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-semibold">{tab.label}</span>
-                    <span className={`
-                      px-2 py-1 rounded-full text-xs font-bold
-                      ${isActive 
-                        ? 'bg-white/20 text-white' 
-                        : `${
-                            tab.color === 'blue' ? 'bg-blue-100 text-blue-700' :
-                            tab.color === 'orange' ? 'bg-orange-100 text-orange-700' :
-                            tab.color === 'green' ? 'bg-green-100 text-green-700' :
-                            'bg-red-100 text-red-700'
-                          }`
-                      }
-                    `}>
-                      {tab.count}
-                    </span>
-                  </button>
-                );
-              })}
+        {/* Filter Tabs */}
+        <div className="mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-primary-200 p-1">
+            <div className="grid grid-cols-4 gap-1">
+              <button
+                onClick={() => setFilters({ ...filters, status: [] })}
+                className={`flex items-center justify-center px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  !filters.status || filters.status.length === 0
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Building className="w-4 h-4 mr-2" />
+                All Requests
+                <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                  {statusCounts.pending + statusCounts.approved + statusCounts.rejected}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setFilters({ ...filters, status: ['pending'] })}
+                className={`flex items-center justify-center px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  filters.status && filters.status.includes('pending')
+                    ? 'bg-orange-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Pending Review
+                <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                  {statusCounts.pending}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setFilters({ ...filters, status: ['approved'] })}
+                className={`flex items-center justify-center px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  filters.status && filters.status.includes('approved')
+                    ? 'bg-green-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Approved
+                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  {statusCounts.approved}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setFilters({ ...filters, status: ['rejected'] })}
+                className={`flex items-center justify-center px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  filters.status && filters.status.includes('rejected')
+                    ? 'bg-red-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Rejected
+                <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                  {statusCounts.rejected}
+                </span>
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Requests List */}
         <div className="space-y-6">
           {filteredRequests.length === 0 ? (
-            <Card className="p-12 text-center bg-white/70 backdrop-blur-sm border border-blue-200/50">
+            <Card className="p-12 text-center bg-white border border-primary-200">
               <div className="max-w-md mx-auto">
-                {statusFilter === 'pending' && (
-                  <>
-                    <Clock className="w-16 h-16 text-orange-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Pending Requests</h3>
-                    <p className="text-gray-500">There are currently no NGO registrations awaiting review.</p>
-                    <p className="text-sm text-gray-400 mt-2">New registrations will appear here for approval.</p>
-                  </>
-                )}
-                {statusFilter === 'approved' && (
-                  <>
-                    <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Approved NGOs</h3>
-                    <p className="text-gray-500">No NGOs have been approved yet.</p>
-                    <p className="text-sm text-gray-400 mt-2">Approved organizations will be listed here.</p>
-                  </>
-                )}
-                {statusFilter === 'rejected' && (
-                  <>
-                    <X className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Rejected Applications</h3>
-                    <p className="text-gray-500">No NGO applications have been rejected.</p>
-                    <p className="text-sm text-gray-400 mt-2">Rejected applications will appear here.</p>
-                  </>
-                )}
-                {statusFilter === 'all' && (
-                  <>
-                    <Building className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No NGO Registrations</h3>
-                    <p className="text-gray-500">No NGO registration requests found.</p>
-                    <p className="text-sm text-gray-400 mt-2">All NGO applications will be displayed here.</p>
-                  </>
-                )}
-                {searchTerm && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-600">
-                      💡 Try adjusting your search terms or changing the status filter
+                <Building className="w-16 h-16 text-primary-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No NGO Registrations Found</h3>
+                <p className="text-gray-500">No NGO registration requests match your current filters.</p>
+                <p className="text-sm text-gray-400 mt-2">Try adjusting your search terms or filters.</p>
+                {searchQuery && (
+                  <div className="mt-4 p-3 bg-primary-50 rounded-lg">
+                    <p className="text-sm text-primary-600">
+                      💡 Try adjusting your search terms or changing the filters
                     </p>
                   </div>
                 )}
@@ -505,19 +514,19 @@ export const NGORequestsPage: React.FC = () => {
             </Card>
           ) : (
             filteredRequests.map((request) => (
-              <Card key={request._id} className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <Card key={request._id} className="p-6 bg-white border border-primary-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">{request.organizationName || 'Unnamed Organization'}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      request.verificationStatus === 'pending' ? 'bg-blue-100 text-blue-800' :
+                      request.verificationStatus === 'pending' ? 'bg-primary-100 text-primary-800' :
                       request.verificationStatus === 'approved' ? 'bg-green-100 text-green-800' :
                       'bg-red-100 text-red-800'
                     }`}>
                       {request.verificationStatus}
                     </span>
                     {request.organizationType && (
-                      <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+                      <span className="px-3 py-1 bg-primary-50 text-primary-700 text-xs rounded-full">
                         {request.organizationType}
                       </span>
                     )}
@@ -530,18 +539,18 @@ export const NGORequestsPage: React.FC = () => {
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center space-x-2 text-gray-600">
-                        <Mail className="w-4 h-4 text-blue-500" />
+                        <Mail className="w-4 h-4 text-primary-500" />
                         <span>{request.email}</span>
                       </div>
                       {request.phone && (
                         <div className="flex items-center space-x-2 text-gray-600">
-                          <Phone className="w-4 h-4 text-blue-500" />
+                          <Phone className="w-4 h-4 text-primary-500" />
                           <span>{request.phone}</span>
                         </div>
                       )}
                       {request.location && (
                         <div className="flex items-center space-x-2 text-gray-600">
-                          <MapPin className="w-4 h-4 text-blue-500" />
+                          <MapPin className="w-4 h-4 text-primary-500" />
                           <span>
                             {[request.location.city, request.location.state, request.location.country]
                               .filter(Boolean)
@@ -554,16 +563,16 @@ export const NGORequestsPage: React.FC = () => {
                     <div className="space-y-2 text-sm">
                       {request.registrationNumber && (
                         <div className="flex items-center space-x-2 text-gray-600">
-                          <FileText className="w-4 h-4 text-blue-500" />
+                          <FileText className="w-4 h-4 text-primary-500" />
                           <span>Reg: {request.registrationNumber}</span>
                         </div>
                       )}
                       <div className="flex items-center space-x-2 text-gray-600">
-                        <Calendar className="w-4 h-4 text-blue-500" />
+                        <Calendar className="w-4 h-4 text-primary-500" />
                         <span>Submitted: {new Date(request.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center space-x-2 text-gray-600">
-                        <Building className="w-4 h-4 text-blue-500" />
+                        <Building className="w-4 h-4 text-primary-500" />
                         <span>Contact: {request.name}</span>
                       </div>
                     </div>
@@ -575,7 +584,7 @@ export const NGORequestsPage: React.FC = () => {
                         href={request.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 flex items-center space-x-1 text-sm"
+                        className="text-primary-600 hover:text-primary-700 flex items-center space-x-1 text-sm"
                       >
                         <ExternalLink className="w-4 h-4" />
                         <span>Visit Website</span>
@@ -587,17 +596,17 @@ export const NGORequestsPage: React.FC = () => {
                   {request.documents && (
                     <div className="space-y-4 pt-4 border-t border-gray-200">
                       <h4 className="font-semibold text-gray-900 flex items-center">
-                        <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                        <FileText className="w-4 h-4 mr-2 text-primary-500" />
                         Uploaded Documents
                       </h4>
                       
                       {/* Registration Certificate */}
                       {request.documents.registrationCertificate && (
-                        <div className="p-4 bg-blue-50 rounded-lg">
+                        <div className="p-4 bg-primary-50 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-2">
-                              <FileText className="w-4 h-4 text-blue-600" />
-                              <span className="font-medium text-blue-900">Registration Certificate</span>
+                              <FileText className="w-4 h-4 text-primary-600" />
+                              <span className="font-medium text-primary-900">Registration Certificate</span>
                               <span className={`px-2 py-1 rounded text-xs font-medium ${
                                 request.documents.registrationCertificate.status === 'approved' ? 'bg-green-100 text-green-800' :
                                 request.documents.registrationCertificate.status === 'rejected' ? 'bg-red-100 text-red-800' :
@@ -610,7 +619,7 @@ export const NGORequestsPage: React.FC = () => {
                               href={`http://localhost:5000/uploads/documents/${request.documents.registrationCertificate.filename}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-700"
+                              className="text-primary-600 hover:text-primary-700"
                             >
                               <ExternalLink className="w-4 h-4" />
                             </a>
@@ -781,7 +790,7 @@ export const NGORequestsPage: React.FC = () => {
 
                   {request.verificationStatus === 'pending' && (
                     <div className="pt-4 border-t border-gray-200">
-                      <div className="flex items-center space-x-2 text-blue-600">
+                      <div className="flex items-center space-x-2 text-primary-600">
                         <Clock className="w-5 h-5" />
                         <span className="text-sm font-medium">Pending document review - approve all documents to activate this NGO</span>
                       </div>

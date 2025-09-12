@@ -128,11 +128,11 @@ export const CreateStory: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Your Impact Story</h1>
+          <h1 className="text-3xl font-bold text-primary-900 mb-2">Create Your Impact Story</h1>
           <p className="text-gray-600">Share your journey and inspire others with your experiences</p>
         </div>
 
@@ -140,8 +140,8 @@ export const CreateStory: React.FC = () => {
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Title */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Title *
               </label>
               <Input
@@ -154,15 +154,15 @@ export const CreateStory: React.FC = () => {
             </Card>
 
             {/* Excerpt */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Excerpt *
               </label>
               <textarea
                 value={formData.excerpt}
                 onChange={(e) => handleInputChange('excerpt', e.target.value)}
                 placeholder="Write a brief summary of your story (max 500 characters)..."
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+                className={`w-full px-3 py-2 border border-primary-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none ${
                   errors.excerpt ? 'border-red-500' : ''
                 }`}
                 rows={3}
@@ -175,14 +175,14 @@ export const CreateStory: React.FC = () => {
             </Card>
 
             {/* Content - Rich Text Editor Placeholder */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Content *
               </label>
-              <div className="border border-gray-300 rounded-md">
-                <div className="bg-gray-50 px-3 py-2 border-b border-gray-300 flex items-center space-x-2">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Rich Text Editor</span>
+              <div className="border border-primary-200 rounded-md">
+                <div className="bg-primary-50 px-3 py-2 border-b border-primary-200 flex items-center space-x-2">
+                  <FileText className="w-4 h-4 text-primary-600" />
+                  <span className="text-sm text-primary-700">Rich Text Editor</span>
                 </div>
                 <textarea
                   value={formData.content}
@@ -198,20 +198,20 @@ export const CreateStory: React.FC = () => {
             </Card>
 
             {/* Tags */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Tags
               </label>
               <div className="flex flex-wrap gap-2 mb-3">
                 {formData.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800"
                   >
                     {tag}
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
+                      className="ml-2 text-primary-600 hover:text-primary-800"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -235,14 +235,14 @@ export const CreateStory: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Category */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Category *
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-3 py-2 border border-primary-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                   errors.category ? 'border-red-500' : ''
                 }`}
               >
@@ -256,8 +256,8 @@ export const CreateStory: React.FC = () => {
             </Card>
 
             {/* Image Upload */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Cover Image
               </label>
               <div className="space-y-3">
@@ -279,9 +279,9 @@ export const CreateStory: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center">
-                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Upload a cover image for your story</p>
+                  <div className="border-2 border-dashed border-primary-200 rounded-md p-8 text-center">
+                    <ImageIcon className="w-12 h-12 text-primary-400 mx-auto mb-4" />
+                    <p className="text-primary-600 mb-4">Upload a cover image for your story</p>
                     <input
                       type="file"
                       accept="image/*"
@@ -301,7 +301,7 @@ export const CreateStory: React.FC = () => {
             </Card>
 
             {/* Actions */}
-            <Card className="p-6">
+            <Card className="p-6 border border-primary-200 shadow-soft">
               <div className="space-y-3">
                 <Button
                   onClick={() => handleSubmit('draft')}
@@ -316,7 +316,7 @@ export const CreateStory: React.FC = () => {
                 <Button
                   onClick={() => handleSubmit('published')}
                   disabled={loading}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white"
                 >
                   <Heart className="w-4 h-4 mr-2" />
                   Publish Story
@@ -332,7 +332,7 @@ export const CreateStory: React.FC = () => {
                 </Button>
               </div>
 
-              <div className="mt-4 text-sm text-gray-600">
+              <div className="mt-4 text-sm text-primary-600">
                 <p>✨ Your story will be published immediately and visible to the community</p>
               </div>
             </Card>

@@ -174,10 +174,10 @@ export const EventRegistrationPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading event details...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-primary-600">Loading event details...</p>
         </div>
       </div>
     );
@@ -185,10 +185,12 @@ export const EventRegistrationPage: React.FC = () => {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={() => navigate('/events')}>
+          <h2 className="text-2xl font-bold text-primary-900 mb-4">
+            {error || 'Event not found'}
+          </h2>
+          <Button onClick={() => navigate('/events')} className="bg-primary-600 hover:bg-primary-700">
             Back to Events
           </Button>
         </div>
@@ -200,23 +202,23 @@ export const EventRegistrationPage: React.FC = () => {
 
   if (justRegistered) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-10 text-center bg-white/90 backdrop-blur-sm border border-green-200 shadow-2xl">
-          <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-white" />
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full p-8 text-center bg-white border-primary-200">
+          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-3">
+          <h2 className="text-2xl font-bold text-primary-900 mb-3">
             Registration Successful!
           </h2>
-          <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-            You have successfully registered for <strong className="text-blue-600">{event.title}</strong>. 
+          <p className="text-gray-600 mb-6">
+            You have successfully registered for <strong className="text-primary-600">{event.title}</strong>. 
             We'll send you a confirmation email with all the details.
           </p>
-          <div className="space-y-4">
-            <Button onClick={() => navigate('/volunteer/dashboard')} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl">
+          <div className="space-y-3">
+            <Button onClick={() => navigate('/volunteer/dashboard')} className="w-full bg-primary-600 hover:bg-primary-700">
               Go to Dashboard
             </Button>
-            <Button variant="outline" onClick={() => navigate('/events')} className="w-full border-blue-200 text-blue-600 hover:bg-blue-50">
+            <Button variant="outline" onClick={() => navigate('/events')} className="w-full border-primary-200 text-primary-600 hover:bg-primary-50">
               Browse More Events
             </Button>
           </div>
@@ -226,331 +228,321 @@ export const EventRegistrationPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Enhanced Back Button */}
-        <div className="mb-8">
-          <Button 
-            variant="ghost" 
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Button
+            variant="ghost"
             onClick={() => navigate(-1)}
-            className="group text-gray-600 hover:text-blue-600 hover:bg-blue-50/80 p-4 rounded-2xl transition-all duration-300 border border-transparent hover:border-blue-200/50"
+            className="text-primary-600 hover:bg-primary-50"
           >
-            <ArrowLeft className="w-5 h-5 mr-3 group-hover:-translate-x-1 transition-transform duration-300" />
-            <span className="font-medium">Back to Events</span>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Events
           </Button>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
-          {/* Main Event Content */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Enhanced Hero Section */}
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Hero Section */}
             {event.images && event.images.length > 0 ? (
-              <div className="relative group overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-br from-blue-600 to-indigo-700">
-                <img
-                  src={event.images[0]}
-                  alt={event.title}
-                  className="w-full h-80 lg:h-96 object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                
-                {/* Category Badge */}
-                <div className="absolute top-6 left-6">
-                  <span className="px-4 py-2 bg-white/95 backdrop-blur-sm text-blue-700 rounded-full text-sm font-semibold shadow-lg">
-                    {event.category}
-                  </span>
-                </div>
+              <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
+                <div className="relative h-80">
+                  <img
+                    src={event.images[0]}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  
+                  {/* Category Badge */}
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-white/90 text-primary-600 rounded-full text-sm font-semibold">
+                      {event.category}
+                    </span>
+                  </div>
 
-                {/* Organization Info */}
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/20 shadow-lg">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">{event.organizationName.charAt(0)}</span>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Organized by</p>
-                        <p className="text-sm font-semibold text-gray-900">{event.organizationName}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Registration Status Badge */}
-                    {event.isUserRegistered && (
-                      <div className="bg-green-500/95 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/20 shadow-lg">
-                        <div className="flex items-center space-x-2">
-                          <CheckCircle className="w-5 h-5 text-white" />
-                          <span className="text-white text-sm font-semibold">Registered</span>
+                  {/* Organization Badge */}
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2">
+                        <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">{event.organizationName.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Organized by</p>
+                          <p className="text-sm font-medium text-gray-900">{event.organizationName}</p>
                         </div>
                       </div>
-                    )}
+                      
+                      {/* Registration Status Badge */}
+                      {event.isUserRegistered && (
+                        <div className="bg-green-500 rounded-lg px-3 py-2">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="w-4 h-4 text-white" />
+                            <span className="text-white text-sm font-medium">Registered</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
               /* Fallback Hero for events without images */
-              <div className="relative overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 h-80 lg:h-96">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-600/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
+                <div className="relative h-80 bg-primary-600 flex items-center justify-center">
                   <div className="text-center text-white">
-                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                      <Calendar className="w-10 h-10" />
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Calendar className="w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold mb-2">{event.category}</h2>
-                    <p className="text-blue-100">Community Event</p>
+                    <h2 className="text-xl font-bold mb-2">{event.category}</h2>
+                    <p className="text-primary-100">Community Event</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Event Title & Description Card */}
-            <Card className="p-8 bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-3xl">
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-6 leading-tight">
-                {event.title}
-              </h1>
-              
-              <p className="text-gray-700 text-lg leading-relaxed mb-8 text-justify">
-                {event.description}
-              </p>
-            </Card>
+            {/* Event Title & Description */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{event.title}</h1>
+              <p className="text-gray-700 leading-relaxed">{event.description}</p>
+            </div>
 
             {/* Event Details Grid */}
-            <div className="grid sm:grid-cols-2 gap-6">
-              <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-blue-500 rounded-2xl shadow-lg">
-                    <Calendar className="w-6 h-6 text-white" />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary-500 rounded-lg">
+                    <Calendar className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-blue-600 font-medium uppercase tracking-wide">Date</p>
-                    <p className="text-gray-900 font-semibold text-lg">{formatDate(event.date)}</p>
+                    <p className="text-sm text-gray-600 font-medium">Date</p>
+                    <p className="text-gray-900 font-semibold">{formatDate(event.date)}</p>
                   </div>
                 </div>
-              </Card>
+              </div>
 
-              <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-0 shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-green-500 rounded-2xl shadow-lg">
-                    <Clock className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <Clock className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-green-600 font-medium uppercase tracking-wide">Time</p>
-                    <p className="text-gray-900 font-semibold text-lg">{event.startTime} - {event.endTime}</p>
+                    <p className="text-sm text-gray-600 font-medium">Time</p>
+                    <p className="text-gray-900 font-semibold">{event.startTime} - {event.endTime}</p>
                   </div>
                 </div>
-              </Card>
+              </div>
 
-              <Card className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-0 shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300 sm:col-span-2">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-purple-500 rounded-2xl shadow-lg">
-                    <MapPin className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:col-span-2">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-purple-500 rounded-lg">
+                    <MapPin className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-purple-600 font-medium uppercase tracking-wide">Location</p>
-                    <p className="text-gray-900 font-semibold text-lg">{event.location.address}</p>
+                    <p className="text-sm text-gray-600 font-medium">Location</p>
+                    <p className="text-gray-900 font-semibold">{event.location.address}</p>
                     <p className="text-gray-600">{event.location.city}, {event.location.state}</p>
                   </div>
                 </div>
-              </Card>
+              </div>
             </div>
 
             {/* Registration Progress */}
-            <Card className="p-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 border-0 shadow-xl rounded-3xl text-white">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                    <Users className="w-6 h-6" />
+                  <div className="p-2 bg-primary-600 rounded-lg">
+                    <Users className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">Registration Progress</p>
-                    <p className="text-2xl font-bold">{registeredCount} of {event.capacity} volunteers</p>
+                    <p className="text-gray-600 text-sm font-medium">Registration Progress</p>
+                    <p className="text-xl font-bold text-gray-900">{registeredCount} of {event.capacity} volunteers</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold">{Math.round((registeredCount / event.capacity) * 100)}%</p>
-                  <p className="text-blue-100 text-sm">Filled</p>
+                  <p className="text-2xl font-bold text-gray-900">{Math.round((registeredCount / event.capacity) * 100)}%</p>
+                  <p className="text-gray-600 text-sm">Filled</p>
                 </div>
               </div>
               
-              <div className="w-full bg-white/20 rounded-full h-4 backdrop-blur-sm">
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
                 <div 
-                  className="bg-white h-4 rounded-full transition-all duration-1000 ease-out shadow-lg"
+                  className="bg-primary-600 h-3 rounded-full transition-all duration-1000"
                   style={{ width: `${(registeredCount / event.capacity) * 100}%` }}
                 />
               </div>
               
-              <div className="mt-4 flex justify-between text-sm text-blue-100">
+              <div className="flex justify-between text-sm text-gray-600">
                 <span>{event.availableSpots} spots remaining</span>
                 <span>{event.capacity - registeredCount} registered</span>
               </div>
-            </Card>
+            </div>
 
             {/* Requirements */}
             {event.requirements && (
-              <Card className="p-8 bg-gradient-to-br from-amber-50 to-orange-50 border-0 shadow-xl rounded-3xl">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-amber-500 rounded-2xl shadow-lg">
-                    <CheckCircle className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="p-2 bg-amber-500 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Requirements</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Requirements</h3>
                 </div>
-                <div className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-amber-200/50">
-                  <p className="text-gray-700 leading-relaxed">{event.requirements}</p>
+                <div className="bg-amber-50 rounded-lg border border-amber-200 p-4">
+                  <p className="text-gray-700">{event.requirements}</p>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* What to Expect */}
             {event.whatToExpect && (
-              <Card className="p-8 bg-gradient-to-br from-green-50 to-emerald-50 border-0 shadow-xl rounded-3xl">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-green-500 rounded-2xl shadow-lg">
-                    <Users className="w-6 h-6 text-white" />
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <Users className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">What to Expect</h3>
+                  <h3 className="text-xl font-bold text-gray-900">What to Expect</h3>
                 </div>
-                <div className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-green-200/50">
-                  <p className="text-gray-700 leading-relaxed">{event.whatToExpect}</p>
+                <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+                  <p className="text-gray-700">{event.whatToExpect}</p>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* Tags */}
             {event.tags && event.tags.length > 0 && (
-              <Card className="p-8 bg-white/95 backdrop-blur-sm border-0 shadow-xl rounded-3xl">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Event Tags</h3>
-                <div className="flex flex-wrap gap-3">
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Event Tags</h3>
+                <div className="flex flex-wrap gap-2">
                   {event.tags.map((tag, index) => (
                     <span 
                       key={index} 
-                      className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                      className="px-3 py-1 bg-primary-500 text-white rounded-full text-sm font-medium"
                     >
                       #{tag}
                     </span>
                   ))}
                 </div>
-              </Card>
+              </div>
             )}
           </div>
 
-          {/* Enhanced Registration Sidebar */}
-          <div className="lg:col-span-2">
-            <div className="sticky top-8">
-              <Card className="p-8 bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-3xl">
-                {event.isUserRegistered ? (
-                  // Enhanced Registered User View
-                  <div className="text-center">
-                    <div className="relative mb-8">
-                      <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-2xl">
-                        <CheckCircle className="w-10 h-10 text-white" />
-                      </div>
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
-                        <div className="w-3 h-3 bg-white rounded-full"></div>
+          {/* Registration Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              {event.isUserRegistered ? (
+                // Registered User View
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    You're Registered!
+                  </h3>
+                  <p className="text-gray-600 mb-6">You're all set for this amazing event</p>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Registration Status</span>
+                        <span className="px-2 py-1 bg-green-500 text-white rounded-full text-sm font-medium">Confirmed</span>
                       </div>
                     </div>
                     
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">
-                      You're Registered!
-                    </h3>
-                    <p className="text-gray-600 mb-8 text-lg">You're all set for this amazing event</p>
-                    
-                    <div className="space-y-4 mb-8">
-                      <div className="p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-semibold">Registration Status</span>
-                          <span className="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-bold">Confirmed</span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-semibold">Event Date</span>
-                          <span className="text-blue-700 font-bold">{formatDate(event.date)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-semibold">Time</span>
-                          <span className="text-purple-700 font-bold">{event.startTime} - {event.endTime}</span>
-                        </div>
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Event Date</span>
+                        <span className="text-gray-900 font-medium">{formatDate(event.date)}</span>
                       </div>
                     </div>
-
-                    <div className="space-y-4">
-                      <Button 
-                        onClick={() => navigate('/volunteer/dashboard')}
-                        className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-xl hover:shadow-2xl py-4 text-lg font-semibold rounded-2xl transition-all duration-300"
-                      >
-                        Go to My Dashboard
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={handleUnregister}
-                        disabled={isRegistering}
-                        className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 py-4 text-lg font-semibold rounded-2xl transition-all duration-300"
-                      >
-                        {isRegistering ? 'Processing...' : 'Cancel Registration'}
-                      </Button>
+                    
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Time</span>
+                        <span className="text-gray-900 font-medium">{event.startTime} - {event.endTime}</span>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  // Enhanced Registration Form
-                  <>
-                    <div className="text-center mb-8">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-                        <Users className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
-                        Join This Event
-                      </h3>
-                      <p className="text-gray-600 text-lg">Be part of something meaningful</p>
-                    </div>
 
-                    <div className="space-y-6 mb-8">
-                      <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-semibold">Event Date</span>
-                          <span className="text-blue-700 font-bold">{formatDate(event.date)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-semibold">Time</span>
-                          <span className="text-green-700 font-bold">{event.startTime} - {event.endTime}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200/50">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-semibold">Available Spots</span>
-                          <span className="text-purple-700 font-bold">{event.availableSpots} remaining</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={handleRegister}
-                      disabled={isRegistering || event.availableSpots <= 0}
-                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed py-5 text-xl font-bold rounded-2xl transition-all duration-300 hover:scale-105"
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => navigate('/volunteer/dashboard')}
+                      className="w-full bg-primary-600 hover:bg-primary-700 text-white"
                     >
-                      {isRegistering ? (
-                        <div className="flex items-center justify-center space-x-3">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                          <span>Registering...</span>
-                        </div>
-                      ) : event.availableSpots <= 0 ? (
-                        'Event Full'
-                      ) : (
-                        'Register Now'
-                      )}
+                      Go to My Dashboard
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleUnregister}
+                      disabled={isRegistering}
+                      className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      {isRegistering ? 'Processing...' : 'Cancel Registration'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Registration Form
+                <>
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Register for Event</h3>
+                    <p className="text-gray-600">Be part of something meaningful</p>
+                  </div>
 
-                    <p className="text-sm text-gray-500 text-center mt-6 leading-relaxed">
-                      By registering, you agree to attend the event and follow all guidelines provided by the organizer.
-                    </p>
-                  </>
-                )}
-              </Card>
+                  <div className="space-y-4 mb-6">
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Event Date</span>
+                        <span className="text-gray-900 font-medium">{formatDate(event.date)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Time</span>
+                        <span className="text-gray-900 font-medium">{event.startTime} - {event.endTime}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Available Spots</span>
+                        <span className="text-gray-900 font-medium">{event.availableSpots} remaining</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleRegister}
+                    disabled={isRegistering || event.availableSpots <= 0}
+                    className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3"
+                  >
+                    {isRegistering ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        <span>Registering...</span>
+                      </div>
+                    ) : event.availableSpots <= 0 ? (
+                      'Event Full'
+                    ) : (
+                      'Register Now'
+                    )}
+                  </Button>
+
+                  <p className="text-sm text-gray-500 text-center mt-4">
+                    By registering, you agree to attend the event and follow all guidelines provided by the organizer.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

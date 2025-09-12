@@ -1,24 +1,18 @@
 import { useState, useEffect } from 'react';
 import { 
   Activity, 
-  Search, 
-  Filter, 
-  Calendar, 
   User, 
-  Shield, 
   AlertTriangle,
   CheckCircle,
   XCircle,
   Info,
   Download,
-  RefreshCw,
-  Clock,
-  Monitor,
-  Globe
+  RefreshCw
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { SearchBar, SearchFilters } from '../../components/search/SearchBar';
+import { FilterPanel } from '../../components/search/FilterPanel';
 
 interface ActivityLogEntry {
   id: string;
@@ -237,10 +231,8 @@ export default function ActivityLogPage() {
   const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<ActivityLogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('today');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
 
@@ -250,7 +242,7 @@ export default function ActivityLogPage() {
 
   useEffect(() => {
     filterLogs();
-  }, [logs, searchTerm, statusFilter, categoryFilter, dateFilter]);
+  }, [logs, searchQuery, filters]);
 
   const fetchLogs = async () => {
     setIsLoading(true);
@@ -302,42 +294,35 @@ export default function ActivityLogPage() {
     let filtered = [...logs];
 
     // Search filter
-    if (searchTerm) {
+    if (searchQuery) {
       filtered = filtered.filter(log =>
-        log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.resource.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.details.toLowerCase().includes(searchTerm.toLowerCase())
+        log.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.resource.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.details.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.ipAddress.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(log => log.status === statusFilter);
+    if (filters.status && filters.status.length > 0) {
+      filtered = filtered.filter(log => filters.status!.includes(log.status));
     }
 
     // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(log => log.category === categoryFilter);
+    if (filters.category && filters.category.length > 0) {
+      filtered = filtered.filter(log => filters.category!.includes(log.category));
     }
 
-    // Date filter
-    const now = new Date();
-    if (dateFilter === 'today') {
-      filtered = filtered.filter(log => {
-        const logDate = new Date(log.timestamp);
-        return logDate.toDateString() === now.toDateString();
-      });
-    } else if (dateFilter === 'week') {
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(log => new Date(log.timestamp) >= weekAgo);
-    } else if (dateFilter === 'month') {
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(log => new Date(log.timestamp) >= monthAgo);
+    // Date range filter
+    if (filters.dateRange?.start && filters.dateRange?.end) {
+      filtered = filtered.filter(log =>
+        log.timestamp >= filters.dateRange!.start! &&
+        log.timestamp <= filters.dateRange!.end!
+      );
     }
 
     setFilteredLogs(filtered);
-    setCurrentPage(1);
   };
 
   const getStatusIcon = (status: string) => {
@@ -349,7 +334,7 @@ export default function ActivityLogPage() {
       case 'error':
         return <XCircle className="w-5 h-5 text-red-600" />;
       case 'info':
-        return <Info className="w-5 h-5 text-blue-600" />;
+        return <Info className="w-5 h-5 text-primary-600" />;
       default:
         return <Info className="w-5 h-5 text-gray-600" />;
     }
@@ -364,7 +349,7 @@ export default function ActivityLogPage() {
       case 'error':
         return 'bg-red-100 text-red-800';
       case 'info':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-primary-100 text-primary-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -398,7 +383,7 @@ export default function ActivityLogPage() {
       case 'auth':
         return 'bg-purple-100 text-purple-800';
       case 'user':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-primary-100 text-primary-800';
       case 'ngo':
         return 'bg-green-100 text-green-800';
       case 'event':
@@ -419,13 +404,13 @@ export default function ActivityLogPage() {
   const currentLogs = filteredLogs.slice(startIndex, endIndex);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center space-x-2">
-              <Activity className="w-8 h-8 text-blue-600" />
+              <Activity className="w-8 h-8 text-primary-600" />
               <span>Activity Log</span>
             </h1>
             <p className="text-gray-600 mt-2">Monitor system activities and user actions</p>
@@ -451,118 +436,107 @@ export default function ActivityLogPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border border-primary-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Activities</p>
-                <p className="text-2xl font-bold text-blue-600">{filteredLogs.length}</p>
+                <p className="text-2xl font-bold text-primary-600">{filteredLogs.length}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Activity className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <Activity className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
           
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border border-primary-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Success Rate</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-primary-600">
                   {Math.round((filteredLogs.filter(l => l.status === 'success').length / filteredLogs.length) * 100)}%
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <CheckCircle className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
           
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border border-primary-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Failed Actions</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-primary-600">
                   {filteredLogs.filter(l => l.status === 'error').length}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <XCircle className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <XCircle className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
           
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border border-primary-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Unique Users</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-primary-600">
                   {new Set(filteredLogs.map(l => l.userId)).size}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <User className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg">
+                <User className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6 bg-blue-50 border border-blue-100">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-2">
-              <Input
-                placeholder="Search activities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="w-5 h-5" />}
-                className="bg-white"
-              />
-            </div>
-            
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="success">Success</option>
-              <option value="warning">Warning</option>
-              <option value="error">Error</option>
-              <option value="info">Info</option>
-            </select>
-            
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Categories</option>
-              <option value="auth">Authentication</option>
-              <option value="user">User Actions</option>
-              <option value="ngo">NGO Actions</option>
-              <option value="event">Events</option>
-              <option value="system">System</option>
-              <option value="admin">Admin Actions</option>
-            </select>
-            
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">Last Week</option>
-              <option value="month">Last Month</option>
-            </select>
-          </div>
-        </Card>
+        {/* Enhanced Search and Filters */}
+        <div className="space-y-4">
+          <SearchBar
+            placeholder="Search activities by user, action, resource, or IP address..."
+            onSearch={setSearchQuery}
+            onFilter={setFilters}
+            showFilters={true}
+            className="w-full"
+          />
+
+          <FilterPanel
+            title="Activity Filters"
+            filters={{
+              status: [
+                { value: 'success', label: 'Success', count: logs.filter(l => l.status === 'success').length },
+                { value: 'warning', label: 'Warning', count: logs.filter(l => l.status === 'warning').length },
+                { value: 'error', label: 'Error', count: logs.filter(l => l.status === 'error').length },
+                { value: 'info', label: 'Info', count: logs.filter(l => l.status === 'info').length }
+              ],
+              category: [
+                { value: 'auth', label: 'Authentication', count: logs.filter(l => l.category === 'auth').length },
+                { value: 'user', label: 'User Actions', count: logs.filter(l => l.category === 'user').length },
+                { value: 'ngo', label: 'NGO Actions', count: logs.filter(l => l.category === 'ngo').length },
+                { value: 'event', label: 'Events', count: logs.filter(l => l.category === 'event').length },
+                { value: 'system', label: 'System', count: logs.filter(l => l.category === 'system').length },
+                { value: 'admin', label: 'Admin Actions', count: logs.filter(l => l.category === 'admin').length }
+              ],
+              dateRange: filters.dateRange
+            }}
+            selectedFilters={{
+              status: filters.status || [],
+              category: filters.category || [],
+              priority: [],
+              dateRange: filters.dateRange
+            }}
+            onFilterChange={setFilters}
+            onClearAll={() => setFilters({})}
+            className="w-full"
+          />
+        </div>
 
         {/* Activity Log Table */}
-        <Card className="overflow-hidden bg-white border border-blue-100">
+        <Card className="overflow-hidden bg-white border border-primary-100">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-blue-50 border-b border-blue-100">
+              <thead className="bg-primary-50 border-b border-primary-100">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -587,12 +561,12 @@ export default function ActivityLogPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-blue-100">
+              <tbody className="bg-white divide-y divide-primary-100">
                 {isLoading ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center">
                       <div className="flex items-center justify-center space-x-2">
-                        <RefreshCw className="w-5 h-5 animate-spin text-blue-600" />
+                        <RefreshCw className="w-5 h-5 animate-spin text-primary-600" />
                         <span className="text-gray-500">Loading activity logs...</span>
                       </div>
                     </td>
@@ -605,7 +579,7 @@ export default function ActivityLogPage() {
                   </tr>
                 ) : (
                   currentLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-blue-50">
+                    <tr key={log.id} className="hover:bg-primary-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(log.status)}
@@ -647,7 +621,7 @@ export default function ActivityLogPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="bg-blue-50 px-6 py-3 border-t border-blue-100">
+            <div className="bg-primary-50 px-6 py-3 border-t border-primary-100">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-700">
                   Showing {startIndex + 1} to {Math.min(endIndex, filteredLogs.length)} of {filteredLogs.length} results

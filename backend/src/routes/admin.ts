@@ -11,7 +11,8 @@ import {
   getDashboardStats,
   getAllMessages,
   respondToMessage,
-  updateMessageStatus
+  updateMessageStatus,
+  getAnalyticsData
 } from '../controllers/adminController.js';
 import {
   approveDocument,
@@ -46,6 +47,7 @@ router.patch('/users/:userId/toggle-status', toggleUserStatus);  // Toggle user 
 
 // Dashboard Routes
 router.get('/dashboard/stats', getDashboardStats);          // Get dashboard statistics
+router.get('/analytics', getAnalyticsData);                 // Get analytics data for charts
 
 // Message Management Routes
 router.get('/messages', getAllMessages);                    // Get all messages with filtering

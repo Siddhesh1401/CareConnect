@@ -46,15 +46,15 @@ export const StoryDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-primary-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-32 mb-8"></div>
-            <div className="h-96 bg-gray-200 rounded mb-8"></div>
+            <div className="h-8 bg-primary-100 rounded w-32 mb-8"></div>
+            <div className="h-96 bg-primary-100 rounded mb-8"></div>
             <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-4 bg-primary-100 rounded w-full"></div>
+              <div className="h-4 bg-primary-100 rounded w-3/4"></div>
+              <div className="h-4 bg-primary-100 rounded w-1/2"></div>
             </div>
           </div>
         </div>
@@ -64,7 +64,7 @@ export const StoryDetailPage: React.FC = () => {
 
   if (error || !story) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-primary-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-16">
             <p className="text-red-600 mb-4">{error || 'Story not found'}</p>
@@ -78,10 +78,10 @@ export const StoryDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
-        <Link to="/stories" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8">
+        <Link to="/stories" className="inline-flex items-center text-primary-600 hover:text-primary-800 mb-8">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Stories
         </Link>
@@ -90,7 +90,7 @@ export const StoryDetailPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex flex-wrap gap-2 mb-4">
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              story.category === 'education' ? 'bg-blue-100 text-blue-800' :
+              story.category === 'education' ? 'bg-primary-100 text-primary-800' :
               story.category === 'environment' ? 'bg-green-100 text-green-800' :
               story.category === 'healthcare' ? 'bg-red-100 text-red-800' :
               story.category === 'community' ? 'bg-purple-100 text-purple-800' :
@@ -101,7 +101,7 @@ export const StoryDetailPage: React.FC = () => {
             </span>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+          <h1 className="text-4xl font-bold text-primary-900 mb-4 leading-tight">
             {story.title}
           </h1>
 
@@ -110,9 +110,9 @@ export const StoryDetailPage: React.FC = () => {
           </p>
 
           {/* Author Info */}
-          <div className="flex items-center justify-between py-6 border-t border-b border-gray-200">
+          <div className="flex items-center justify-between py-6 border-t border-b border-primary-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
                 {story.author.avatar ? (
                   <img
                     src={story.author.avatar}
@@ -120,11 +120,11 @@ export const StoryDetailPage: React.FC = () => {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-6 h-6 text-blue-600" />
+                  <User className="w-6 h-6 text-primary-600" />
                 )}
               </div>
               <div>
-                <div className="font-semibold text-gray-900">{story.author.name}</div>
+                <div className="font-semibold text-primary-900">{story.author.name}</div>
                 <div className="text-sm text-gray-600">{story.author.role === 'ngo_admin' ? 'NGO Representative' : 'Volunteer'}</div>
               </div>
             </div>
@@ -158,7 +158,7 @@ export const StoryDetailPage: React.FC = () => {
         )}
 
         {/* Story Content */}
-        <Card className="p-8 mb-8">
+        <Card className="p-8 mb-8 bg-white border border-primary-200 shadow-soft">
           <div className="prose prose-lg max-w-none">
             {story.content.split('\n').map((paragraph: string, index: number) => (
               <p key={index} className="mb-4 text-gray-700 leading-relaxed">
@@ -169,14 +169,14 @@ export const StoryDetailPage: React.FC = () => {
         </Card>
 
         {/* Engagement Section */}
-        <Card className="p-6">
+        <Card className="p-6 bg-white border border-primary-200 shadow-soft">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <button className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors">
                 <Heart className="w-5 h-5" />
                 <span>{story.likes}</span>
               </button>
-              <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+              <button className="flex items-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors">
                 <MessageCircle className="w-5 h-5" />
                 <span>{story.comments}</span>
               </button>
@@ -188,7 +188,7 @@ export const StoryDetailPage: React.FC = () => {
 
             {user && user.id === story.author.id && (
               <Link to={`/stories/${story.id}/edit`}>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-primary-200 hover:border-primary-300 hover:bg-primary-50">
                   Edit Story
                 </Button>
               </Link>
@@ -198,9 +198,9 @@ export const StoryDetailPage: React.FC = () => {
 
         {/* Related Stories Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">More Stories</h2>
+          <h2 className="text-2xl font-bold text-primary-900 mb-6">More Stories</h2>
           <Link to="/stories">
-            <Button variant="outline">
+            <Button variant="outline" className="border-primary-200 hover:border-primary-300 hover:bg-primary-50">
               Browse All Stories
             </Button>
           </Link>

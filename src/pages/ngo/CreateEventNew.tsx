@@ -155,162 +155,83 @@ export const CreateEvent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
+        <div className="flex items-center space-x-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100">
+          <Button
+            variant="ghost"
             onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-primary-600 hover:text-primary-900 hover:bg-primary-50"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Event</h1>
-            <p className="text-gray-600 mt-2">Fill in the details to create a volunteer event</p>
+            <h1 className="text-3xl font-bold text-primary-900">Create New Event</h1>
+            <p className="text-primary-600 mt-2">Fill in the details to create a volunteer event</p>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <Card className="p-4 bg-red-50 border border-red-200">
-            <div className="flex items-center space-x-2 text-red-700">
-              <AlertCircle className="w-5 h-5" />
-              <span className="font-medium">{error}</span>
+          <Card className="border border-red-200 shadow-soft">
+            <div className="p-4">
+              <div className="flex items-center space-x-2 text-red-700">
+                <AlertCircle className="w-5 h-5" />
+                <span className="font-medium">{error}</span>
+              </div>
             </div>
           </Card>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-            <div className="space-y-4">
-              <Input
-                label="Event Title *"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="Enter event title"
-                leftIcon={<FileText className="w-5 h-5" />}
-                required
-              />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Describe your event, its purpose, and what volunteers will do"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Tag className="w-4 h-4 inline mr-1" />
-                  Category *
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </Card>
-
-          {/* Date and Time */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Date & Time</h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              <Input
-                label="Event Date *"
-                name="date"
-                type="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                leftIcon={<Calendar className="w-5 h-5" />}
-                required
-                min={new Date().toISOString().split('T')[0]}
-              />
-
-              <Input
-                label="Start Time *"
-                name="startTime"
-                type="time"
-                value={formData.startTime}
-                onChange={handleInputChange}
-                leftIcon={<Clock className="w-5 h-5" />}
-                required
-              />
-
-              <Input
-                label="End Time *"
-                name="endTime"
-                type="time"
-                value={formData.endTime}
-                onChange={handleInputChange}
-                leftIcon={<Clock className="w-5 h-5" />}
-                required
-              />
-            </div>
-          </Card>
-
-          {/* Location */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Location</h3>
-            <div className="space-y-4">
-              <Input
-                label="Address *"
-                name="location.address"
-                value={formData.location.address}
-                onChange={handleInputChange}
-                placeholder="Street address, building name, etc."
-                leftIcon={<MapPin className="w-5 h-5" />}
-                required
-              />
-              
-              <div className="grid md:grid-cols-2 gap-4">
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Basic Information</h3>
+              <div className="space-y-4">
                 <Input
-                  label="City *"
-                  name="location.city"
-                  value={formData.location.city}
+                  label="Event Title *"
+                  name="title"
+                  value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="City"
+                  placeholder="Enter event title"
+                  leftIcon={<FileText className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
                 />
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State *
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={4}
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+                    placeholder="Describe your event, its purpose, and what volunteers will do"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
+                    <Tag className="w-4 h-4 inline mr-1" />
+                    Category *
                   </label>
                   <select
-                    name="location.state"
-                    value={formData.location.state}
+                    name="category"
+                    value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
                     required
                   >
-                    <option value="">Select state</option>
-                    {states.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
                       </option>
                     ))}
                   </select>
@@ -319,64 +240,161 @@ export const CreateEvent: React.FC = () => {
             </div>
           </Card>
 
-          {/* Event Details */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
-            <div className="space-y-4">
-              <Input
-                label="Volunteer Capacity *"
-                name="capacity"
-                type="number"
-                value={formData.capacity}
-                onChange={handleInputChange}
-                placeholder="Maximum number of volunteers"
-                leftIcon={<Users className="w-5 h-5" />}
-                min="1"
-                required
-              />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Requirements (Optional)
-                </label>
-                <textarea
-                  name="requirements"
-                  value={formData.requirements}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Any specific skills, experience, or items volunteers should bring"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What to Expect (Optional)
-                </label>
-                <textarea
-                  name="whatToExpect"
-                  value={formData.whatToExpect}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="What volunteers can expect during the event"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags (Optional)
-                </label>
+          {/* Date and Time */}
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Date & Time</h3>
+              <div className="grid md:grid-cols-3 gap-4">
                 <Input
-                  name="tags"
-                  value={formData.tags}
+                  label="Event Date *"
+                  name="date"
+                  type="date"
+                  value={formData.date}
                   onChange={handleInputChange}
-                  placeholder="Enter tags separated by commas (e.g., cleanup, outdoor, family-friendly)"
-                  leftIcon={<Tag className="w-5 h-5" />}
+                  leftIcon={<Calendar className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  required
+                  min={new Date().toISOString().split('T')[0]}
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Tags help volunteers find your event more easily
-                </p>
+
+                <Input
+                  label="Start Time *"
+                  name="startTime"
+                  type="time"
+                  value={formData.startTime}
+                  onChange={handleInputChange}
+                  leftIcon={<Clock className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  required
+                />
+
+                <Input
+                  label="End Time *"
+                  name="endTime"
+                  type="time"
+                  value={formData.endTime}
+                  onChange={handleInputChange}
+                  leftIcon={<Clock className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  required
+                />
+              </div>
+            </div>
+          </Card>
+
+          {/* Location */}
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Location</h3>
+              <div className="space-y-4">
+                <Input
+                  label="Address *"
+                  name="location.address"
+                  value={formData.location.address}
+                  onChange={handleInputChange}
+                  placeholder="Street address, building name, etc."
+                  leftIcon={<MapPin className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  required
+                />
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Input
+                    label="City *"
+                    name="location.city"
+                    value={formData.location.city}
+                    onChange={handleInputChange}
+                    placeholder="City"
+                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                    required
+                  />
+
+                  <div>
+                    <label className="block text-sm font-medium text-primary-700 mb-2">
+                      State *
+                    </label>
+                    <select
+                      name="location.state"
+                      value={formData.location.state}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+                      required
+                    >
+                      <option value="">Select state</option>
+                      {states.map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Event Details */}
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Event Details</h3>
+              <div className="space-y-4">
+                <Input
+                  label="Volunteer Capacity *"
+                  name="capacity"
+                  type="number"
+                  value={formData.capacity}
+                  onChange={handleInputChange}
+                  placeholder="Maximum number of volunteers"
+                  leftIcon={<Users className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  min="1"
+                  required
+                />
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
+                    Requirements (Optional)
+                  </label>
+                  <textarea
+                    name="requirements"
+                    value={formData.requirements}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+                    placeholder="Any specific skills, experience, or items volunteers should bring"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
+                    What to Expect (Optional)
+                  </label>
+                  <textarea
+                    name="whatToExpect"
+                    value={formData.whatToExpect}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+                    placeholder="What volunteers can expect during the event"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
+                    Tags (Optional)
+                  </label>
+                  <Input
+                    name="tags"
+                    value={formData.tags}
+                    onChange={handleInputChange}
+                    placeholder="Enter tags separated by commas (e.g., cleanup, outdoor, family-friendly)"
+                    leftIcon={<Tag className="w-5 h-5" />}
+                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  />
+                  <p className="text-sm text-primary-500 mt-1">
+                    Tags help volunteers find your event more easily
+                  </p>
+                </div>
               </div>
             </div>
           </Card>
@@ -388,13 +406,14 @@ export const CreateEvent: React.FC = () => {
               variant="outline"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
+              className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 min-w-[200px]"
+              className="bg-primary-600 hover:bg-primary-700 border border-primary-700 min-w-[200px]"
             >
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">

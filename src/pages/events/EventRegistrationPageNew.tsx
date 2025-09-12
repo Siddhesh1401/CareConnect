@@ -117,9 +117,9 @@ export const EventRegistrationPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading event details...</p>
         </div>
       </div>
@@ -128,7 +128,7 @@ export const EventRegistrationPage: React.FC = () => {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={() => navigate('/events')}>
@@ -141,23 +141,23 @@ export const EventRegistrationPage: React.FC = () => {
 
   if (isRegistered) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-10 text-center bg-white/90 backdrop-blur-sm border border-green-200 shadow-2xl">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full p-10 text-center bg-white border border-primary-200 shadow-soft">
           <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-12 h-12 text-white" />
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent mb-3">
+          <h2 className="text-3xl font-bold text-primary-900 mb-3">
             Registration Successful!
           </h2>
           <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-            You have successfully registered for <strong className="text-blue-600">{event.title}</strong>. 
+            You have successfully registered for <strong className="text-primary-600">{event.title}</strong>. 
             We'll send you a confirmation email with all the details.
           </p>
           <div className="space-y-4">
-            <Button onClick={() => navigate('/volunteer/dashboard')} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl">
+            <Button onClick={() => navigate('/volunteer/dashboard')} className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-lg hover:shadow-xl">
               Go to Dashboard
             </Button>
-            <Button variant="outline" onClick={() => navigate('/events')} className="w-full border-blue-200 text-blue-600 hover:bg-blue-50">
+            <Button variant="outline" onClick={() => navigate('/events')} className="w-full border-primary-200 text-primary-600 hover:bg-primary-50">
               Browse More Events
             </Button>
           </div>
@@ -169,13 +169,13 @@ export const EventRegistrationPage: React.FC = () => {
   const registeredCount = event.capacity - event.availableSpots;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)}
-          className="mb-8 text-gray-600 hover:text-blue-600 hover:bg-blue-50 p-3 rounded-xl"
+          className="mb-8 text-gray-600 hover:text-primary-600 hover:bg-primary-50 p-3 rounded-xl"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Events
@@ -193,9 +193,9 @@ export const EventRegistrationPage: React.FC = () => {
                   className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/20">
+                <div className="absolute bottom-6 left-6 bg-white border border-primary-200 rounded-2xl px-4 py-3 shadow-soft">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-bold">{event.organizationName.charAt(0)}</span>
                     </div>
                     <span className="text-sm font-semibold text-gray-900">{event.organizationName}</span>
@@ -205,42 +205,42 @@ export const EventRegistrationPage: React.FC = () => {
             )}
 
             {/* Event Info */}
-            <Card className="p-8 bg-white/80 backdrop-blur-sm border border-blue-100/50 shadow-xl">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-6">{event.title}</h1>
+            <Card className="p-8 bg-white border border-primary-200 shadow-soft">
+              <h1 className="text-4xl font-bold text-primary-900 mb-6">{event.title}</h1>
               
               <div className="grid sm:grid-cols-2 gap-6 mb-8">
                 <div className="flex items-center space-x-3 text-gray-600">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <Calendar className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-primary-100 rounded-xl">
+                    <Calendar className="w-5 h-5 text-primary-600" />
                   </div>
                   <span className="font-medium">{formatDate(event.date)}</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-600">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <Clock className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-primary-100 rounded-xl">
+                    <Clock className="w-5 h-5 text-primary-600" />
                   </div>
                   <span className="font-medium">{event.startTime} - {event.endTime}</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-600 sm:col-span-2">
-                  <div className="p-2 bg-blue-100 rounded-xl">
-                    <MapPin className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-primary-100 rounded-xl">
+                    <MapPin className="w-5 h-5 text-primary-600" />
                   </div>
                   <span className="font-medium">{event.location.address}, {event.location.city}, {event.location.state}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-2xl border border-blue-200/50">
+              <div className="flex items-center justify-between mb-8 p-6 bg-primary-50 rounded-2xl border border-primary-200">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-500 rounded-xl">
+                  <div className="p-2 bg-primary-500 rounded-xl">
                     <Users className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-blue-800 font-semibold text-lg">
+                  <span className="text-primary-800 font-semibold text-lg">
                     {registeredCount} of {event.capacity} volunteers registered
                   </span>
                 </div>
-                <div className="w-32 bg-blue-200 rounded-full h-3">
+                <div className="w-32 bg-primary-200 rounded-full h-3">
                   <div 
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500"
+                    className="bg-gradient-to-r from-primary-500 to-primary-600 h-3 rounded-full transition-all duration-500"
                     style={{ width: `${(registeredCount / event.capacity) * 100}%` }}
                   />
                 </div>
@@ -271,10 +271,10 @@ export const EventRegistrationPage: React.FC = () => {
               {/* Tags */}
               {event.tags && event.tags.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Tags</h3>
+                  <h3 className="text-xl font-semibold text-primary-900 mb-4">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {event.tags.map((tag, index) => (
-                      <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      <span key={index} className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium">
                         {tag}
                       </span>
                     ))}
@@ -286,31 +286,31 @@ export const EventRegistrationPage: React.FC = () => {
 
           {/* Registration Card */}
           <div className="lg:col-span-1">
-            <Card className="p-8 bg-white/90 backdrop-blur-sm border border-blue-100/50 shadow-xl sticky top-8">
+            <Card className="p-8 bg-white border border-primary-200 shadow-soft sticky top-8">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Register for Event</h3>
+                <h3 className="text-2xl font-bold text-primary-900 mb-2">Register for Event</h3>
                 <p className="text-gray-600">Join this amazing volunteer opportunity</p>
               </div>
 
               <div className="space-y-6 mb-8">
-                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
+                <div className="flex justify-between items-center p-4 bg-primary-50 rounded-xl">
                   <span className="text-gray-700 font-medium">Event Date</span>
-                  <span className="text-blue-600 font-semibold">{formatDate(event.date)}</span>
+                  <span className="text-primary-600 font-semibold">{formatDate(event.date)}</span>
                 </div>
-                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
+                <div className="flex justify-between items-center p-4 bg-primary-50 rounded-xl">
                   <span className="text-gray-700 font-medium">Time</span>
-                  <span className="text-blue-600 font-semibold">{event.startTime} - {event.endTime}</span>
+                  <span className="text-primary-600 font-semibold">{event.startTime} - {event.endTime}</span>
                 </div>
-                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
+                <div className="flex justify-between items-center p-4 bg-primary-50 rounded-xl">
                   <span className="text-gray-700 font-medium">Available Spots</span>
-                  <span className="text-blue-600 font-semibold">{event.availableSpots}</span>
+                  <span className="text-primary-600 font-semibold">{event.availableSpots}</span>
                 </div>
               </div>
 
               <Button
                 onClick={handleRegister}
                 disabled={isRegistering || event.availableSpots <= 0}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed py-4 text-lg font-semibold"
+                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed py-4 text-lg font-semibold"
               >
                 {isRegistering ? (
                   <div className="flex items-center justify-center space-x-2">

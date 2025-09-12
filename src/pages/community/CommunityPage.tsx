@@ -169,13 +169,13 @@ export const CommunityPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-4xl lg:text-5xl font-bold flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent animate-fade-in">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+            <h1 className="text-4xl lg:text-5xl font-bold flex items-center space-x-3 text-primary-700 animate-fade-in">
+              <div className="p-3 bg-primary-600 rounded-lg">
                 <Users className="w-8 h-8 text-white" />
               </div>
               <span>Community</span>
@@ -184,7 +184,7 @@ export const CommunityPage: React.FC = () => {
           </div>
           <Button 
             onClick={() => setShowCreatePost(!showCreatePost)} 
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            className="bg-primary-600 hover:bg-primary-700"
           >
             <Plus className="mr-2 w-4 h-4" />
             Create Post
@@ -192,13 +192,13 @@ export const CommunityPage: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-2 bg-white/80 backdrop-blur-sm p-2 rounded-2xl mb-12 shadow-lg border border-blue-100/50">
+        <div className="flex space-x-2 bg-white p-2 rounded-lg mb-12 shadow-lg border border-primary-200">
           <button
             onClick={() => setActiveTab('feed')}
-            className={`flex-1 py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
+            className={`flex-1 py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === 'feed' 
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                ? 'bg-primary-600 text-white' 
+                : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
             }`}
           >
             Feed
@@ -207,7 +207,7 @@ export const CommunityPage: React.FC = () => {
             onClick={() => setActiveTab('my-communities')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'my-communities' 
-                ? 'bg-blue-600 text-white' 
+                ? 'bg-primary-600 text-white' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-white'
             }`}
           >
@@ -217,7 +217,7 @@ export const CommunityPage: React.FC = () => {
             onClick={() => setActiveTab('discover')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'discover' 
-                ? 'bg-blue-600 text-white' 
+                ? 'bg-primary-600 text-white' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-white'
             }`}
           >
@@ -227,7 +227,7 @@ export const CommunityPage: React.FC = () => {
 
         {/* Create Post Modal */}
         {showCreatePost && (
-          <Card className="p-6 mb-8 bg-blue-50 border-blue-100">
+          <Card className="p-6 mb-8 bg-primary-50 border-primary-200">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Create a New Post</h3>
             <div className="space-y-4">
               <Input
@@ -241,7 +241,7 @@ export const CommunityPage: React.FC = () => {
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div className="flex items-center justify-between">

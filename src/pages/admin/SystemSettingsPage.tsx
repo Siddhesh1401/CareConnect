@@ -116,10 +116,10 @@ export const SystemSettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white overflow-hidden">
+        <div className="relative bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 rounded-2xl p-8 text-white overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
           <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"></div>
@@ -132,7 +132,7 @@ export const SystemSettingsPage: React.FC = () => {
                 </div>
                 <span>System Settings</span>
               </h1>
-              <p className="text-blue-100 mt-2">Configure platform settings and preferences</p>
+              <p className="text-primary-100 mt-2">Configure platform settings and preferences</p>
             </div>
             <div className="flex space-x-3">
               <Button 
@@ -161,9 +161,9 @@ export const SystemSettingsPage: React.FC = () => {
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* General Settings */}
-          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-900">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+              <div className="p-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg">
                 <Globe className="w-5 h-5 text-white" />
               </div>
               <span>General Settings</span>
@@ -185,7 +185,7 @@ export const SystemSettingsPage: React.FC = () => {
                   value={generalSettings.siteDescription}
                   onChange={(e) => handleGeneralChange('siteDescription', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   placeholder="Platform description"
                 />
               </div>
@@ -211,7 +211,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={generalSettings.maintenanceMode}
                     onChange={(e) => handleGeneralChange('maintenanceMode', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Maintenance Mode</span>
                 </label>
@@ -221,7 +221,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={generalSettings.registrationEnabled}
                     onChange={(e) => handleGeneralChange('registrationEnabled', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">User Registration Enabled</span>
                 </label>
@@ -230,9 +230,9 @@ export const SystemSettingsPage: React.FC = () => {
           </Card>
 
           {/* Email Settings */}
-          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-900">
-              <div className="p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg">
+              <div className="p-2 bg-gradient-to-r from-green-500 to-primary-500 rounded-lg">
                 <Mail className="w-5 h-5 text-white" />
               </div>
               <span>Email Settings</span>
@@ -295,7 +295,7 @@ export const SystemSettingsPage: React.FC = () => {
           </Card>
 
           {/* Security Settings */}
-          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-900">
               <div className="p-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg">
                 <Shield className="w-5 h-5 text-white" />
@@ -339,7 +339,7 @@ export const SystemSettingsPage: React.FC = () => {
                   value={securitySettings.ipWhitelist}
                   onChange={(e) => handleSecurityChange('ipWhitelist', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   placeholder="192.168.1.1, 10.0.0.1"
                 />
               </div>
@@ -350,7 +350,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={securitySettings.requireSpecialChars}
                     onChange={(e) => handleSecurityChange('requireSpecialChars', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Require Special Characters in Password</span>
                 </label>
@@ -360,7 +360,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={securitySettings.twoFactorRequired}
                     onChange={(e) => handleSecurityChange('twoFactorRequired', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Require Two-Factor Authentication</span>
                 </label>
@@ -369,7 +369,7 @@ export const SystemSettingsPage: React.FC = () => {
           </Card>
 
           {/* Notification Settings */}
-          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl hover:shadow-2xl transition-all duration-300">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-900">
               <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg">
                 <Bell className="w-5 h-5 text-white" />
@@ -386,7 +386,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={notificationSettings.emailNotifications}
                     onChange={(e) => handleNotificationChange('emailNotifications', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Email Notifications</span>
                 </label>
@@ -396,7 +396,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={notificationSettings.pushNotifications}
                     onChange={(e) => handleNotificationChange('pushNotifications', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Push Notifications</span>
                 </label>
@@ -406,13 +406,13 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={notificationSettings.smsNotifications}
                     onChange={(e) => handleNotificationChange('smsNotifications', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">SMS Notifications</span>
                 </label>
               </div>
               
-              <div className="space-y-3 pt-4 border-t border-blue-100">
+              <div className="space-y-3 pt-4 border-t border-primary-100">
                 <h4 className="font-medium text-gray-900">System Alerts</h4>
                 
                 <label className="flex items-center space-x-2">
@@ -420,7 +420,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={notificationSettings.adminAlerts}
                     onChange={(e) => handleNotificationChange('adminAlerts', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Admin Alerts</span>
                 </label>
@@ -430,7 +430,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={notificationSettings.systemAlerts}
                     onChange={(e) => handleNotificationChange('systemAlerts', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">System Performance Alerts</span>
                 </label>
@@ -440,7 +440,7 @@ export const SystemSettingsPage: React.FC = () => {
                     type="checkbox"
                     checked={notificationSettings.maintenanceAlerts}
                     onChange={(e) => handleNotificationChange('maintenanceAlerts', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Maintenance Alerts</span>
                 </label>
@@ -450,9 +450,9 @@ export const SystemSettingsPage: React.FC = () => {
         </div>
 
         {/* Database Status */}
-        <Card className="p-6 bg-blue-50 border border-blue-100">
+        <Card className="p-6 bg-primary-50 border border-primary-100">
           <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-900">
-            <Database className="w-5 h-5 text-blue-600" />
+            <Database className="w-5 h-5 text-primary-600" />
             <span>System Status</span>
           </h3>
           
@@ -462,7 +462,7 @@ export const SystemSettingsPage: React.FC = () => {
               <div className="text-sm text-gray-600">Database Status</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600 mb-1">98.5%</div>
+              <div className="text-2xl font-bold text-primary-600 mb-1">98.5%</div>
               <div className="text-sm text-gray-600">System Uptime</div>
             </div>
             <div className="text-center">

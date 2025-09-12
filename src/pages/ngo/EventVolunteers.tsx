@@ -171,10 +171,10 @@ export const EventVolunteers: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading volunteers...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-primary-600">Loading volunteers...</p>
         </div>
       </div>
     );
@@ -182,10 +182,10 @@ export const EventVolunteers: React.FC = () => {
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">Event not found</p>
-          <Button onClick={() => navigate('/ngo/events')}>
+          <Button onClick={() => navigate('/ngo/events')} className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
             Back to Events
           </Button>
         </div>
@@ -194,23 +194,23 @@ export const EventVolunteers: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100">
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
               onClick={() => navigate('/ngo/events')}
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="border-primary-300 text-primary-700 hover:bg-primary-50"
             >
               <ArrowLeft className="mr-2 w-4 h-4" />
               Back to Events
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Event Volunteers</h1>
-              <p className="text-gray-600 mt-2">{event.title}</p>
-              <p className="text-sm text-gray-500">{formatDate(event.date)}</p>
+              <h1 className="text-3xl font-bold text-primary-900">Event Volunteers</h1>
+              <p className="text-primary-600 mt-2">{event.title}</p>
+              <p className="text-sm text-primary-500">{formatDate(event.date)}</p>
             </div>
           </div>
 
@@ -219,7 +219,7 @@ export const EventVolunteers: React.FC = () => {
               variant="outline"
               onClick={handleExportVolunteers}
               disabled={volunteers.length === 0}
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="border-primary-300 text-primary-700 hover:bg-primary-50"
             >
               <Download className="mr-2 w-4 h-4" />
               Export CSV
@@ -229,151 +229,166 @@ export const EventVolunteers: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-white border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total Registered</p>
-                <p className="text-2xl font-bold text-blue-600">{event.registeredCount}</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-white border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Confirmed</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {volunteers.filter(v => v.status === 'confirmed').length}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-primary-600 text-sm font-medium">Total Registered</p>
+                  <p className="text-2xl font-bold text-primary-900">{event.registeredCount}</p>
+                </div>
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <Users className="w-6 h-6 text-primary-600" />
+                </div>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-white border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Waitlist</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {volunteers.filter(v => v.status === 'waitlist').length}
-                </p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Clock className="w-6 h-6 text-yellow-600" />
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-primary-600 text-sm font-medium">Confirmed</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {volunteers.filter(v => v.status === 'confirmed').length}
+                  </p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 bg-white border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Cancelled</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {volunteers.filter(v => v.status === 'cancelled').length}
-                </p>
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-primary-600 text-sm font-medium">Waitlist</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {volunteers.filter(v => v.status === 'waitlist').length}
+                  </p>
+                </div>
+                <div className="p-3 bg-yellow-100 rounded-lg">
+                  <Clock className="w-6 h-6 text-yellow-600" />
+                </div>
               </div>
-              <div className="p-3 bg-red-100 rounded-lg">
-                <XCircle className="w-6 h-6 text-red-600" />
+            </div>
+          </Card>
+
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-primary-600 text-sm font-medium">Cancelled</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {volunteers.filter(v => v.status === 'cancelled').length}
+                  </p>
+                </div>
+                <div className="p-3 bg-red-100 rounded-lg">
+                  <XCircle className="w-6 h-6 text-red-600" />
+                </div>
               </div>
             </div>
           </Card>
         </div>
 
         {/* Search and Filters */}
-        <Card className="p-6 bg-white border border-blue-100">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search volunteers by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="w-5 h-5" />}
-              />
-            </div>
+        <Card className="border border-primary-200 shadow-soft">
+          <div className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search volunteers by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  leftIcon={<Search className="w-5 h-5" />}
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                />
+              </div>
 
-            <div className="flex space-x-4">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Status</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="waitlist">Waitlist</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+              <div className="flex space-x-4">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-4 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+                >
+                  <option value="all">All Status</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="waitlist">Waitlist</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
           </div>
         </Card>
 
         {/* Volunteers List */}
         {filteredVolunteers.length === 0 ? (
-          <Card className="p-12 text-center bg-white border border-blue-100">
-            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No volunteers found</h3>
-            <p className="text-gray-600">
-              {searchTerm ? 'Try adjusting your search terms.' : 'No volunteers have registered for this event yet.'}
-            </p>
+          <Card className="border border-primary-200 shadow-soft">
+            <div className="p-12 text-center">
+              <Users className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-primary-900 mb-2">No volunteers found</h3>
+              <p className="text-primary-600">
+                {searchTerm ? 'Try adjusting your search terms.' : 'No volunteers have registered for this event yet.'}
+              </p>
+            </div>
           </Card>
         ) : (
           <div className="grid gap-6">
             {filteredVolunteers.map((volunteer) => (
-              <Card key={volunteer.userId} className="p-6 bg-white border border-blue-100 hover:shadow-lg transition-shadow">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {volunteer.volunteer?.name || volunteer.userName}
-                      </h3>
-                      <span className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(volunteer.status)}`}>
-                        {getStatusIcon(volunteer.status)}
-                        <span className="capitalize">{volunteer.status}</span>
-                      </span>
-                      {volunteer.volunteer?.verificationStatus === 'approved' && (
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Verified
+              <Card key={volunteer.userId} className="border border-primary-200 shadow-soft hover:shadow-medium transition-shadow">
+                <div className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-xl font-semibold text-primary-900">
+                          {volunteer.volunteer?.name || volunteer.userName}
+                        </h3>
+                        <span className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(volunteer.status)}`}>
+                          {getStatusIcon(volunteer.status)}
+                          <span className="capitalize">{volunteer.status}</span>
                         </span>
-                      )}
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center space-x-2">
-                        <Mail className="w-4 h-4 text-blue-500" />
-                        <span>{volunteer.volunteer?.email || volunteer.userEmail}</span>
+                        {volunteer.volunteer?.verificationStatus === 'approved' && (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Verified
+                          </span>
+                        )}
                       </div>
-                      {volunteer.volunteer?.phone && (
+
+                      <div className="grid md:grid-cols-3 gap-4 text-sm text-primary-700 mb-4">
                         <div className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4 text-blue-500" />
-                          <span>{volunteer.volunteer.phone}</span>
+                          <Mail className="w-4 h-4 text-primary-500" />
+                          <span>{volunteer.volunteer?.email || volunteer.userEmail}</span>
                         </div>
-                      )}
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-blue-500" />
-                        <span>Registered: {formatDate(volunteer.registrationDate)}</span>
+                        {volunteer.volunteer?.phone && (
+                          <div className="flex items-center space-x-2">
+                            <Phone className="w-4 h-4 text-primary-500" />
+                            <span>{volunteer.volunteer.phone}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-primary-500" />
+                          <span>Registered: {formatDate(volunteer.registrationDate)}</span>
+                        </div>
                       </div>
+
+                      {volunteer.volunteer?.joinedDate && (
+                        <p className="text-sm text-primary-500">
+                          Member since: {formatDate(volunteer.volunteer?.joinedDate)}
+                        </p>
+                      )}
                     </div>
 
-                    {volunteer.volunteer?.joinedDate && (
-                      <p className="text-sm text-gray-500">
-                        Member since: {formatDate(volunteer.volunteer?.joinedDate)}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex space-x-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleContactVolunteer(volunteer.volunteer?.email || volunteer.userEmail)}
-                      className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                    </Button>
+                    <div className="flex space-x-2 ml-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleContactVolunteer(volunteer.volunteer?.email || volunteer.userEmail)}
+                        className="border-primary-300 text-primary-700 hover:bg-primary-50"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>

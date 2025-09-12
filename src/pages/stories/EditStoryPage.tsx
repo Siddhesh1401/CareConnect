@@ -161,19 +161,19 @@ export const EditStoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-primary-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded mb-6 w-64"></div>
+            <div className="h-8 bg-primary-200 rounded mb-6 w-64"></div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+                  <div key={i} className="h-32 bg-primary-100 rounded-xl"></div>
                 ))}
               </div>
               <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+                  <div key={i} className="h-32 bg-primary-100 rounded-xl"></div>
                 ))}
               </div>
             </div>
@@ -184,19 +184,19 @@ export const EditStoryPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
             <button
               onClick={() => navigate('/stories?tab=my')}
-              className="mr-4 p-2 text-gray-500 hover:text-gray-700 transition-colors"
+              className="mr-4 p-2 text-primary-600 hover:text-primary-800 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Story</h1>
+              <h1 className="text-3xl font-bold text-primary-900 mb-2">Edit Story</h1>
               <p className="text-gray-600">Update your story and share your latest experiences</p>
             </div>
           </div>
@@ -206,8 +206,8 @@ export const EditStoryPage: React.FC = () => {
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Title */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Title *
               </label>
               <Input
@@ -220,15 +220,15 @@ export const EditStoryPage: React.FC = () => {
             </Card>
 
             {/* Excerpt */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Excerpt *
               </label>
               <textarea
                 value={formData.excerpt}
                 onChange={(e) => handleInputChange('excerpt', e.target.value)}
                 placeholder="Write a brief summary of your story (max 500 characters)..."
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+                className={`w-full px-3 py-2 border border-primary-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none ${
                   errors.excerpt ? 'border-red-500' : ''
                 }`}
                 rows={3}
@@ -241,14 +241,14 @@ export const EditStoryPage: React.FC = () => {
             </Card>
 
             {/* Content - Rich Text Editor Placeholder */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Content *
               </label>
-              <div className="border border-gray-300 rounded-md">
-                <div className="bg-gray-50 px-3 py-2 border-b border-gray-300 flex items-center space-x-2">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Rich Text Editor</span>
+              <div className="border border-primary-200 rounded-md">
+                <div className="bg-primary-50 px-3 py-2 border-b border-primary-200 flex items-center space-x-2">
+                  <FileText className="w-4 h-4 text-primary-600" />
+                  <span className="text-sm text-primary-700">Rich Text Editor</span>
                 </div>
                 <textarea
                   value={formData.content}
@@ -264,20 +264,20 @@ export const EditStoryPage: React.FC = () => {
             </Card>
 
             {/* Tags */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Tags
               </label>
               <div className="flex flex-wrap gap-2 mb-3">
                 {formData.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800"
                   >
                     {tag}
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
+                      className="ml-2 text-primary-600 hover:text-primary-800"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -301,14 +301,14 @@ export const EditStoryPage: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Category */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Category *
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-3 py-2 border border-primary-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                   errors.category ? 'border-red-500' : ''
                 }`}
               >
@@ -322,13 +322,13 @@ export const EditStoryPage: React.FC = () => {
             </Card>
 
             {/* Image Upload */}
-            <Card className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Card className="p-6 border border-primary-200 shadow-soft">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Image
               </label>
               {formData.image ? (
                 <div className="space-y-4">
-                  <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                  <div className="aspect-video bg-primary-100 rounded-lg overflow-hidden">
                     <img
                       src={formData.image}
                       alt="Story preview"
@@ -346,9 +346,9 @@ export const EditStoryPage: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-sm text-gray-600 mb-4">
+                <div className="border-2 border-dashed border-primary-200 rounded-lg p-6 text-center">
+                  <ImageIcon className="w-12 h-12 text-primary-400 mx-auto mb-4" />
+                  <p className="text-sm text-primary-600 mb-4">
                     Add an image to make your story more engaging
                   </p>
                   <div className="flex flex-col items-center">
@@ -371,7 +371,7 @@ export const EditStoryPage: React.FC = () => {
             </Card>
 
             {/* Actions */}
-            <Card className="p-6">
+            <Card className="p-6 border border-primary-200 shadow-soft">
               <div className="space-y-3">
                 <Button
                   onClick={() => handleSubmit('draft')}
@@ -386,7 +386,7 @@ export const EditStoryPage: React.FC = () => {
                 <Button
                   onClick={() => handleSubmit('published')}
                   disabled={saving}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white"
                 >
                   <Heart className="w-4 h-4 mr-2" />
                   {saving ? 'Publishing...' : 'Update & Publish'}
@@ -402,7 +402,7 @@ export const EditStoryPage: React.FC = () => {
                 </Button>
               </div>
 
-              <div className="mt-4 text-sm text-gray-600">
+              <div className="mt-4 text-sm text-primary-600">
                 <p>✨ Your changes will be saved and visible to the community</p>
               </div>
             </Card>

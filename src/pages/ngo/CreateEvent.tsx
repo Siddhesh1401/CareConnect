@@ -189,26 +189,26 @@ export const CreateEvent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100">
           <Button 
             variant="ghost" 
             onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-primary-600 hover:text-primary-900 hover:bg-primary-50"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Event</h1>
-            <p className="text-gray-600 mt-2">Fill in the details to create a volunteer event</p>
+            <h1 className="text-3xl font-bold text-primary-900">Create New Event</h1>
+            <p className="text-primary-600 mt-2">Fill in the details to create a volunteer event</p>
           </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <Card className="p-4 bg-red-50 border border-red-200">
+          <Card className="p-4 bg-red-50 border border-red-200 shadow-soft">
             <div className="flex items-center space-x-2 text-red-700">
               <AlertCircle className="w-5 h-5" />
               <span className="font-medium">{error}</span>
@@ -218,8 +218,8 @@ export const CreateEvent: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Basic Information</h3>
             <div className="space-y-4">
               <Input
                 label="Event Title *"
@@ -232,7 +232,7 @@ export const CreateEvent: React.FC = () => {
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Description *
                 </label>
                 <textarea
@@ -240,14 +240,14 @@ export const CreateEvent: React.FC = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                   placeholder="Describe your event, its purpose, and what volunteers will do"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   <Tag className="w-4 h-4 inline mr-1" />
                   Category *
                 </label>
@@ -255,7 +255,7 @@ export const CreateEvent: React.FC = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                   required
                 >
                   <option value="">Select a category</option>
@@ -270,11 +270,11 @@ export const CreateEvent: React.FC = () => {
           </Card>
 
           {/* Event Images */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Images (Optional)</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Event Images (Optional)</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Upload Event Images (Max 3)
                 </label>
                 <input
@@ -282,9 +282,9 @@ export const CreateEvent: React.FC = () => {
                   accept="image/*"
                   multiple
                   onChange={handleImageChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-primary-500 mt-1">
                   Accepted formats: JPG, PNG, GIF. Max size: 5MB per image.
                 </p>
               </div>
@@ -296,12 +296,12 @@ export const CreateEvent: React.FC = () => {
                       <img
                         src={URL.createObjectURL(image)}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border"
+                        className="w-full h-32 object-cover rounded-lg border border-primary-200"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 border border-red-600"
                       >
                         ×
                       </button>
@@ -313,8 +313,8 @@ export const CreateEvent: React.FC = () => {
           </Card>
 
           {/* Date and Time */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Date & Time</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Date & Time</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <Input
                 label="Event Date *"
@@ -350,8 +350,8 @@ export const CreateEvent: React.FC = () => {
           </Card>
 
           {/* Location */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Location</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Location</h3>
             <div className="space-y-4">
               <Input
                 label="Address *"
@@ -374,14 +374,14 @@ export const CreateEvent: React.FC = () => {
                 />
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     State *
                   </label>
                   <select
                     name="location.state"
                     value={formData.location.state}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                     required
                   >
                     <option value="">Select state</option>
@@ -397,8 +397,8 @@ export const CreateEvent: React.FC = () => {
           </Card>
 
           {/* Event Details */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Event Details</h3>
             <div className="space-y-4">
               <Input
                 label="Volunteer Capacity *"
@@ -413,7 +413,7 @@ export const CreateEvent: React.FC = () => {
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Requirements (Optional)
                 </label>
                 <textarea
@@ -421,13 +421,13 @@ export const CreateEvent: React.FC = () => {
                   value={formData.requirements}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                   placeholder="Any specific skills, experience, or items volunteers should bring"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   What to Expect (Optional)
                 </label>
                 <textarea
@@ -435,13 +435,13 @@ export const CreateEvent: React.FC = () => {
                   value={formData.whatToExpect}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                   placeholder="What volunteers can expect during the event"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Tags (Optional)
                 </label>
                 <Input
@@ -451,7 +451,7 @@ export const CreateEvent: React.FC = () => {
                   placeholder="Enter tags separated by commas (e.g., cleanup, outdoor, family-friendly)"
                   leftIcon={<Tag className="w-5 h-5" />}
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-primary-500 mt-1">
                   Tags help volunteers find your event more easily
                 </p>
               </div>
@@ -459,19 +459,20 @@ export const CreateEvent: React.FC = () => {
           </Card>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6">
+          <div className="flex justify-end space-x-4 pt-6 bg-white rounded-xl p-6 border border-primary-100 shadow-soft">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
+              className="border-primary-300 hover:border-primary-400"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 min-w-[200px]"
+              className="bg-primary-600 hover:bg-primary-700 min-w-[200px] border border-primary-700"
             >
               {isSubmitting ? (
                 <div className="flex items-center space-x-2">

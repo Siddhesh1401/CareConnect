@@ -165,13 +165,13 @@ export const StoriesPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8">
+      <div className="min-h-screen bg-primary-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded mb-6 w-64"></div>
+            <div className="h-8 bg-primary-100 rounded mb-6 w-64"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-80 bg-gray-200 rounded-xl"></div>
+                <div key={i} className="h-80 bg-primary-100 rounded-xl"></div>
               ))}
             </div>
           </div>
@@ -181,25 +181,25 @@ export const StoriesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-6">
-            <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent animate-fade-in">
+            <h1 className="text-4xl lg:text-5xl font-bold text-primary-900 animate-fade-in">
               Stories
             </h1>
             {user && (
               <Link to="/stories/create" className="ml-6">
-                <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg">
+                <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700 shadow-soft">
                   <Plus className="w-4 h-4 mr-2" />
                   Share Your Story
                 </Button>
               </Link>
             )}
           </div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in-up">
-            {activeTab === 'all' 
+          <p className="text-xl text-primary-600 max-w-3xl mx-auto animate-fade-in-up">
+            {activeTab === 'all'
               ? "Discover inspiring stories of change, impact, and transformation from our community"
               : "Manage your published stories and drafts"
             }
@@ -208,13 +208,13 @@ export const StoriesPage: React.FC = () => {
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-xl p-1 shadow-lg border border-blue-100">
+          <div className="bg-white rounded-xl p-1 shadow-soft border border-primary-100">
             <button
               onClick={() => handleTabChange('all')}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === 'all'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-gray-600 hover:text-blue-600'
+                  ? 'bg-primary-600 text-white shadow-soft'
+                  : 'text-primary-600 hover:text-primary-700 hover:bg-primary-50'
               }`}
             >
               All Stories
@@ -224,8 +224,8 @@ export const StoriesPage: React.FC = () => {
                 onClick={() => handleTabChange('my')}
                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                   activeTab === 'my'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-blue-600'
+                    ? 'bg-primary-600 text-white shadow-soft'
+                    : 'text-primary-600 hover:text-primary-700 hover:bg-primary-50'
                 }`}
               >
                 My Stories
@@ -237,40 +237,46 @@ export const StoriesPage: React.FC = () => {
         {/* My Stories Stats */}
         {activeTab === 'my' && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <Card className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-blue-100">
-                  <Eye className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Stories</p>
-                  <p className="text-2xl font-bold text-gray-900">{(myStories || []).length}</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-green-100">
-                  <Heart className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Published</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {(myStories || []).filter(s => s.status === 'published').length}
-                  </p>
+            <Card className="border border-primary-200 shadow-soft">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-lg bg-primary-100">
+                    <Eye className="w-6 h-6 text-primary-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-primary-600">Total Stories</p>
+                    <p className="text-2xl font-bold text-primary-900">{(myStories || []).length}</p>
+                  </div>
                 </div>
               </div>
             </Card>
-            <Card className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-yellow-100">
-                  <Edit className="w-6 h-6 text-yellow-600" />
+            <Card className="border border-primary-200 shadow-soft">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-lg bg-green-100">
+                    <Heart className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-primary-600">Published</p>
+                    <p className="text-2xl font-bold text-primary-900">
+                      {(myStories || []).filter(s => s.status === 'published').length}
+                    </p>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Drafts</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {(myStories || []).filter(s => s.status === 'draft').length}
-                  </p>
+              </div>
+            </Card>
+            <Card className="border border-primary-200 shadow-soft">
+              <div className="p-6">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-lg bg-yellow-100">
+                    <Edit className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-primary-600">Drafts</p>
+                    <p className="text-2xl font-bold text-primary-900">
+                      {(myStories || []).filter(s => s.status === 'draft').length}
+                    </p>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -278,57 +284,59 @@ export const StoriesPage: React.FC = () => {
         )}
 
         {/* Search and Filters */}
-        <Card className="p-8 mb-12 bg-gradient-to-r from-white to-blue-50/50 border border-blue-100/50 shadow-xl backdrop-blur-sm">
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1">
-              <Input
-                placeholder={activeTab === 'all' ? "Search stories..." : "Search my stories..."}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="w-5 h-5" />}
-                className="w-full h-12 text-lg border-blue-200 focus:border-blue-400"
-              />
-            </div>
-            {activeTab === 'all' ? (
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full lg:w-52 h-12 px-4 py-3 border border-blue-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300"
-              >
-                <option value="all">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <Filter className="w-4 h-4 text-gray-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-700">Filter:</span>
-                </div>
-                <div className="flex space-x-2">
-                  {[
-                    { key: 'all', label: 'All' },
-                    { key: 'published', label: 'Published' },
-                    { key: 'draft', label: 'Drafts' }
-                  ].map((option) => (
-                    <button
-                      key={option.key}
-                      onClick={() => setMyStoriesFilter(option.key as any)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        myStoriesFilter === option.key
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-white text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+        <Card className="border border-primary-200 shadow-soft mb-12">
+          <div className="p-8">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1">
+                <Input
+                  placeholder={activeTab === 'all' ? "Search stories..." : "Search my stories..."}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  leftIcon={<Search className="w-5 h-5" />}
+                  className="w-full h-12 text-lg border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                />
               </div>
-            )}
+              {activeTab === 'all' ? (
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full lg:w-52 h-12 px-4 py-3 border border-primary-200 rounded-xl text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400 bg-white shadow-soft hover:shadow-medium transition-all duration-300"
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <Filter className="w-4 h-4 text-primary-500 mr-2" />
+                    <span className="text-sm font-medium text-primary-700">Filter:</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    {[
+                      { key: 'all', label: 'All' },
+                      { key: 'published', label: 'Published' },
+                      { key: 'draft', label: 'Drafts' }
+                    ].map((option) => (
+                      <button
+                        key={option.key}
+                        onClick={() => setMyStoriesFilter(option.key as any)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          myStoriesFilter === option.key
+                            ? 'bg-primary-100 text-primary-700'
+                            : 'bg-white text-primary-600 hover:bg-primary-50 border border-primary-200'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -345,10 +353,10 @@ export const StoriesPage: React.FC = () => {
               </div>
               <div className="lg:w-1/2 p-8">
                 <div className="flex items-center space-x-2 mb-3">
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                  <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full font-medium">
                     FEATURED
                   </span>
-                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-primary-50 text-primary-600 px-2 py-1 rounded-full">
                     {categories.find(c => c.value === filteredStories[0].category)?.label}
                   </span>
                 </div>
@@ -398,7 +406,7 @@ export const StoriesPage: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                       story.category === 'environment' ? 'bg-green-100 text-green-800' :
-                      story.category === 'education' ? 'bg-blue-100 text-blue-800' :
+                      story.category === 'education' ? 'bg-primary-100 text-primary-800' :
                       story.category === 'healthcare' ? 'bg-red-100 text-red-800' :
                       story.category === 'community' ? 'bg-purple-100 text-purple-800' :
                       'bg-yellow-100 text-yellow-800'
@@ -417,7 +425,7 @@ export const StoriesPage: React.FC = () => {
                   {activeTab === 'my' && (
                     <div className="flex items-center space-x-2">
                       <Link to={`/stories/edit/${story.id}`}>
-                        <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                        <button className="p-1 text-gray-400 hover:text-primary-600 transition-colors">
                           <Edit className="w-4 h-4" />
                         </button>
                       </Link>
@@ -465,7 +473,7 @@ export const StoriesPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-4 border-t border-blue-100">
+                <div className="flex items-center justify-between pt-4 border-t border-primary-100">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center space-x-1">
                       <Heart className="w-4 h-4" />
@@ -488,7 +496,7 @@ export const StoriesPage: React.FC = () => {
                   </div>
                   <Link
                     to={`/stories/${story.id}`}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
+                    className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center space-x-1"
                   >
                     <span>Read More</span>
                     <ArrowRight className="w-3 h-3" />
@@ -510,7 +518,7 @@ export const StoriesPage: React.FC = () => {
 
         {/* Empty State */}
         {filteredStories.length === 0 && (
-          <div className="text-center py-12 bg-blue-50 rounded-lg">
+          <div className="text-center py-12 bg-primary-50 rounded-lg">
             {activeTab === 'all' ? (
               <>
                 <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />

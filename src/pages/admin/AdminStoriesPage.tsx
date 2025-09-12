@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { SearchBar, SearchFilters } from '../../components/search/SearchBar';
+import { FilterPanel } from '../../components/search/FilterPanel';
 import { storyAPI } from '../../services/api';
 
 interface Story {
@@ -25,23 +26,43 @@ interface Story {
 export const AdminStoriesPage: React.FC = () => {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchStories();
-  }, [searchTerm, statusFilter, currentPage]);
+  }, [searchQuery, filters, currentPage]);
 
   const fetchStories = async () => {
     try {
       setLoading(true);
-      const response = await storyAPI.getAllStoriesAdmin({
+      const params: any = {
         page: currentPage,
         limit: 20,
-        status: statusFilter !== 'all' ? statusFilter : undefined
-      });
+        search: searchQuery || undefined
+      };
+
+      // Add status filters
+      if (filters.status && filters.status.length > 0) {
+        params.status = filters.status.join(',');
+      }
+
+      // Add category filters
+      if (filters.category && filters.category.length > 0) {
+        params.category = filters.category.join(',');
+      }
+
+      // Add date range filters
+      if (filters.dateRange?.start) {
+        params.startDate = filters.dateRange.start.toISOString().split('T')[0];
+      }
+      if (filters.dateRange?.end) {
+        params.endDate = filters.dateRange.end.toISOString().split('T')[0];
+      }
+
+      const response = await storyAPI.getAllStoriesAdmin(params);
 
       if (response.success) {
         setStories(response.data.stories);
@@ -95,7 +116,7 @@ export const AdminStoriesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-primary-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -103,35 +124,49 @@ export const AdminStoriesPage: React.FC = () => {
           <p className="text-gray-600">Review, approve, and manage user-generated stories</p>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search stories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="w-5 h-5" />}
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="pending_review">Pending Review</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
-          </div>
-        </Card>
+        {/* Enhanced Search and Filters */}
+        <div className="mb-6 space-y-4">
+          <SearchBar
+            placeholder="Search stories by title, author, or content..."
+            onSearch={setSearchQuery}
+            onFilter={setFilters}
+            showFilters={true}
+            className="w-full"
+          />
+
+          <FilterPanel
+            title="Story Filters"
+            filters={{
+              status: [
+                { value: 'draft', label: 'Draft', count: stories.filter(s => s.status === 'draft').length },
+                { value: 'published', label: 'Published', count: stories.filter(s => s.status === 'published').length },
+                { value: 'pending_review', label: 'Pending Review', count: stories.filter(s => s.status === 'pending_review').length }
+              ],
+              category: [
+                { value: 'personal', label: 'Personal Stories' },
+                { value: 'community', label: 'Community Impact' },
+                { value: 'volunteer', label: 'Volunteer Experience' },
+                { value: 'success', label: 'Success Stories' }
+              ],
+              dateRange: filters.dateRange
+            }}
+            selectedFilters={{
+              status: filters.status || [],
+              category: filters.category || [],
+              priority: [],
+              dateRange: filters.dateRange
+            }}
+            onFilterChange={setFilters}
+            onClearAll={() => setFilters({})}
+            className="w-full"
+          />
+        </div>
 
         {/* Stories Table */}
         <Card className="overflow-hidden">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
               <p className="text-gray-600 mt-2">Loading stories...</p>
             </div>
           ) : stories.length === 0 ? (

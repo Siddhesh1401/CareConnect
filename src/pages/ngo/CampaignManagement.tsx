@@ -104,16 +104,16 @@ export const CampaignManagement: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Campaign Management</h1>
-            <p className="text-gray-600 mt-2">Create and manage your fundraising campaigns</p>
+            <h1 className="text-3xl font-bold text-primary-900">Campaign Management</h1>
+            <p className="text-primary-600 mt-2">Create and manage your fundraising campaigns</p>
           </div>
           <Link to="/ngo/campaigns/create">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
               <Plus className="mr-2 w-4 h-4" />
               Create Campaign
             </Button>
@@ -122,59 +122,57 @@ export const CampaignManagement: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Raised</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-primary-600 text-sm font-medium">Total Raised</p>
+                <p className="text-2xl font-bold text-primary-900">
                   ₹{(stats?.totalRaised || 0).toLocaleString('en-IN')}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <DollarSign className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg border border-primary-200">
+                <DollarSign className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
           
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Active Campaigns</p>
-                <p className="text-2xl font-bold text-blue-600">{stats?.activeCampaigns || 0}</p>
+                <p className="text-primary-600 text-sm font-medium">Active Campaigns</p>
+                <p className="text-2xl font-bold text-primary-900">{stats?.activeCampaigns || 0}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Target className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg border border-primary-200">
+                <Target className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
           
-                    <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Donors</p>
-                <p className="text-2xl font-bold text-blue-600">{stats?.totalDonors || 0}</p>
+                <p className="text-primary-600 text-sm font-medium">Total Donors</p>
+                <p className="text-2xl font-bold text-primary-900">{stats?.totalDonors || 0}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg border border-primary-200">
+                <Users className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
           
-          <Card className="p-6 bg-white border border-blue-100">
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Completed Campaigns</p>
-                <p className="text-2xl font-bold text-blue-600">{stats?.completedCampaigns || 0}</p>
+                <p className="text-primary-600 text-sm font-medium">Completed Campaigns</p>
+                <p className="text-2xl font-bold text-primary-900">{stats?.completedCampaigns || 0}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-primary-100 rounded-lg border border-primary-200">
+                <TrendingUp className="w-6 h-6 text-primary-600" />
               </div>
             </div>
           </Card>
-        </div>
-
-        {/* Search and Filters */}
-        <Card className="p-6 bg-blue-50 border border-blue-100">
+        </div>        {/* Search and Filters */}
+        <Card className="p-6 bg-primary-50 border-primary-200 shadow-soft">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <Input
@@ -182,13 +180,13 @@ export const CampaignManagement: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 leftIcon={<Search className="w-5 h-5" />}
-                className="bg-white"
+                className="bg-white border-primary-200 focus:border-primary-300"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -229,21 +227,21 @@ export const CampaignManagement: React.FC = () => {
             ))
           ) : (
             filteredCampaigns.map((campaign) => (
-              <Card key={campaign._id || campaign.id} className="p-6 bg-white border border-blue-100">
+              <Card key={campaign._id || campaign.id} className="p-6 bg-white border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">{campaign.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        campaign.status === 'active' ? 'bg-blue-100 text-blue-800' :
-                        campaign.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        campaign.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
+                      <h3 className="text-xl font-semibold text-primary-900">{campaign.title}</h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                        campaign.status === 'active' ? 'bg-primary-100 text-primary-800 border-primary-200' :
+                        campaign.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
+                        campaign.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                        'bg-gray-100 text-gray-800 border-gray-200'
                       }`}>
                         {campaign.status}
                       </span>
                     </div>
-                    <p className="text-gray-600 mb-4">{campaign.description}</p>
+                    <p className="text-primary-600 mb-4">{campaign.description}</p>
                   </div>
 
                   <div className="flex items-center space-x-2 ml-4">
@@ -283,41 +281,41 @@ export const CampaignManagement: React.FC = () => {
                 {/* Campaign Progress */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">
+                    <span className="text-primary-600 px-2 py-1 bg-primary-50 rounded border border-primary-100">
                       ₹{campaign.raised.toLocaleString()} raised of ₹{campaign.target.toLocaleString()}
                     </span>
-                    <span className="text-gray-600">
+                    <span className="text-primary-600 px-2 py-1 bg-primary-50 rounded border border-primary-100">
                       {Math.round((campaign.raised / campaign.target) * 100)}% complete
                     </span>
                   </div>
                   
-                  <div className="w-full bg-blue-100 rounded-full h-3">
+                  <div className="w-full bg-primary-200 rounded-full h-3 border border-primary-300">
                     <div 
                       className={`h-3 rounded-full transition-all ${
-                        campaign.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                        campaign.status === 'completed' ? 'bg-green-500' : 'bg-primary-500'
                       }`}
                       style={{ width: `${Math.min((campaign.raised / campaign.target) * 100, 100)}%` }}
                     />
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-lg font-semibold text-gray-900">{campaign.donors}</div>
-                      <div className="text-gray-600">Donors</div>
+                    <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
+                      <div className="text-lg font-semibold text-primary-900">{campaign.donors}</div>
+                      <div className="text-primary-600">Donors</div>
                     </div>
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
+                      <div className="text-lg font-semibold text-primary-900">
                         {campaign.daysLeft > 0 ? `${campaign.daysLeft} days` : 'Completed'}
                       </div>
-                      <div className="text-gray-600">
+                      <div className="text-primary-600">
                         {campaign.daysLeft > 0 ? 'Remaining' : 'Status'}
                       </div>
                     </div>
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
+                      <div className="text-lg font-semibold text-primary-900">
                         ₹{campaign.donors > 0 ? Math.round(campaign.raised / campaign.donors).toLocaleString() : '0'}
                       </div>
-                      <div className="text-gray-600">Avg. Donation</div>
+                      <div className="text-primary-600">Avg. Donation</div>
                     </div>
                   </div>
                 </div>
@@ -328,14 +326,14 @@ export const CampaignManagement: React.FC = () => {
 
         {/* Empty State */}
         {!loading && filteredCampaigns.length === 0 && (
-          <Card className="p-12 text-center bg-blue-50 border border-blue-100">
-            <Target className="w-16 h-16 text-blue-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
-            <p className="text-gray-600 mb-6">
+          <Card className="p-12 text-center bg-primary-50 border-primary-200 shadow-soft">
+            <Target className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-primary-900 mb-2">No campaigns found</h3>
+            <p className="text-primary-600 mb-6">
               {searchTerm ? 'Try adjusting your search criteria' : 'Create your first campaign to start fundraising'}
             </p>
             <Link to="/ngo/campaigns/create">
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
                 <Plus className="mr-2 w-4 h-4" />
                 Create Campaign
               </Button>
@@ -347,15 +345,16 @@ export const CampaignManagement: React.FC = () => {
       {/* Donor Modal */}
       {showDonorModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-soft border border-primary-200">
+            <div className="flex items-center justify-between p-6 border-b border-primary-100">
+              <h2 className="text-xl font-semibold text-primary-900">
                 Donors for {selectedCampaign?.title}
               </h2>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowDonorModal(false)}
+                className="text-primary-600 hover:text-primary-900 hover:bg-primary-50"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -364,42 +363,42 @@ export const CampaignManagement: React.FC = () => {
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               {loadingDonors ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2 text-gray-600">Loading donors...</span>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  <span className="ml-2 text-primary-600">Loading donors...</span>
                 </div>
               ) : donors.length === 0 ? (
                 <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600">No donors found for this campaign</p>
+                  <Users className="w-12 h-12 text-primary-300 mx-auto mb-4" />
+                  <p className="text-primary-600">No donors found for this campaign</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {donors.map((donor, index) => (
-                    <Card key={donor._id || index} className="p-4 bg-gray-50 border border-gray-200">
+                    <Card key={donor._id || index} className="p-4 bg-primary-50 border-primary-200 shadow-sm hover:shadow-medium transition-all duration-300">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-blue-600" />
+                          <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center border border-primary-200">
+                            <User className="w-5 h-5 text-primary-600" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{donor.name || 'Anonymous'}</p>
-                            <p className="text-sm text-gray-600">{donor.email}</p>
+                            <p className="font-medium text-primary-900">{donor.name || 'Anonymous'}</p>
+                            <p className="text-sm text-primary-600">{donor.email}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-green-600">
+                          <p className="font-semibold text-green-600 px-2 py-1 bg-green-50 rounded border border-green-200">
                             ₹{donor.amount?.toLocaleString('en-IN') || '0'}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-primary-500 mt-1">
                             {donor.donatedAt ? new Date(donor.donatedAt).toLocaleDateString() : 'N/A'}
                           </p>
                         </div>
                       </div>
                       {donor.message && (
-                        <div className="mt-3 p-3 bg-white rounded-lg border">
+                        <div className="mt-3 p-3 bg-white rounded-lg border border-primary-200">
                           <div className="flex items-start space-x-2">
-                            <MessageSquare className="w-4 h-4 text-gray-400 mt-0.5" />
-                            <p className="text-sm text-gray-700">{donor.message}</p>
+                            <MessageSquare className="w-4 h-4 text-primary-400 mt-0.5" />
+                            <p className="text-sm text-primary-700">{donor.message}</p>
                           </div>
                         </div>
                       )}

@@ -168,11 +168,11 @@ export const EventsPage: React.FC = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent mb-6 animate-fade-in">
+          <h1 className="text-4xl lg:text-5xl font-bold text-primary-900 mb-6 animate-fade-in">
             Volunteer Events
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in-up">
@@ -181,7 +181,7 @@ export const EventsPage: React.FC = () => {
         </div>
 
         {/* Search and Filters */}
-        <Card className="p-8 mb-12 bg-gradient-to-r from-white to-blue-50/50 border border-blue-100/50 shadow-xl backdrop-blur-sm">
+        <Card className="p-8 mb-12 bg-white border border-primary-200 shadow-soft">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Search */}
             <div className="flex-1">
@@ -190,7 +190,7 @@ export const EventsPage: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 leftIcon={<Search className="w-5 h-5" />}
-                className="w-full h-12 text-lg border-blue-200 focus:border-blue-400"
+                className="w-full h-12 text-lg border-primary-200 focus:border-primary-500"
               />
             </div>
 
@@ -199,7 +199,7 @@ export const EventsPage: React.FC = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full lg:w-52 h-12 px-4 py-3 border border-blue-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300"
+                className="w-full lg:w-52 h-12 px-4 py-3 border border-primary-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none cursor-pointer bg-white shadow-soft hover:shadow-medium transition-all duration-300"
               >
                 {categories.map((category) => (
                   <option key={category.value} value={category.value}>
@@ -215,7 +215,7 @@ export const EventsPage: React.FC = () => {
               <select
                 value={selectedLocation}
                 onChange={(e) => handleLocationChange(e.target.value)}
-                className="w-full lg:w-52 h-12 px-4 py-3 border border-blue-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300"
+                className="w-full lg:w-52 h-12 px-4 py-3 border border-primary-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none cursor-pointer bg-white shadow-soft hover:shadow-medium transition-all duration-300"
               >
                 {locations.map((location) => (
                   <option key={location.value} value={location.value}>
@@ -229,7 +229,7 @@ export const EventsPage: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden h-12 border-blue-200 hover:border-blue-300 hover:bg-blue-50"
+              className="lg:hidden h-12 border-primary-200 hover:border-primary-300 hover:bg-primary-50"
             >
               <Filter className="w-4 h-4 mr-2" />
               Filters
@@ -244,16 +244,16 @@ export const EventsPage: React.FC = () => {
               'Loading events...'
             ) : (
               <>
-                Showing <span className="font-semibold text-blue-600">{events.length}</span> events
+                Showing <span className="font-semibold text-primary-600">{events.length}</span> events
                 {searchTerm && (
-                  <span> for "<span className="font-semibold text-blue-600">{searchTerm}</span>"</span>
+                  <span> for "<span className="font-semibold text-primary-600">{searchTerm}</span>"</span>
                 )}
               </>
             )}
           </p>
           <div className="flex items-center space-x-3 text-sm text-gray-500">
             <span className="font-medium">Sort by:</span>
-            <select className="border border-blue-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+            <select className="border border-primary-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white shadow-soft hover:shadow-medium transition-all duration-300">
               <option value="date">Date</option>
               <option value="popularity">Popularity</option>
               <option value="location">Location</option>
@@ -265,16 +265,16 @@ export const EventsPage: React.FC = () => {
         {loading && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, index) => (
-              <Card key={index} className="overflow-hidden bg-white/80 backdrop-blur-sm border border-blue-100/50">
-                <div className="w-full h-48 bg-gray-200 animate-pulse"></div>
+              <Card key={index} className="overflow-hidden bg-white border border-primary-200 shadow-soft">
+                <div className="w-full h-48 bg-primary-100 animate-pulse"></div>
                 <div className="p-6 space-y-4">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-primary-100 rounded animate-pulse"></div>
+                  <div className="h-6 bg-primary-100 rounded animate-pulse"></div>
                   <div className="space-y-2">
-                    <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div className="h-3 bg-primary-100 rounded animate-pulse"></div>
+                    <div className="h-3 bg-primary-100 rounded animate-pulse w-3/4"></div>
                   </div>
-                  <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-10 bg-primary-100 rounded animate-pulse"></div>
                 </div>
               </Card>
             ))}
@@ -285,9 +285,9 @@ export const EventsPage: React.FC = () => {
         {!loading && events.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {events.map((event) => (
-              <Card key={event._id} className="group overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 bg-white/80 backdrop-blur-sm border border-blue-100/50">
+              <Card key={event._id} className="group overflow-hidden hover:shadow-medium hover:-translate-y-2 transition-all duration-500 bg-white border border-primary-200 shadow-soft">
                 <div className="relative">
-                  <div className="w-full h-48 bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
+                  <div className="w-full h-48 bg-gradient-to-r from-primary-400 to-primary-600 flex items-center justify-center">
                     <Building className="w-16 h-16 text-white/70" />
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -310,17 +310,17 @@ export const EventsPage: React.FC = () => {
                 <div className="p-6 space-y-4">
                   {/* NGO Info */}
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center">
                       <Building className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
+                    <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700 transition-colors duration-300">
                       {event.organizationName}
                     </span>
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   </div>
 
                   {/* Event Title */}
-                  <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
+                  <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors duration-300">
                     {event.title}
                   </h3>
 
@@ -332,27 +332,27 @@ export const EventsPage: React.FC = () => {
                   {/* Event Details */}
                   <div className="space-y-3 text-sm text-gray-600">
                     <div className="flex items-center space-x-3">
-                      <Calendar className="w-4 h-4 text-blue-500" />
+                      <Calendar className="w-4 h-4 text-primary-500" />
                       <span className="font-medium">{formatDate(event.date)}</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Clock className="w-4 h-4 text-blue-500" />
+                      <Clock className="w-4 h-4 text-primary-500" />
                       <span className="font-medium">{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <MapPin className="w-4 h-4 text-blue-500" />
+                      <MapPin className="w-4 h-4 text-primary-500" />
                       <span className="font-medium">{event.location.address}, {event.location.city}</span>
                     </div>
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center space-x-3">
-                        <Users className="w-4 h-4 text-blue-500" />
+                        <Users className="w-4 h-4 text-primary-500" />
                         <span className="font-medium">
                           {event.capacity - event.availableSpots}/{event.capacity} registered
                         </span>
                       </div>
-                      <div className="w-24 bg-blue-100 rounded-full h-2">
+                      <div className="w-24 bg-primary-100 rounded-full h-2">
                         <div 
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${((event.capacity - event.availableSpots) / event.capacity) * 100}%` }}
                         />
                       </div>
@@ -372,12 +372,12 @@ export const EventsPage: React.FC = () => {
                       </Link>
                     ) : (
                       <Link to={`/events/${event._id}`} className="flex-1">
-                        <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+                        <Button className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-lg hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                           View & Register
                         </Button>
                       </Link>
                     )}
-                    <Button variant="outline" size="sm" className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-600">
+                    <Button variant="outline" size="sm" className="border-primary-200 hover:border-primary-300 hover:bg-primary-50 text-primary-600">
                       <Heart className="w-4 h-4" />
                     </Button>
                   </div>
@@ -389,8 +389,8 @@ export const EventsPage: React.FC = () => {
 
         {/* No Results */}
         {!loading && events.length === 0 && (
-          <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border border-blue-200/50">
-            <Calendar className="w-20 h-20 text-blue-300 mx-auto mb-6" />
+          <div className="text-center py-16 bg-primary-50 rounded-2xl border border-primary-200">
+            <Calendar className="w-20 h-20 text-primary-300 mx-auto mb-6" />
             <h3 className="text-2xl font-bold text-gray-900 mb-3">No events found</h3>
             <p className="text-gray-600 mb-6 text-lg">
               Try adjusting your search criteria or filters to find more events.
@@ -401,7 +401,7 @@ export const EventsPage: React.FC = () => {
                 setSelectedCategory('all');
                 setSelectedLocation('all');
               }}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-lg hover:shadow-xl"
             >
               Clear Filters
             </Button>
@@ -415,7 +415,7 @@ export const EventsPage: React.FC = () => {
               variant="outline"
               disabled={pagination.page === 1}
               onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-              className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-600"
+              className="border-primary-200 hover:border-primary-300 hover:bg-primary-50 text-primary-600"
             >
               Previous
             </Button>
@@ -429,8 +429,8 @@ export const EventsPage: React.FC = () => {
                     variant={pagination.page === page ? 'primary' : 'outline'}
                     onClick={() => setPagination(prev => ({ ...prev, page }))}
                     className={pagination.page === page 
-                      ? 'bg-blue-600 text-white' 
-                      : 'border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-600'
+                      ? 'bg-primary-600 text-white' 
+                      : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50 text-primary-600'
                     }
                   >
                     {page}
@@ -443,7 +443,7 @@ export const EventsPage: React.FC = () => {
               variant="outline"
               disabled={pagination.page === pagination.pages}
               onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-              className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-600"
+              className="border-primary-200 hover:border-primary-300 hover:bg-primary-50 text-primary-600"
             >
               Next
             </Button>

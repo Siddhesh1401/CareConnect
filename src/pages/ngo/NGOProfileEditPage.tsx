@@ -136,10 +136,10 @@ export const NGOProfileEditPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading profile...</p>
+          <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-primary-600">Loading profile...</p>
         </div>
       </div>
     );
@@ -147,12 +147,12 @@ export const NGOProfileEditPage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Not Found</h2>
-          <p className="text-gray-600 mb-6">Unable to load your profile information</p>
-          <Button onClick={() => navigate('/ngo/dashboard')}>
+          <h2 className="text-2xl font-bold text-primary-900 mb-2">Profile Not Found</h2>
+          <p className="text-primary-600 mb-6">Unable to load your profile information</p>
+          <Button onClick={() => navigate('/ngo/dashboard')} className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
@@ -162,24 +162,24 @@ export const NGOProfileEditPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-primary-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-blue-100">
+      <div className="bg-white shadow-soft border-b border-primary-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate('/ngo/dashboard')}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 border-primary-300 text-primary-700 hover:bg-primary-50"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Dashboard</span>
             </Button>
-            <div className="h-6 w-px bg-gray-300"></div>
+            <div className="h-6 w-px bg-primary-200"></div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">Edit Organization Profile</h1>
-              <p className="text-sm text-gray-600">Update your organization's information</p>
+              <h1 className="text-xl font-semibold text-primary-900">Edit Organization Profile</h1>
+              <p className="text-sm text-primary-600">Update your organization's information</p>
             </div>
           </div>
         </div>
@@ -203,21 +203,21 @@ export const NGOProfileEditPage: React.FC = () => {
           )}
 
           {/* Profile Picture Section */}
-          <Card>
+          <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
+              <h2 className="text-lg font-semibold text-primary-900 mb-4">Profile Picture</h2>
               <div className="flex items-center space-x-6">
                 <img
                   src={profile.profilePicture || 'https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=600'}
                   alt={profile.organizationName}
-                  className="w-24 h-24 rounded-xl border-4 border-white shadow-lg object-cover"
+                  className="w-24 h-24 rounded-xl border-4 border-white shadow-soft object-cover"
                 />
                 <div>
-                  <Button variant="outline" type="button" className="flex items-center space-x-2">
+                  <Button variant="outline" type="button" className="flex items-center space-x-2 border-primary-300 text-primary-700 hover:bg-primary-50">
                     <Upload className="w-4 h-4" />
                     <span>Change Picture</span>
                   </Button>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-primary-500 mt-2">
                     JPG, PNG or GIF. Max size 2MB.
                   </p>
                 </div>
@@ -226,12 +226,12 @@ export const NGOProfileEditPage: React.FC = () => {
           </Card>
 
           {/* Basic Information */}
-          <Card>
+          <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Basic Information</h2>
+              <h2 className="text-lg font-semibold text-primary-900 mb-6">Basic Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Organization Name *
                   </label>
                   <Input
@@ -239,17 +239,18 @@ export const NGOProfileEditPage: React.FC = () => {
                     onChange={(e) => handleInputChange('organizationName', e.target.value)}
                     placeholder="Enter organization name"
                     required
+                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Organization Type *
                   </label>
                   <select
                     value={formData.organizationType}
                     onChange={(e) => handleInputChange('organizationType', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
                     required
                   >
                     <option value="">Select type</option>
@@ -263,7 +264,7 @@ export const NGOProfileEditPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Founded Year
                   </label>
                   <Input
@@ -273,23 +274,25 @@ export const NGOProfileEditPage: React.FC = () => {
                     placeholder="2020"
                     min="1800"
                     max={new Date().getFullYear()}
+                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Phone Number
                   </label>
                   <Input
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder="+91 9876543210"
+                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   />
                 </div>
               </div>
 
               <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Description *
                 </label>
                 <Textarea
@@ -298,33 +301,35 @@ export const NGOProfileEditPage: React.FC = () => {
                   placeholder="Describe your organization, mission, and activities..."
                   rows={4}
                   required
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                 />
               </div>
             </div>
           </Card>
 
           {/* Location Information */}
-          <Card>
+          <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center space-x-2">
-                <MapPin className="w-5 h-5" />
+              <h2 className="text-lg font-semibold text-primary-900 mb-6 flex items-center space-x-2">
+                <MapPin className="w-5 h-5 text-primary-500" />
                 <span>Location Information</span>
               </h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Address
                   </label>
                   <Input
                     value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     placeholder="Street address"
+                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-primary-700 mb-2">
                       City *
                     </label>
                     <Input
@@ -332,11 +337,12 @@ export const NGOProfileEditPage: React.FC = () => {
                       onChange={(e) => handleInputChange('city', e.target.value)}
                       placeholder="City"
                       required
+                      className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-primary-700 mb-2">
                       State *
                     </label>
                     <Input
@@ -344,11 +350,12 @@ export const NGOProfileEditPage: React.FC = () => {
                       onChange={(e) => handleInputChange('state', e.target.value)}
                       placeholder="State"
                       required
+                      className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-primary-700 mb-2">
                       Country *
                     </label>
                     <Input
@@ -356,6 +363,7 @@ export const NGOProfileEditPage: React.FC = () => {
                       onChange={(e) => handleInputChange('country', e.target.value)}
                       placeholder="Country"
                       required
+                      className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                     />
                   </div>
                 </div>
@@ -364,14 +372,14 @@ export const NGOProfileEditPage: React.FC = () => {
           </Card>
 
           {/* Contact Information */}
-          <Card>
+          <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center space-x-2">
-                <Globe className="w-5 h-5" />
+              <h2 className="text-lg font-semibold text-primary-900 mb-6 flex items-center space-x-2">
+                <Globe className="w-5 h-5 text-primary-500" />
                 <span>Contact Information</span>
               </h2>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Website
                 </label>
                 <Input
@@ -379,6 +387,7 @@ export const NGOProfileEditPage: React.FC = () => {
                   value={formData.website}
                   onChange={(e) => handleInputChange('website', e.target.value)}
                   placeholder="https://www.yourorganization.com"
+                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                 />
               </div>
             </div>
@@ -391,13 +400,14 @@ export const NGOProfileEditPage: React.FC = () => {
               variant="outline"
               onClick={() => navigate('/ngo/dashboard')}
               disabled={saving}
+              className="border-primary-300 text-primary-700 hover:bg-primary-50"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 flex items-center space-x-2"
+              className="bg-primary-600 hover:bg-primary-700 border border-primary-700 flex items-center space-x-2"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

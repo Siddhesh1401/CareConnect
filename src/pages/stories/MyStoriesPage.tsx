@@ -34,7 +34,7 @@ interface Story {
 
 const statusColors = {
   draft: 'bg-yellow-100 text-yellow-800',
-  published: 'bg-green-100 text-green-800'
+  published: 'bg-primary-100 text-primary-800'
 };
 
 export const MyStoriesPage: React.FC = () => {
@@ -106,16 +106,16 @@ export const MyStoriesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stories</h1>
+            <h1 className="text-3xl font-bold text-primary-900 mb-2">My Stories</h1>
             <p className="text-gray-600">Manage your published stories and drafts</p>
           </div>
           <Link to="/stories/create">
-            <Button className="bg-green-600 hover:bg-green-700">
+            <Button className="bg-primary-600 hover:bg-primary-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Create New Story
             </Button>
@@ -124,38 +124,38 @@ export const MyStoriesPage: React.FC = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <Card className="p-6">
+          <Card className="p-6 border border-primary-200 shadow-soft">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-blue-100">
-                <Eye className="w-6 h-6 text-blue-600" />
+              <div className="p-3 rounded-lg bg-primary-100">
+                <Eye className="w-6 h-6 text-primary-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Stories</p>
-                <p className="text-2xl font-bold text-gray-900">{stories.length}</p>
+                <p className="text-sm font-medium text-primary-700">Total Stories</p>
+                <p className="text-2xl font-bold text-primary-900">{stories.length}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6 border border-primary-200 shadow-soft">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-green-100">
-                <Heart className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-lg bg-primary-100">
+                <Heart className="w-6 h-6 text-primary-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Published</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-primary-700">Published</p>
+                <p className="text-2xl font-bold text-primary-900">
                   {stories.filter(s => s.status === 'published').length}
                 </p>
               </div>
             </div>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6 border border-primary-200 shadow-soft">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-yellow-100">
-                <Edit className="w-6 h-6 text-yellow-600" />
+              <div className="p-3 rounded-lg bg-primary-100">
+                <Edit className="w-6 h-6 text-primary-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Drafts</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-primary-700">Drafts</p>
+                <p className="text-2xl font-bold text-primary-900">
                   {stories.filter(s => s.status === 'draft').length}
                 </p>
               </div>
@@ -166,8 +166,8 @@ export const MyStoriesPage: React.FC = () => {
         {/* Filters */}
         <div className="flex items-center space-x-4 mb-6">
           <div className="flex items-center">
-            <Filter className="w-4 h-4 text-gray-500 mr-2" />
-            <span className="text-sm font-medium text-gray-700">Filter:</span>
+            <Filter className="w-4 h-4 text-primary-600 mr-2" />
+            <span className="text-sm font-medium text-primary-700">Filter:</span>
           </div>
           <div className="flex space-x-2">
             {[
@@ -180,8 +180,8 @@ export const MyStoriesPage: React.FC = () => {
                 onClick={() => setFilter(option.key as any)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filter === option.key
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                    ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                    : 'bg-white text-gray-600 hover:bg-primary-50 border border-gray-200'
                 }`}
               >
                 {option.label}
@@ -192,22 +192,22 @@ export const MyStoriesPage: React.FC = () => {
 
         {/* Stories Grid */}
         {filteredStories.length === 0 ? (
-          <Card className="p-12 text-center">
+          <Card className="p-12 text-center border border-primary-200 shadow-soft">
             <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Edit className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Edit className="w-8 h-8 text-primary-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-primary-900 mb-2">
                 {filter === 'all' ? 'No stories yet' : `No ${filter} stories`}
               </h3>
-              <p className="text-gray-500 mb-6">
+              <p className="text-primary-600 mb-6">
                 {filter === 'all' 
                   ? 'Start sharing your impact stories with the community'
                   : `You don't have any ${filter} stories yet`
                 }
               </p>
               <Link to="/stories/create">
-                <Button className="bg-green-600 hover:bg-green-700">
+                <Button className="bg-primary-600 hover:bg-primary-700 text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Your First Story
                 </Button>
@@ -217,9 +217,9 @@ export const MyStoriesPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => (
-              <Card key={story.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={story.id} className="overflow-hidden hover:shadow-soft transition-shadow border border-primary-200">
                 {/* Story Image */}
-                <div className="aspect-video bg-gray-200 relative">
+                <div className="aspect-video bg-primary-100 relative">
                   {story.image ? (
                     <img
                       src={story.image}
@@ -228,11 +228,15 @@ export const MyStoriesPage: React.FC = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Heart className="w-12 h-12 text-gray-400" />
+                      <Heart className="w-12 h-12 text-primary-400" />
                     </div>
                   )}
                   <div className="absolute top-4 right-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[story.status]}`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      story.status === 'draft' 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-primary-100 text-primary-800'
+                    }`}>
                       {story.status === 'draft' ? 'Draft' : 'Published'}
                     </span>
                   </div>
@@ -240,7 +244,7 @@ export const MyStoriesPage: React.FC = () => {
 
                 {/* Story Content */}
                 <div className="p-6">
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="font-semibold text-lg text-primary-900 mb-2 line-clamp-2">
                     {story.title}
                   </h3>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -249,7 +253,7 @@ export const MyStoriesPage: React.FC = () => {
 
                   {/* Stats */}
                   {story.status === 'published' && (
-                    <div className="flex items-center space-x-4 text-xs text-gray-500 mb-4">
+                    <div className="flex items-center space-x-4 text-xs text-primary-600 mb-4">
                       <div className="flex items-center space-x-1">
                         <Eye className="w-3 h-3" />
                         <span>{story.views}</span>
@@ -266,7 +270,7 @@ export const MyStoriesPage: React.FC = () => {
                   )}
 
                   {/* Date */}
-                  <div className="flex items-center text-xs text-gray-500 mb-4">
+                  <div className="flex items-center text-xs text-primary-600 mb-4">
                     <Calendar className="w-3 h-3 mr-1" />
                     <span>
                       {story.status === 'published' && story.publishedDate
@@ -294,7 +298,7 @@ export const MyStoriesPage: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setShowDeleteConfirm(story.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      className="p-2 text-primary-400 hover:text-red-500 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -308,15 +312,15 @@ export const MyStoriesPage: React.FC = () => {
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <Card className="max-w-md w-full mx-4 p-6">
+            <Card className="max-w-md w-full mx-4 p-6 border border-primary-200 shadow-soft">
               <div className="text-center">
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Trash2 className="w-6 h-6 text-red-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-primary-900 mb-2">
                   Delete Story
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-primary-600 mb-6">
                   Are you sure you want to delete this story? This action cannot be undone.
                 </p>
                 <div className="flex space-x-3">
@@ -329,7 +333,7 @@ export const MyStoriesPage: React.FC = () => {
                   </Button>
                   <Button
                     onClick={() => handleDelete(showDeleteConfirm)}
-                    className="flex-1 bg-red-600 hover:bg-red-700"
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                   >
                     Delete
                   </Button>

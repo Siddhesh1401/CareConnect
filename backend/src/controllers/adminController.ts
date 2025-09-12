@@ -812,14 +812,14 @@ export const getDashboardStats = async (req: AuthRequest, res: Response): Promis
           name: user.name,
           email: user.email,
           role: user.role,
-          joinedDate: user.createdAt
+          joinedDate: (user as any).createdAt
         })),
         pendingNGORequests: recentNGOs.map(ngo => ({
           id: ngo._id,
           organizationName: ngo.organizationName || ngo.name,
           contactPerson: ngo.name,
           email: ngo.email,
-          submittedDate: ngo.createdAt
+          submittedDate: (ngo as any).createdAt
         }))
       }
     });
@@ -986,6 +986,173 @@ export const updateMessageStatus = async (req: AuthRequest, res: Response): Prom
 
   } catch (error) {
     console.error('Update message status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Get analytics data for charts and metrics
+export const getAnalyticsData = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { timeRange = '30d' } = req.query;
+
+    // Calculate date range based on timeRange
+    const now = new Date();
+    let startDate: Date;
+
+    switch (timeRange) {
+      case '7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '90d':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case '1y':
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    // Get user growth data (monthly aggregation)
+    const userGrowthData = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          totalUsers: { $sum: 1 },
+          volunteers: {
+            $sum: { $cond: [{ $eq: ['$role', 'volunteer'] }, 1, 0] }
+          },
+          ngos: {
+            $sum: { $cond: [{ $eq: ['$role', 'ngo_admin'] }, 1, 0] }
+          }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 }
+      }
+    ]);
+
+    // Format user growth data for charts
+    const formattedUserGrowth = userGrowthData.map(item => ({
+      month: new Date(item._id.year, item._id.month - 1).toLocaleDateString('en-US', { month: 'short' }),
+      users: item.totalUsers,
+      volunteers: item.volunteers,
+      ngos: item.ngos
+    }));
+
+    // Get NGO status distribution
+    const ngoStatusData = await User.aggregate([
+      { $match: { role: 'ngo_admin' } },
+      {
+        $group: {
+          _id: '$verificationStatus',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const formattedNGOStatus = ngoStatusData.map(item => ({
+      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+      value: item.count,
+      color: item._id === 'approved' ? '#10B981' :
+             item._id === 'pending' ? '#F59E0B' : '#EF4444'
+    }));
+
+    // Get system activity data (daily aggregation for the time range)
+    const activityData = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          lastLogin: { $exists: true }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$lastLogin' }
+          },
+          logins: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id': 1 } }
+    ]);
+
+    // Get total users count
+    const totalUsers = await User.countDocuments();
+    const totalVolunteers = await User.countDocuments({ role: 'volunteer' });
+    const totalNGOs = await User.countDocuments({ role: 'ngo_admin' });
+    const activeNGOs = await User.countDocuments({
+      role: 'ngo_admin',
+      verificationStatus: 'approved'
+    });
+
+    // Calculate growth percentages (comparing with previous period)
+    const previousPeriodStart = new Date(startDate.getTime() - (now.getTime() - startDate.getTime()));
+    const currentPeriodUsers = await User.countDocuments({
+      createdAt: { $gte: startDate }
+    });
+    const previousPeriodUsers = await User.countDocuments({
+      createdAt: { $gte: previousPeriodStart, $lt: startDate }
+    });
+
+    const userGrowthPercent = previousPeriodUsers > 0
+      ? ((currentPeriodUsers - previousPeriodUsers) / previousPeriodUsers * 100)
+      : 0;
+
+    // Mock campaign data (since we don't have a Campaign model yet)
+    const campaignPerformanceData = [
+      { name: 'Education Drive', donations: 25000, participants: 120 },
+      { name: 'Healthcare Camp', donations: 18000, participants: 95 },
+      { name: 'Environment Clean', donations: 15000, participants: 85 },
+      { name: 'Food Distribution', donations: 22000, participants: 110 },
+      { name: 'Skill Development', donations: 30000, participants: 140 }
+    ];
+
+    // Format activity data for charts
+    const formattedActivityData = activityData.map(item => ({
+      date: new Date(item._id).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      logins: item.logins,
+      actions: Math.floor(item.logins * 2.5), // Mock actions data
+      errors: Math.floor(Math.random() * 5) // Mock errors data
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Analytics data retrieved successfully',
+      data: {
+        userGrowth: formattedUserGrowth,
+        ngoStatus: formattedNGOStatus,
+        campaignPerformance: campaignPerformanceData,
+        activity: formattedActivityData,
+        metrics: {
+          totalUsers,
+          totalVolunteers,
+          totalNGOs,
+          activeNGOs,
+          totalDonations: 110000, // Mock data
+          systemActivity: formattedActivityData.reduce((sum, day) => sum + day.actions, 0),
+          userGrowthPercent: Math.round(userGrowthPercent * 10) / 10
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get analytics data error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

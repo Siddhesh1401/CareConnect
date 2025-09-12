@@ -59,43 +59,43 @@ export const ProfilePage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">Profile Settings</h1>
+          <h1 className="text-4xl font-bold text-primary-700">Profile Settings</h1>
           <Button 
             variant="ghost" 
             onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl p-3"
+            className="text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg p-3"
           >
             <X className="w-5 h-5" />
           </Button>
         </div>
 
         {/* Profile Header */}
-        <Card className="p-8 bg-gradient-to-r from-white to-blue-50/50 border border-blue-100/50 shadow-xl">
+        <Card className="p-8 bg-white border-primary-200">
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
             <div className="relative group">
               {user?.avatar ? (
                 <img
                   src={user.avatar}
                   alt={user.name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-blue-200 group-hover:border-blue-300 transition-colors duration-300"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-primary-200"
                 />
               ) : (
-                <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center border-4 border-blue-200 group-hover:border-blue-300 transition-colors duration-300">
+                <div className="w-32 h-32 bg-primary-600 rounded-full flex items-center justify-center border-4 border-primary-200">
                   <User className="w-16 h-16 text-white" />
                 </div>
               )}
-              <button className="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110">
+              <button className="absolute bottom-0 right-0 w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-700 transition-all duration-200">
                 <Camera className="w-5 h-5 text-white" />
               </button>
             </div>
             
             <div className="flex-1">
               <h2 className="text-3xl font-bold text-gray-900 mb-1">{user?.name}</h2>
-              <p className="text-blue-600 capitalize font-semibold text-lg">{user?.role?.replace('_', ' ')}</p>
+              <p className="text-primary-600 capitalize font-semibold text-lg">{user?.role?.replace('_', ' ')}</p>
               <p className="text-gray-600 text-lg">{user?.email}</p>
               <p className="text-sm text-gray-500 mt-3">
                 Member since {user?.joinedDate ? new Date(user.joinedDate).toLocaleDateString() : 'N/A'}
@@ -103,8 +103,8 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             {user?.role === 'volunteer' && user?.points && (
-              <div className="text-center bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200/50">
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">{user.points}</div>
+              <div className="text-center bg-primary-50 p-6 rounded-lg border border-primary-200">
+                <div className="text-4xl font-bold text-primary-700">{user.points}</div>
                 <div className="text-sm text-gray-600 font-medium">Total Points</div>
               </div>
             )}

@@ -137,10 +137,10 @@ export const CampaignDetailsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaign details...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-primary-600">Loading campaign details...</p>
         </div>
       </div>
     );
@@ -148,11 +148,11 @@ export const CampaignDetailsPage: React.FC = () => {
 
   if (!campaign) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Campaign not found</h2>
+          <h2 className="text-2xl font-bold text-primary-900 mb-4">Campaign not found</h2>
           <Link to="/campaigns">
-            <Button>Back to Campaigns</Button>
+            <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700">Back to Campaigns</Button>
           </Link>
         </div>
       </div>
@@ -160,217 +160,234 @@ export const CampaignDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Button
+            variant="ghost"
             onClick={() => navigate(-1)}
-            className="flex items-center"
+            className="text-primary-600 hover:bg-primary-50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Back to Campaigns
           </Button>
         </div>
+      </div>
 
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
+          {/* Main Content Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Campaign Header */}
-            <Card className="overflow-hidden bg-white">
-              <div className="relative">
+            {/* Hero Section */}
+            <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
+              <div className="relative h-80">
                 <img
                   src={campaign.image}
                   alt={campaign.title}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getUrgencyColor(campaign.urgency)}`}>
-                    {campaign.urgency.toUpperCase()} PRIORITY
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                {/* Floating Badges */}
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getUrgencyColor(campaign.urgency)}`}>
+                    {campaign.urgency.toUpperCase()}
+                  </span>
+                  <span className="px-3 py-1 bg-white/90 text-gray-700 rounded-full text-xs font-medium">
+                    {campaign.category}
                   </span>
                 </div>
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <button className="p-2 bg-black/70 text-white rounded-full hover:bg-black/80">
+
+                <div className="absolute top-4 right-4">
+                  <button className="p-2 bg-white/90 backdrop-blur-sm text-gray-700 rounded-full hover:bg-white transition-colors">
                     <Share2 className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
 
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                    {campaign.category}
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                    {campaign.daysLeft} days left
-                  </span>
-                </div>
-
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                  {campaign.title}
-                </h1>
-
-                <div className="flex items-center text-gray-600 mb-4">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  <span className="mr-6">{campaign.location}</span>
-                  <Users className="w-4 h-4 mr-2" />
-                  <Link to={`/ngos/${campaign.ngoId}`} className="text-blue-600 hover:text-blue-800">
-                    {campaign.ngoName}
-                  </Link>
-                </div>
-
-                <div className="prose max-w-none">
-                  {campaign.fullDescription.split('\n').map((paragraph, index) => (
-                    <p key={index} className="mb-4 text-gray-700 leading-relaxed">
-                      {paragraph.startsWith('**') && paragraph.endsWith('**') ? (
-                        <strong className="text-gray-900">{paragraph.slice(2, -2)}</strong>
-                      ) : paragraph.startsWith('- ') ? (
-                        <span className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>{paragraph.slice(2)}</span>
-                        </span>
-                      ) : (
-                        paragraph
-                      )}
-                    </p>
-                  ))}
+                {/* Title and Meta */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h1 className="text-3xl font-bold text-white mb-2">{campaign.title}</h1>
+                  <div className="flex items-center gap-4 text-white/90 text-sm">
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {campaign.location}
+                    </div>
+                    <div className="flex items-center">
+                      <Users className="w-4 h-4 mr-1" />
+                      <Link to={`/ngos/${campaign.ngoId}`} className="hover:text-white">
+                        {campaign.ngoName}
+                      </Link>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {campaign.daysLeft} days left
+                    </div>
+                  </div>
                 </div>
               </div>
-            </Card>
+            </div>
 
-            {/* Campaign Updates */}
-            <Card className="p-6 bg-white">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Campaign Updates</h2>
+            {/* Description */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">About This Campaign</h2>
+              <div className="prose max-w-none">
+                {campaign.fullDescription.split('\n').map((paragraph, index) => (
+                  <p key={index} className="mb-3 text-gray-700 leading-relaxed">
+                    {paragraph.startsWith('**') && paragraph.endsWith('**') ? (
+                      <strong className="text-gray-900">{paragraph.slice(2, -2)}</strong>
+                    ) : paragraph.startsWith('- ') ? (
+                      <span className="flex items-start">
+                        <span className="mr-2 text-primary-500">•</span>
+                        <span>{paragraph.slice(2)}</span>
+                      </span>
+                    ) : (
+                      paragraph
+                    )}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            {/* Updates Section */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Recent Updates</h2>
               <div className="space-y-6">
-                {campaign.updates.map((update) => (
-                  <div key={update.id} className="border-l-4 border-blue-600 pl-4">
+                {campaign.updates.length > 0 ? campaign.updates.map((update) => (
+                  <div key={update.id} className="border-l-4 border-primary-500 pl-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold text-gray-900">{update.title}</h3>
-                      <span className="text-sm text-gray-500">
-                        {new Date(update.date).toLocaleDateString()}
-                      </span>
+                      <span className="text-sm text-gray-500">{new Date(update.date).toLocaleDateString()}</span>
                     </div>
-                    <p className="text-gray-600 mb-3">{update.content}</p>
+                    <p className="text-gray-700">{update.content}</p>
                     {update.image && (
                       <img
                         src={update.image}
                         alt={update.title}
-                        className="w-full max-w-md h-32 object-cover rounded-lg"
+                        className="mt-3 w-full max-w-md h-32 object-cover rounded-lg"
                       />
                     )}
                   </div>
-                ))}
+                )) : (
+                  <p className="text-gray-500 text-center py-8">No updates available yet.</p>
+                )}
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Donation Progress */}
-            <Card className="p-6 bg-white sticky top-8">
-              <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  ₹{campaign.raised.toLocaleString()}
+            <Card className="border-primary-200">
+              <div className="p-6">
+                <div className="text-center mb-6">
+                  <div className="text-3xl font-bold text-primary-900 mb-2">
+                    ₹{campaign.raised.toLocaleString()}
+                  </div>
+                  <div className="text-primary-600">
+                    raised of ₹{campaign.target.toLocaleString()} goal
+                  </div>
                 </div>
-                <div className="text-gray-600">
-                  raised of ₹{campaign.target.toLocaleString()} goal
+
+                <div className="mb-6">
+                  <div className="w-full bg-primary-100 rounded-full h-3 mb-4">
+                    <div
+                      className="bg-primary-600 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${getProgressPercentage(campaign.raised, campaign.target)}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-sm text-primary-600">
+                    <span>{Math.round(getProgressPercentage(campaign.raised, campaign.target))}% funded</span>
+                    <span>{campaign.donors} donors</span>
+                  </div>
                 </div>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center text-primary-600">
+                      <Clock className="w-4 h-4 mr-2 text-primary-500" />
+                      Days remaining
+                    </span>
+                    <span className="font-medium text-primary-900">{campaign.daysLeft}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center text-primary-600">
+                      <Target className="w-4 h-4 mr-2 text-primary-500" />
+                      Goal amount
+                    </span>
+                    <span className="font-medium text-primary-900">₹{campaign.target.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center text-primary-600">
+                      <Calendar className="w-4 h-4 mr-2 text-primary-500" />
+                      Campaign started
+                    </span>
+                    <span className="font-medium text-primary-900">
+                      {new Date(campaign.createdDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full bg-primary-600 hover:bg-primary-700 border border-primary-700 text-lg py-3 mb-3"
+                  onClick={() => setShowDonationModal(true)}
+                >
+                  <Heart className="w-5 h-5 mr-2" />
+                  Support Campaign
+                </Button>
+
+                <Button variant="outline" className="w-full border-primary-300 text-primary-700 hover:bg-primary-50">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Campaign
+                </Button>
               </div>
-
-              <div className="mb-6">
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-                  <div
-                    className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                    style={{ width: `${getProgressPercentage(campaign.raised, campaign.target)}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{Math.round(getProgressPercentage(campaign.raised, campaign.target))}% funded</span>
-                  <span>{campaign.donors} donors</span>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center text-gray-600">
-                    <Clock className="w-4 h-4 mr-2" />
-                    Days remaining
-                  </span>
-                  <span className="font-medium">{campaign.daysLeft}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center text-gray-600">
-                    <Target className="w-4 h-4 mr-2" />
-                    Goal amount
-                  </span>
-                  <span className="font-medium">₹{campaign.target.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center text-gray-600">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Campaign started
-                  </span>
-                  <span className="font-medium">
-                    {new Date(campaign.createdDate).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3 mb-3"
-                onClick={() => setShowDonationModal(true)}
-              >
-                <Heart className="w-5 h-5 mr-2" />
-                Support Campaign
-              </Button>
-
-              <Button variant="outline" className="w-full">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Campaign
-              </Button>
             </Card>
 
             {/* NGO Info */}
-            <Card className="p-6 bg-white">
-              <h3 className="font-bold text-gray-900 mb-4">About the Organization</h3>
-              <Link to={`/ngos/${campaign.ngoId}`} className="block">
-                <div className="flex items-center mb-3">
-                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
-                    {campaign.ngoName.charAt(0)}
+            <Card className="border-primary-200">
+              <div className="p-6">
+                <h3 className="font-bold text-primary-900 mb-4">About the Organization</h3>
+                <Link to={`/ngos/${campaign.ngoId}`} className="block">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                      {campaign.ngoName.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-medium text-primary-900">{campaign.ngoName}</div>
+                      <div className="text-sm text-primary-600">Verified NGO</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-medium text-gray-900">{campaign.ngoName}</div>
-                    <div className="text-sm text-gray-600">Verified NGO</div>
-                  </div>
-                </div>
-              </Link>
-              <p className="text-sm text-gray-600 mb-4">
-                {campaign.ngoName} is a verified non-profit organization working towards creating positive social impact through various community initiatives.
-              </p>
-              <Link to={`/ngos/${campaign.ngoId}`}>
-                <Button variant="outline" className="w-full">
-                  <Eye className="w-4 h-4 mr-2" />
-                  View NGO Profile
-                </Button>
-              </Link>
+                </Link>
+                <p className="text-sm text-primary-600 mb-4">
+                  {campaign.ngoName} is a verified non-profit organization working towards creating positive social impact through various community initiatives.
+                </p>
+                <Link to={`/ngos/${campaign.ngoId}`}>
+                  <Button variant="outline" className="w-full border-primary-300 text-primary-700 hover:bg-primary-50">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View NGO Profile
+                  </Button>
+                </Link>
+              </div>
             </Card>
 
             {/* Impact Stats */}
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50">
-              <h3 className="font-bold text-gray-900 mb-4">Campaign Impact</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Communities helped</span>
-                  <span className="font-bold text-blue-600">15+</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">People benefited</span>
-                  <span className="font-bold text-blue-600">3,000+</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Systems installed</span>
-                  <span className="font-bold text-blue-600">8</span>
+            <Card className="border-primary-200 bg-primary-50">
+              <div className="p-6">
+                <h3 className="font-bold text-primary-900 mb-4">Campaign Impact</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-primary-600">Communities helped</span>
+                    <span className="font-bold text-primary-700">15+</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-primary-600">People benefited</span>
+                    <span className="font-bold text-primary-700">3,000+</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-primary-600">Systems installed</span>
+                    <span className="font-bold text-primary-700">8</span>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -395,13 +412,13 @@ export const CampaignDetailsPage: React.FC = () => {
             {donationSuccess ? (
               <div className="text-center py-8">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">Thank You!</h4>
-                <p className="text-gray-600">Your donation has been processed successfully.</p>
+                <h4 className="text-xl font-semibold text-primary-900 mb-2">Thank You!</h4>
+                <p className="text-primary-600">Your donation has been processed successfully.</p>
               </div>
             ) : (
               <>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Donation Amount (₹)
                   </label>
                   <Input
@@ -410,19 +427,19 @@ export const CampaignDetailsPage: React.FC = () => {
                     onChange={(e) => setDonationAmount(e.target.value)}
                     placeholder="Enter amount"
                     min="1"
-                    className="w-full"
+                    className="w-full border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   />
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Message (Optional)
                   </label>
                   <textarea
                     value={donationMessage}
                     onChange={(e) => setDonationMessage(e.target.value)}
                     placeholder="Leave a message for the NGO..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-primary-900"
                     rows={3}
                   />
                 </div>
@@ -431,14 +448,14 @@ export const CampaignDetailsPage: React.FC = () => {
                   <Button
                     variant="outline"
                     onClick={() => setShowDonationModal(false)}
-                    className="flex-1"
+                    className="flex-1 border-primary-300 text-primary-700 hover:bg-primary-50"
                     disabled={isDonating}
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleDonation}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    className="flex-1 bg-primary-600 hover:bg-primary-700 border border-primary-700"
                     disabled={isDonating || !donationAmount}
                   >
                     {isDonating ? (

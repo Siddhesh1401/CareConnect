@@ -201,9 +201,9 @@ export const CampaignsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className="text-gray-600">Loading campaigns...</p>
         </div>
       </div>
@@ -211,11 +211,11 @@ export const CampaignsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-primary-900 mb-4">
             Support Meaningful Campaigns
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -225,25 +225,25 @@ export const CampaignsPage: React.FC = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card key="active-campaigns" className="p-6 text-center bg-white">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
+          <Card key="active-campaigns" className="p-6 text-center bg-white border border-primary-200 shadow-soft">
+            <div className="text-3xl font-bold text-primary-600 mb-2">
               {campaigns.filter(c => c.status === 'active').length}
             </div>
             <div className="text-gray-600">Active Campaigns</div>
           </Card>
-          <Card key="total-raised" className="p-6 text-center bg-white">
+          <Card key="total-raised" className="p-6 text-center bg-white border border-primary-200 shadow-soft">
             <div className="text-3xl font-bold text-green-600 mb-2">
               ₹{campaigns.reduce((sum, c) => sum + c.raised, 0).toLocaleString()}
             </div>
             <div className="text-gray-600">Total Raised</div>
           </Card>
-          <Card key="total-donors" className="p-6 text-center bg-white">
+          <Card key="total-donors" className="p-6 text-center bg-white border border-primary-200 shadow-soft">
             <div className="text-3xl font-bold text-purple-600 mb-2">
               {campaigns.reduce((sum, c) => sum + c.donors, 0)}
             </div>
             <div className="text-gray-600">Total Donors</div>
           </Card>
-          <Card key="urgent-campaigns" className="p-6 text-center bg-white">
+          <Card key="urgent-campaigns" className="p-6 text-center bg-white border border-primary-200 shadow-soft">
             <div className="text-3xl font-bold text-orange-600 mb-2">
               {campaigns.filter(c => c.urgency === 'high').length}
             </div>
@@ -252,7 +252,7 @@ export const CampaignsPage: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <Card className="p-6 mb-8 bg-white">
+        <Card className="p-6 mb-8 bg-white border border-primary-200 shadow-soft">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             <div className="flex-1">
               <Input
@@ -265,7 +265,7 @@ export const CampaignsPage: React.FC = () => {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white shadow-soft"
               disabled={loadingCategories}
             >
               <option value="all">
@@ -280,7 +280,7 @@ export const CampaignsPage: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white shadow-soft"
             >
               <option value="urgency">Sort by Urgency</option>
               <option value="deadline">Sort by Deadline</option>
@@ -293,7 +293,7 @@ export const CampaignsPage: React.FC = () => {
         {/* Campaigns Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {sortedCampaigns.map((campaign) => (
-            <Card key={campaign.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
+            <Card key={campaign.id} className="overflow-hidden hover:shadow-medium transition-shadow bg-white border border-primary-200 shadow-soft">
               <div className="relative">
                 <img
                   src={campaign.image}
@@ -314,7 +314,7 @@ export const CampaignsPage: React.FC = () => {
 
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                  <span className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-xs font-medium">
                     {campaign.category}
                   </span>
                   <button className="text-gray-400 hover:text-gray-600">
@@ -347,9 +347,9 @@ export const CampaignsPage: React.FC = () => {
                       ₹{campaign.target.toLocaleString()} goal
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div className="w-full bg-primary-100 rounded-full h-2 mb-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${getProgressPercentage(campaign.raised, campaign.target)}%` }}
                     ></div>
                   </div>
@@ -365,13 +365,13 @@ export const CampaignsPage: React.FC = () => {
                     to={`/campaigns/${campaign.id}`}
                     className="flex-1"
                   >
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full border-primary-200 hover:border-primary-300 hover:bg-primary-50">
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
                   </Link>
                   <Button 
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    className="flex-1 bg-primary-600 hover:bg-primary-700"
                     onClick={() => handleSupportClick(campaign)}
                   >
                     <Heart className="w-4 h-4 mr-2" />
@@ -385,9 +385,9 @@ export const CampaignsPage: React.FC = () => {
 
         {/* Empty State */}
         {sortedCampaigns.length === 0 && (
-          <Card className="p-12 text-center bg-white">
-            <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
+          <Card className="p-12 text-center bg-white border border-primary-200 shadow-soft">
+            <Target className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-primary-900 mb-2">No campaigns found</h3>
             <p className="text-gray-600">
               Try adjusting your search criteria or check back later for new campaigns.
             </p>
@@ -395,13 +395,13 @@ export const CampaignsPage: React.FC = () => {
         )}
 
         {/* Call to Action */}
-        <Card className="p-8 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white mt-12">
+        <Card className="p-8 text-center bg-gradient-to-r from-primary-600 to-primary-700 text-white mt-12 shadow-medium">
           <h2 className="text-2xl font-bold mb-4">Want to make a bigger impact?</h2>
-          <p className="text-blue-100 mb-6">
+          <p className="text-primary-100 mb-6">
             Join our volunteer community and contribute your time and skills to these amazing causes.
           </p>
           <Link to="/events">
-            <Button className="bg-white text-blue-600 hover:bg-gray-100">
+            <Button className="bg-white text-primary-600 hover:bg-gray-100">
               <ArrowRight className="w-4 h-4 mr-2" />
               Explore Volunteer Opportunities
             </Button>
@@ -412,9 +412,9 @@ export const CampaignsPage: React.FC = () => {
       {/* Donation Modal */}
       {showDonationModal && selectedCampaign && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 border border-primary-200 shadow-medium">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Support This Campaign</h3>
+              <h3 className="text-lg font-semibold text-primary-900">Support This Campaign</h3>
               <button
                 onClick={() => {
                   setShowDonationModal(false);
@@ -429,8 +429,8 @@ export const CampaignsPage: React.FC = () => {
             </div>
 
             <div className="mb-4">
-              <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                <h4 className="font-medium text-gray-900">{selectedCampaign.title}</h4>
+              <div className="bg-primary-50 p-3 rounded-lg mb-4 border border-primary-200">
+                <h4 className="font-medium text-primary-900">{selectedCampaign.title}</h4>
                 <p className="text-sm text-gray-600">by {selectedCampaign.ngoName}</p>
               </div>
             </div>
@@ -438,7 +438,7 @@ export const CampaignsPage: React.FC = () => {
             {donationSuccess ? (
               <div className="text-center py-8">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">Thank You!</h4>
+                <h4 className="text-xl font-semibold text-primary-900 mb-2">Thank You!</h4>
                 <p className="text-gray-600">Your donation has been processed successfully.</p>
               </div>
             ) : (
@@ -453,7 +453,7 @@ export const CampaignsPage: React.FC = () => {
                     onChange={(e) => setDonationAmount(e.target.value)}
                     placeholder="Enter amount"
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white shadow-soft"
                   />
                 </div>
 
@@ -465,7 +465,7 @@ export const CampaignsPage: React.FC = () => {
                     value={donationMessage}
                     onChange={(e) => setDonationMessage(e.target.value)}
                     placeholder="Leave a message for the NGO..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white shadow-soft"
                     rows={3}
                   />
                 </div>
@@ -479,14 +479,14 @@ export const CampaignsPage: React.FC = () => {
                       setDonationAmount('');
                       setDonationMessage('');
                     }}
-                    className="flex-1"
+                    className="flex-1 border-primary-200 hover:border-primary-300 hover:bg-primary-50"
                     disabled={isDonating}
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleDonation}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    className="flex-1 bg-primary-600 hover:bg-primary-700"
                     disabled={isDonating || !donationAmount}
                   >
                     {isDonating ? (

@@ -640,8 +640,13 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // Don't allow updating past events
-    if (event.date <= new Date()) {
+    // Don't allow updating past events (but be more lenient with validation)
+    const eventDate = new Date(event.date);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+    
+    if (eventDay < today) {
       res.status(400).json({
         success: false,
         message: 'Cannot update past events'
@@ -674,6 +679,11 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
         updates.location = JSON.parse(updates.location);
       } catch (e) {
         console.error('Error parsing location:', e);
+        res.status(400).json({
+          success: false,
+          message: 'Invalid location format'
+        });
+        return;
       }
     }
 
@@ -682,6 +692,33 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
         updates.tags = JSON.parse(updates.tags);
       } catch (e) {
         console.error('Error parsing tags:', e);
+        // Don't fail the update for tags parsing error, just set to empty array
+        updates.tags = [];
+      }
+    }
+
+    // Validate location if provided
+    if (updates.location) {
+      if (!updates.location.address || !updates.location.city || !updates.location.state) {
+        console.log('Invalid location data:', updates.location);
+        res.status(400).json({
+          success: false,
+          message: 'Location must include address, city, and state'
+        });
+        return;
+      }
+    }
+
+    // Validate capacity if provided
+    if (updates.capacity) {
+      const capacity = parseInt(updates.capacity);
+      if (isNaN(capacity) || capacity <= 0) {
+        console.log('Invalid capacity:', updates.capacity);
+        res.status(400).json({
+          success: false,
+          message: 'Capacity must be a positive number'
+        });
+        return;
       }
     }
 

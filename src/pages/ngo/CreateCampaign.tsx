@@ -86,27 +86,27 @@ export const CreateCampaign: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100">
           <Button 
             variant="ghost" 
             onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-primary-600 hover:text-primary-900 hover:bg-primary-50"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Fundraising Campaign</h1>
-            <p className="text-gray-600 mt-2">Launch a campaign to raise funds for your cause</p>
+            <h1 className="text-3xl font-bold text-primary-900">Create Fundraising Campaign</h1>
+            <p className="text-primary-600 mt-2">Launch a campaign to raise funds for your cause</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Details</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Campaign Details</h3>
             <div className="space-y-4">
               <Input
                 label="Campaign Title"
@@ -119,7 +119,7 @@ export const CreateCampaign: React.FC = () => {
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Description
                 </label>
                 <textarea
@@ -127,21 +127,21 @@ export const CreateCampaign: React.FC = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                   placeholder="Describe your campaign and its impact"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Category
                 </label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                   required
                   disabled={loadingCategories}
                 >
@@ -159,8 +159,8 @@ export const CreateCampaign: React.FC = () => {
           </Card>
 
           {/* Funding Goals */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Funding Goals</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Funding Goals</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <Input
                 label="Target Amount (₹)"
@@ -188,12 +188,12 @@ export const CreateCampaign: React.FC = () => {
             </div>
             
             {formData.targetAmount && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <div className="mt-4 p-4 bg-primary-50 rounded-lg border border-primary-200">
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-blue-800">
+                  <div className="text-lg font-semibold text-primary-800">
                     Target: ₹{parseInt(formData.targetAmount).toLocaleString()}
                   </div>
-                  <div className="text-sm text-blue-600 mt-1">
+                  <div className="text-sm text-primary-600 mt-1">
                     Platform fee: 2.5% + Payment gateway charges
                   </div>
                 </div>
@@ -202,10 +202,10 @@ export const CreateCampaign: React.FC = () => {
           </Card>
 
           {/* Campaign Story */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Story</h3>
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Campaign Story</h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-700 mb-2">
                 Tell your story (Why this campaign matters)
               </label>
               <textarea
@@ -213,68 +213,70 @@ export const CreateCampaign: React.FC = () => {
                 value={formData.story}
                 onChange={handleInputChange}
                 rows={6}
-                className="w-full px-3 py-2 bg-white border border-blue-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                 placeholder="Share the story behind your campaign. Explain the problem, your solution, and the impact donations will make."
                 required
               />
-              <div className="mt-2 text-sm text-gray-500">
+              <div className="mt-2 text-sm text-primary-500">
                 Tip: Include specific details about how funds will be used and the expected impact.
               </div>
             </div>
           </Card>
 
           {/* Media Upload */}
-          <Card className="p-6 bg-white border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Media</h3>
-            <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-blue-50">
-              <Image className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-2">Upload campaign images or videos</p>
-              <p className="text-sm text-gray-500 mb-4">PNG, JPG, GIF up to 10MB each</p>
-              <Button variant="outline" type="button">
+          <Card className="p-6 bg-white border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Campaign Media</h3>
+            <div className="border-2 border-dashed border-primary-200 rounded-lg p-8 text-center bg-primary-50 hover:border-primary-300 transition-all duration-300">
+              <Image className="w-12 h-12 text-primary-400 mx-auto mb-4" />
+              <p className="text-primary-600 mb-2">Upload campaign images or videos</p>
+              <p className="text-sm text-primary-500 mb-4">PNG, JPG, GIF up to 10MB each</p>
+              <Button variant="outline" type="button" className="border-primary-300 hover:border-primary-400">
                 Choose Files
               </Button>
             </div>
-            <div className="mt-4 text-sm text-gray-500">
+            <div className="mt-4 text-sm text-primary-500">
               High-quality images and videos can increase donations by up to 40%. Include photos that show the impact of your work.
             </div>
           </Card>
 
           {/* Campaign Preview */}
-          <Card className="p-6 bg-blue-50 border border-blue-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Preview</h3>
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
-              <h4 className="font-semibold text-gray-900 mb-2">
+          <Card className="p-6 bg-primary-50 border-primary-200 shadow-soft">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Campaign Preview</h3>
+            <div className="bg-white rounded-lg p-4 border border-primary-200 shadow-sm">
+              <h4 className="font-semibold text-primary-900 mb-2">
                 {formData.title || 'Campaign Title'}
               </h4>
-              <p className="text-gray-600 text-sm mb-3">
+              <p className="text-primary-600 text-sm mb-3">
                 {formData.description || 'Campaign description will appear here...'}
               </p>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Target: ₹{formData.targetAmount ? parseInt(formData.targetAmount).toLocaleString() : '0'}</span>
-                <span className="text-gray-500">Duration: {formData.duration || '0'} days</span>
+                <span className="text-primary-500 px-2 py-1 bg-primary-50 rounded border border-primary-100">Target: ₹{formData.targetAmount ? parseInt(formData.targetAmount).toLocaleString() : '0'}</span>
+                <span className="text-primary-500 px-2 py-1 bg-primary-50 rounded border border-primary-100">Duration: {formData.duration || '0'} days</span>
               </div>
             </div>
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-end">
+          <div className="flex flex-col sm:flex-row gap-4 justify-end bg-white rounded-xl p-6 border border-primary-100 shadow-soft">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate(-1)}
+              className="border-primary-300 hover:border-primary-400"
             >
               Cancel
             </Button>
             <Button
               type="button"
               variant="outline"
+              className="border-primary-300 hover:border-primary-400"
             >
               Save as Draft
             </Button>
             <Button
               type="submit"
               isLoading={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary-600 hover:bg-primary-700 border border-primary-700"
             >
               {isSubmitting ? 'Creating Campaign...' : 'Launch Campaign'}
             </Button>

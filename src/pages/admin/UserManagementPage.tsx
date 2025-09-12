@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, MoreVertical, CheckCircle, XCircle, Users, Crown, UserCheck } from 'lucide-react';
+import { MoreVertical, CheckCircle, XCircle, Users, UserCheck } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { SearchBar, SearchFilters } from '../../components/search/SearchBar';
+import { FilterPanel } from '../../components/search/FilterPanel';
 import api from '../../services/api';
 
 interface User {
@@ -27,9 +29,8 @@ interface UserStats {
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'suspended'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({});
   const [stats, setStats] = useState<UserStats>({
     total: 0,
     active: 0,
@@ -40,9 +41,26 @@ export default function UserManagementPage() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (filterStatus !== 'all') params.append('status', filterStatus);
-      
+      if (searchQuery) params.append('search', searchQuery);
+
+      // Add status filters
+      if (filters.status && filters.status.length > 0) {
+        params.append('status', filters.status.join(','));
+      }
+
+      // Add role filters
+      if (filters.category && filters.category.length > 0) {
+        params.append('role', filters.category.join(','));
+      }
+
+      // Add date range filters
+      if (filters.dateRange?.start) {
+        params.append('startDate', filters.dateRange.start.toISOString().split('T')[0]);
+      }
+      if (filters.dateRange?.end) {
+        params.append('endDate', filters.dateRange.end.toISOString().split('T')[0]);
+      }
+
       const response = await api.get(`/admin/users?${params.toString()}`);
       if (response.data.success) {
         setUsers(response.data.data.users);
@@ -74,13 +92,13 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [searchTerm, filterStatus]);
+  }, [searchQuery, filters]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading users...</p>
         </div>
       </div>
@@ -88,48 +106,45 @@ export default function UserManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-primary-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Enhanced Header with Statistics */}
         <div className="mb-8">
-          <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-3xl p-8 text-white overflow-hidden">
-            <div className="absolute inset-0 bg-black/10"></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+          <div className="relative bg-primary-600 rounded-lg p-8 text-white overflow-hidden">
             
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <div className="p-3 bg-white/20 rounded-lg">
                   <Users className="h-8 w-8" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold">Volunteer Management</h1>
-                  <p className="text-blue-100">Manage volunteer accounts and activities</p>
+                  <p className="text-primary-100">Manage volunteer accounts and activities</p>
                 </div>
               </div>
 
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="bg-white/10 rounded-lg p-4 border border-white/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <UserCheck className="h-5 w-5 text-blue-200" />
-                    <span className="text-blue-100 text-sm">Total Volunteers</span>
+                    <UserCheck className="h-5 w-5 text-white/80" />
+                    <span className="text-white/80 text-sm">Total Volunteers</span>
                   </div>
                   <span className="text-2xl font-bold">{stats.total}</span>
                 </div>
                 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="bg-white/10 rounded-lg p-4 border border-white/20">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="h-5 w-5 text-green-200" />
-                    <span className="text-blue-100 text-sm">Active</span>
+                    <span className="text-white/80 text-sm">Active</span>
                   </div>
                   <span className="text-2xl font-bold">{stats.active}</span>
                 </div>
                 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="bg-white/10 rounded-lg p-4 border border-white/20">
                   <div className="flex items-center gap-2 mb-2">
                     <XCircle className="h-5 w-5 text-red-200" />
-                    <span className="text-blue-100 text-sm">Suspended</span>
+                    <span className="text-white/80 text-sm">Suspended</span>
                   </div>
                   <span className="text-2xl font-bold">{stats.suspended}</span>
                 </div>
@@ -139,42 +154,51 @@ export default function UserManagementPage() {
         </div>
 
         {/* Enhanced Search and Filters */}
-        <Card className="mb-6 p-6 bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search users by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm appearance-none"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="suspended">Suspended</option>
-              </select>
-            </div>
-          </div>
-        </Card>
+        <div className="space-y-4">
+          <SearchBar
+            placeholder="Search users by name, email, or organization..."
+            onSearch={setSearchQuery}
+            onFilter={setFilters}
+            showFilters={true}
+            className="w-full"
+          />
+
+          <FilterPanel
+            title="User Filters"
+            filters={{
+              status: [
+                { value: 'active', label: 'Active', count: users.filter(u => u.accountStatus === 'active').length },
+                { value: 'suspended', label: 'Suspended', count: users.filter(u => u.accountStatus === 'suspended').length }
+              ],
+              category: [
+                { value: 'volunteer', label: 'Volunteers', count: users.filter(u => u.role === 'volunteer').length },
+                { value: 'ngo_admin', label: 'NGO Admins', count: users.filter(u => u.role === 'ngo_admin').length }
+              ],
+              priority: [
+                { value: 'verified', label: 'Verified', count: users.filter(u => u.isVerified).length },
+                { value: 'unverified', label: 'Unverified', count: users.filter(u => !u.isVerified).length }
+              ],
+              dateRange: filters.dateRange
+            }}
+            selectedFilters={{
+              status: filters.status || [],
+              category: filters.category || [],
+              priority: filters.priority || [],
+              dateRange: filters.dateRange
+            }}
+            onFilterChange={setFilters}
+            onClearAll={() => setFilters({})}
+            className="w-full"
+          />
+        </div>
 
         {/* Enhanced Users Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {users.map((user) => (
             <Card 
               key={user._id} 
-              className={`relative overflow-hidden bg-white/70 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group animate-fade-in`}
+              className="relative overflow-hidden bg-white border border-primary-200 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 group"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/30"></div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full -mr-16 -mt-16"></div>
               
               <div className="relative p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -183,7 +207,7 @@ export default function UserManagementPage() {
                       <img
                         src={user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=667eea&color=fff&size=64`}
                         alt={user.name}
-                        className="w-16 h-16 rounded-xl object-cover ring-4 ring-white/50 shadow-lg"
+                        className="w-16 h-16 rounded-lg object-cover ring-4 ring-white/50 shadow-sm"
                       />
                       <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${
                         user.accountStatus === 'active' ? 'bg-green-500' : 'bg-red-500'
@@ -195,7 +219,7 @@ export default function UserManagementPage() {
                       <p className="text-sm text-gray-500 truncate">{user.email}</p>
                       
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 border border-primary-200">
                           👥 Volunteer
                         </span>
                         
@@ -211,7 +235,7 @@ export default function UserManagementPage() {
                   </div>
                   
                   <div className="relative">
-                    <Button variant="outline" size="sm" className="p-2 bg-white/50 border-gray-200 hover:bg-white">
+                    <Button variant="outline" size="sm" className="p-2 bg-white border-gray-200 hover:bg-primary-50">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </div>
@@ -228,7 +252,7 @@ export default function UserManagementPage() {
                   
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Points:</span>
-                    <span className="font-medium text-blue-600">{user.points || 0}</span>
+                    <span className="font-medium text-primary-600">{user.points || 0}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Level:</span>
@@ -265,7 +289,7 @@ export default function UserManagementPage() {
         </div>
 
         {users.length === 0 && !loading && (
-          <Card className="p-12 text-center bg-white/70 backdrop-blur-sm border-0 shadow-xl">
+          <Card className="p-12 text-center bg-white border border-primary-200 shadow-sm">
             <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No volunteers found</h3>
             <p className="text-gray-500">Try adjusting your search or filter criteria.</p>

@@ -3,7 +3,6 @@ import {
   MessageSquare,
   Clock,
   Send,
-  Search,
   User,
   Mail,
   Phone,
@@ -11,6 +10,8 @@ import {
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { SearchBar, SearchFilters } from '../../components/search/SearchBar';
+import { FilterPanel } from '../../components/search/FilterPanel';
 import api from '../../services/api';
 
 interface AdminMessage {
@@ -43,8 +44,8 @@ export const AdminMessagesPage: React.FC = () => {
   const [messages, setMessages] = useState<AdminMessage[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<AdminMessage | null>(null);
   const [responseText, setResponseText] = useState('');
-  const [filter, setFilter] = useState<'all' | 'unread' | 'replied' | 'urgent'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({});
   const [isResponding, setIsResponding] = useState(false);
 
   // Load messages from API
@@ -88,19 +89,33 @@ export const AdminMessagesPage: React.FC = () => {
   }, []);
 
   const filteredMessages = messages.filter(message => {
-    const matchesFilter =
-      filter === 'all' ||
-      (filter === 'unread' && message.status === 'unread') ||
-      (filter === 'replied' && message.status === 'replied') ||
-      (filter === 'urgent' && message.priority === 'urgent');
-
+    // Search filter
     const matchesSearch =
-      searchTerm === '' ||
-      message.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.message.toLowerCase().includes(searchTerm.toLowerCase());
+      searchQuery === '' ||
+      message.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      message.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      message.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      message.userEmail.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesFilter && matchesSearch;
+    // Status filter
+    const matchesStatus = !filters.status || filters.status.length === 0 ||
+      filters.status.includes(message.status);
+
+    // Priority filter
+    const matchesPriority = !filters.priority || filters.priority.length === 0 ||
+      filters.priority.includes(message.priority);
+
+    // Category filter
+    const matchesCategory = !filters.category || filters.category.length === 0 ||
+      filters.category.includes(message.category);
+
+    // Date range filter
+    const matchesDateRange = !filters.dateRange?.start && !filters.dateRange?.end ||
+      (filters.dateRange?.start && filters.dateRange?.end &&
+       message.timestamp >= filters.dateRange.start &&
+       message.timestamp <= filters.dateRange.end);
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesCategory && matchesDateRange;
   });
 
   const handleSendResponse = async () => {
@@ -189,7 +204,7 @@ export const AdminMessagesPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'unread': return 'bg-blue-100 text-blue-800';
+      case 'unread': return 'bg-primary-100 text-primary-800';
       case 'read': return 'bg-yellow-100 text-yellow-800';
       case 'replied': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -197,11 +212,11 @@ export const AdminMessagesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Enhanced Header */}
         <div className="mb-8">
-          <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white overflow-hidden">
+          <div className="relative bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 rounded-2xl p-8 text-white overflow-hidden">
             <div className="absolute inset-0 bg-black/10"></div>
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"></div>
@@ -214,7 +229,7 @@ export const AdminMessagesPage: React.FC = () => {
                   </div>
                   <span>Admin Messages</span>
                 </h1>
-                <p className="text-blue-100 mt-2">Manage user inquiries and support requests</p>
+                <p className="text-primary-100 mt-2">Manage user inquiries and support requests</p>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30">
@@ -227,51 +242,59 @@ export const AdminMessagesPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Enhanced Filters and Search */}
-          <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Search messages..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-blue-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
-                  />
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                {[
-                  { key: 'all', label: 'All Messages', count: messages.length },
-                  { key: 'unread', label: 'Unread', count: messages.filter(m => m.status === 'unread').length },
-                  { key: 'replied', label: 'Replied', count: messages.filter(m => m.status === 'replied').length },
-                  { key: 'urgent', label: 'Urgent', count: messages.filter(m => m.priority === 'urgent').length }
-                ].map(({ key, label, count }) => (
-                  <button
-                    key={key}
-                    onClick={() => setFilter(key as any)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      filter === key
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
-                        : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-blue-50 border border-blue-200/50'
-                    }`}
-                  >
-                    {label} ({count})
-                  </button>
-                ))}
-              </div>
-            </div>
-          </Card>
+          {/* Enhanced Search and Filters */}
+          <div className="space-y-4">
+            <SearchBar
+              placeholder="Search messages by sender, subject, content, or email..."
+              onSearch={setSearchQuery}
+              onFilter={setFilters}
+              showFilters={true}
+              className="w-full"
+            />
+
+            <FilterPanel
+              title="Message Filters"
+              filters={{
+                status: [
+                  { value: 'unread', label: 'Unread', count: messages.filter(m => m.status === 'unread').length },
+                  { value: 'read', label: 'Read', count: messages.filter(m => m.status === 'read').length },
+                  { value: 'replied', label: 'Replied', count: messages.filter(m => m.status === 'replied').length },
+                  { value: 'closed', label: 'Closed', count: messages.filter(m => m.status === 'closed').length }
+                ],
+                priority: [
+                  { value: 'urgent', label: 'Urgent', count: messages.filter(m => m.priority === 'urgent').length },
+                  { value: 'high', label: 'High', count: messages.filter(m => m.priority === 'high').length },
+                  { value: 'medium', label: 'Medium', count: messages.filter(m => m.priority === 'medium').length },
+                  { value: 'low', label: 'Low', count: messages.filter(m => m.priority === 'low').length }
+                ],
+                category: [
+                  { value: 'technical', label: 'Technical Support' },
+                  { value: 'partnership', label: 'Partnership' },
+                  { value: 'support', label: 'General Support' },
+                  { value: 'feedback', label: 'Feedback' },
+                  { value: 'other', label: 'Other' }
+                ],
+                dateRange: filters.dateRange
+              }}
+              selectedFilters={{
+                status: filters.status || [],
+                category: filters.category || [],
+                priority: filters.priority || [],
+                dateRange: filters.dateRange
+              }}
+              onFilterChange={setFilters}
+              onClearAll={() => setFilters({})}
+              className="w-full"
+            />
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Enhanced Messages List */}
           <div className="lg:col-span-1">
-            <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl h-fit max-h-[800px] overflow-y-auto">
+            <Card className="p-6 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl h-fit max-h-[800px] overflow-y-auto">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg">
                   <MessageSquare className="w-5 h-5 text-white" />
                 </div>
                 <span>Messages</span>
@@ -289,8 +312,8 @@ export const AdminMessagesPage: React.FC = () => {
                     }}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
                       selectedMessage?.id === message.id
-                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-300 shadow-lg transform scale-[1.02]'
-                        : 'bg-white/80 backdrop-blur-sm border-blue-200/50 hover:border-blue-300'
+                        ? 'bg-gradient-to-r from-primary-50 to-primary-100 border-primary-300 shadow-lg transform scale-[1.02]'
+                        : 'bg-white/80 backdrop-blur-sm border-primary-200/50 hover:border-primary-300'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -305,7 +328,7 @@ export const AdminMessagesPage: React.FC = () => {
                         <p className="text-xs text-gray-500 line-clamp-2">{message.message}</p>
                       </div>
                       {message.status === 'unread' && (
-                        <div className="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
+                        <div className="w-3 h-3 bg-primary-500 rounded-full ml-2"></div>
                       )}
                     </div>
 
@@ -327,7 +350,7 @@ export const AdminMessagesPage: React.FC = () => {
           {/* Enhanced Message Details and Response */}
           <div className="lg:col-span-2">
             {selectedMessage ? (
-              <Card className="p-6 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl">
+              <Card className="p-6 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl">
                 <div className="mb-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -384,12 +407,12 @@ export const AdminMessagesPage: React.FC = () => {
                           className={`max-w-md px-4 py-3 rounded-2xl ${
                             msg.sender === 'user'
                               ? 'bg-gray-100 text-gray-800'
-                              : 'bg-blue-600 text-white'
+                              : 'bg-primary-600 text-white'
                           }`}
                         >
                           <div className="text-sm whitespace-pre-line">{msg.message}</div>
                           <div className={`text-xs mt-2 ${
-                            msg.sender === 'user' ? 'text-gray-500' : 'text-blue-100'
+                            msg.sender === 'user' ? 'text-gray-500' : 'text-primary-100'
                           }`}>
                             {msg.timestamp.toLocaleString()}
                           </div>
@@ -400,7 +423,7 @@ export const AdminMessagesPage: React.FC = () => {
                 </div>
 
                 {/* Enhanced Response Form - Always show to allow continued conversation */}
-                <div className="border-t border-blue-200/50 pt-6">
+                <div className="border-t border-primary-200/50 pt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                     <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
                       <Send className="w-4 h-4 text-white" />
@@ -418,21 +441,21 @@ export const AdminMessagesPage: React.FC = () => {
                           ? "Continue the conversation..." 
                           : "Type your response to the user..."
                       }
-                      className="w-full px-4 py-3 border border-blue-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/80 backdrop-blur-sm"
+                      className="w-full px-4 py-3 border border-primary-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none bg-white/80 backdrop-blur-sm"
                       rows={4}
                     />
                     <div className="flex justify-end space-x-3">
                       <Button
                         variant="outline"
                         onClick={() => setResponseText('')}
-                        className="border-blue-200/50 text-gray-700 hover:bg-blue-50 bg-white/80"
+                        className="border-primary-200/50 text-gray-700 hover:bg-primary-50 bg-white/80"
                       >
                         Clear
                       </Button>
                       <Button
                         onClick={handleSendResponse}
                         disabled={!responseText.trim() || isResponding}
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 shadow-lg"
+                        className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 disabled:opacity-50 shadow-lg"
                       >
                         {isResponding ? (
                           <>
@@ -451,9 +474,9 @@ export const AdminMessagesPage: React.FC = () => {
                 </div>
               </Card>
             ) : (
-              <Card className="p-12 bg-white/70 backdrop-blur-sm border border-blue-200/50 shadow-xl text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-blue-500" />
+              <Card className="p-12 bg-white/70 backdrop-blur-sm border border-primary-200/50 shadow-xl text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-8 h-8 text-primary-500" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">Select a Message</h3>
                 <p className="text-gray-500">Choose a message from the list to view details and respond</p>

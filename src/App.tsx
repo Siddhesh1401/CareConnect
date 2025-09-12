@@ -45,6 +45,7 @@ import { SystemSettingsPage } from './pages/admin/SystemSettingsPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
 import { AdminStoriesPage } from './pages/admin/AdminStoriesPage';
+import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { CampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CampaignDetailsPage } from './pages/campaigns/CampaignDetailsPage';
 
@@ -172,7 +173,7 @@ function App() {
             </AppLayout>
           } />
           <Route path="/ngos/:id" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <NGOProfilePage />
             </AppLayout>
           } />
@@ -226,7 +227,7 @@ function App() {
           
           <Route path="/events/:eventId" element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppLayout hideFooter>
                 <EventRegistrationPage />
               </AppLayout>
             </ProtectedRoute>
@@ -253,7 +254,7 @@ function App() {
           } />
 
           <Route path="/stories/:id" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <StoryDetailPage />
             </AppLayout>
           } />
@@ -266,7 +267,7 @@ function App() {
           } />
           
           <Route path="/campaigns/:id" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <CampaignDetailsPage />
             </AppLayout>
           } />
@@ -396,6 +397,14 @@ function App() {
             <AdminRoute>
               <AppLayout hideFooter>
                 <AdminStoriesPage />
+              </AppLayout>
+            </AdminRoute>
+          } />
+          
+          <Route path="/admin/analytics" element={
+            <AdminRoute>
+              <AppLayout hideFooter>
+                <AdminAnalyticsPage />
               </AppLayout>
             </AdminRoute>
           } />
