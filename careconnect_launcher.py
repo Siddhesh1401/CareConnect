@@ -708,7 +708,8 @@ class ProfessionalCareConnectLauncher:
     def open_vscode(self):
         """Open VS Code in the current project"""
         try:
-            subprocess.Popen(["code", "."], cwd=self.project_path)
+            vscode_path = r"C:\Users\soham\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+            subprocess.Popen([vscode_path, "."], cwd=self.project_path)
             self.log_message("Opening VS Code...", "success")
         except Exception as e:
             self.log_message(f"Error opening VS Code: {str(e)}", "error")
