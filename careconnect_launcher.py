@@ -708,11 +708,77 @@ class ProfessionalCareConnectLauncher:
     def open_vscode(self):
         """Open VS Code in the current project"""
         try:
-            vscode_path = r"C:\Users\soham\AppData\Local\Programs\Microsoft VS Code\Code.exe"
-            subprocess.Popen([vscode_path, "."], cwd=self.project_path)
-            self.log_message("Opening VS Code...", "success")
+            # Try different methods to open VS Code
+            vscode_opened = False
+            
+            # Method 1: Try 'code' command (if in PATH)
+            try:
+                subprocess.Popen(["code", "."], cwd=self.project_path)
+                vscode_opened = True
+                self.log_message("Opening VS Code...", "success")
+            except:
+                pass
+            
+            if not vscode_opened:
+                # Method 2: Try common VS Code installation paths
+                vscode_paths = [
+                    r"C:\Users\{}\AppData\Local\Programs\Microsoft VS Code\Code.exe".format(os.getenv("USERNAME")),
+                    r"C:\Program Files\Microsoft VS Code\Code.exe",
+                    r"C:\Program Files (x86)\Microsoft VS Code\Code.exe",
+                    r"C:\Program Files\Microsoft VS Code\bin\code.cmd",
+                    r"C:\Program Files (x86)\Microsoft VS Code\bin\code.cmd"
+                ]
+                
+                for vscode_path in vscode_paths:
+                    if os.path.exists(vscode_path):
+                        try:
+                            subprocess.Popen([vscode_path, "."], cwd=self.project_path)
+                            vscode_opened = True
+                            self.log_message("Opening VS Code...", "success")
+                            break
+                        except Exception as e:
+                            continue
+                
+                if not vscode_opened:
+                    # Method 3: Try to open via Windows start command
+                    try:
+                        subprocess.Popen(["cmd", "/c", "start", "code", "."], cwd=self.project_path)
+                        vscode_opened = True
+                        self.log_message("Opening VS Code...", "success")
+                    except:
+                        pass
+                
+                if not vscode_opened:
+                    # Method 4: Check if VS Code is installed via registry (advanced)
+                    try:
+                        import winreg
+                        key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, r"vscode\shell\open\command")
+                        vscode_cmd = winreg.QueryValue(key, None)
+                        if vscode_cmd:
+                            # Extract the executable path from the command
+                            exe_path = vscode_cmd.split('"')[1] if '"' in vscode_cmd else vscode_cmd.split()[0]
+                            if os.path.exists(exe_path):
+                                subprocess.Popen([exe_path, "."], cwd=self.project_path)
+                                vscode_opened = True
+                                self.log_message("Opening VS Code...", "success")
+                    except:
+                        pass
+            
+            if not vscode_opened:
+                # If all methods fail, show helpful error message
+                error_msg = ("VS Code not found. Please:\n"
+                            "1. Install VS Code from https://code.visualstudio.com\n"
+                            "2. Make sure 'code' command is in PATH\n"
+                            "3. Or use 'Open Folder' to open in File Explorer")
+                messagebox.showwarning("VS Code Not Found", error_msg)
+                self.log_message("VS Code not found - see popup for installation instructions", "warning")
+                
         except Exception as e:
             self.log_message(f"Error opening VS Code: {str(e)}", "error")
+            # Show user-friendly error message
+            messagebox.showerror("VS Code Error", 
+                               f"Could not open VS Code:\n{str(e)}\n\n"
+                               "Try installing VS Code or check if it's in your PATH.")
 
     def open_folder(self):
         """Open the project folder in Windows Explorer"""
