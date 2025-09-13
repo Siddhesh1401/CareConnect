@@ -48,7 +48,7 @@ class ProfessionalCareConnectLauncher:
         self.detected_backend_port = 5000   # Default backend port
         
         # Project paths
-        self.project_path = os.getcwd()
+        self.project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.backend_path = os.path.join(self.project_path, "backend")
         
         # Browser options
@@ -496,11 +496,28 @@ class ProfessionalCareConnectLauncher:
                         # Parse frontend port from Vite output - improved regex
                         if "Local:" in line and "localhost:" in line:
                             import re
-                            # Match both colored and plain text output
-                            port_match = re.search(r'localhost:(?:\[1m)?(\d+)(?:\[22m)?', line)
-                            if port_match:
-                                self.detected_frontend_port = int(port_match.group(1))
-                                self.log_message(f"Detected frontend port: {self.detected_frontend_port}", "success")
+                            self.log_message(f"DEBUG: Processing Vite line: {line}", "info")
+
+                            # Match various Vite output formats
+                            port_patterns = [
+                                r'localhost:(\d+)',  # Basic format
+                                r'localhost:(?:\[1m)?(\d+)(?:\[22m)?',  # Colored format
+                                r'http://localhost:(\d+)',  # Full URL format
+                            ]
+
+                            for pattern in port_patterns:
+                                port_match = re.search(pattern, line)
+                                if port_match:
+                                    detected_port = int(port_match.group(1))
+                                    self.log_message(f"DEBUG: Regex matched port {detected_port} using pattern: {pattern}", "info")
+
+                                    # Always update for Vite ports (they take priority)
+                                    if detected_port in [5173, 5174, 5175, 5176, 5177]:
+                                        self.detected_frontend_port = detected_port
+                                        self.log_message(f"Detected Vite frontend port: {self.detected_frontend_port}", "success")
+                                        break
+                                    else:
+                                        self.log_message(f"DEBUG: Port {detected_port} is not a Vite port, ignoring", "info")
                         
                         # Parse backend port from server output
                         elif "Server running on http://localhost:" in line:
@@ -527,17 +544,143 @@ class ProfessionalCareConnectLauncher:
 
     # Quick action methods
     def open_browser(self):
-        """Open browser to the application with selection dialog"""
+        """Open browser selection dialog"""
         try:
-            # Create browser selection dialog
-            browser_choice = self.show_browser_selection_dialog()
-            if not browser_choice:
-                return  # User cancelled
-            
-            # Check which port the frontend is actually running on
-            url = self.get_frontend_url()
-            
-            if browser_choice == "Default Browser":
+            # Show browser selection dialog (handles everything internally)
+            self.show_browser_selection_dialog()
+        except Exception as e:
+            self.log_message(f"Error opening browser dialog: {str(e)}", "error")
+
+    def get_frontend_url(self):
+        """Detect which port the frontend server is actually running on"""
+        self.log_message(f"DEBUG: Current detected_frontend_port = {self.detected_frontend_port}", "info")
+
+        # Reset port detection if it's not a Vite port (to allow Vite detection to work)
+        if self.detected_frontend_port and self.detected_frontend_port not in [5173, 5174, 5175, 5176, 5177]:
+            self.log_message(f"DEBUG: Resetting non-Vite port {self.detected_frontend_port} to allow Vite detection", "info")
+            self.detected_frontend_port = None
+
+        # First priority: use detected port from server logs (most reliable)
+        if self.detected_frontend_port:
+            self.log_message(f"Using detected frontend port from Vite logs: {self.detected_frontend_port}", "info")
+            return f"http://localhost:{self.detected_frontend_port}"
+
+        # Wait a moment for server logs to be processed
+        import time
+        time.sleep(0.5)
+
+        # Check again after waiting
+        if self.detected_frontend_port:
+            self.log_message(f"Using detected frontend port after wait: {self.detected_frontend_port}", "info")
+            return f"http://localhost:{self.detected_frontend_port}"
+
+        # Second priority: scan for Vite-specific ports first (5173-5177 are common Vite ports)
+        self.log_message("Scanning for Vite frontend ports (5173-5177)...", "info")
+        vite_ports = [5173, 5174, 5175, 5176, 5177]  # Vite default ports
+
+        for port in vite_ports:
+            if self.is_port_in_use(port):
+                self.log_message(f"Found Vite server on port: {port}", "success")
+                self.detected_frontend_port = port  # Cache the detected port
+                return f"http://localhost:{port}"
+
+        # Third priority: check other common development ports
+        self.log_message("Checking other development ports (3000, 8080)...", "info")
+        other_dev_ports = [3000, 3001, 8080, 4000]
+        for port in other_dev_ports:
+            if self.is_port_in_use(port):
+                self.log_message(f"Found active development port: {port}", "info")
+                self.detected_frontend_port = port  # Cache the detected port
+                return f"http://localhost:{port}"
+
+        # Final fallback: default Vite port
+        self.log_message("No active frontend port found, using Vite default 5173", "warning")
+        return "http://localhost:5173"
+
+    def show_browser_selection_dialog(self):
+        """Show enhanced browser selection dialog with icons and better styling"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Select Browser")
+        dialog.geometry("700x600")  # Increased size for 2-column layout
+        dialog.configure(bg=self.colors['surface'])
+        dialog.resizable(False, False)
+
+        # Center the dialog on screen
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        # Center the dialog window
+        dialog.update_idletasks()
+        width = dialog.winfo_width()
+        height = dialog.winfo_height()
+        x = (dialog.winfo_screenwidth() // 2) - (width // 2)
+        y = (dialog.winfo_screenheight() // 2) - (height // 2)
+        dialog.geometry(f'+{x}+{y}')
+
+        # Main container with padding
+        main_frame = tk.Frame(dialog, bg=self.colors['surface'], padx=30, pady=25)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Header section
+        header_frame = tk.Frame(main_frame, bg=self.colors['surface'])
+        header_frame.pack(fill=tk.X, pady=(0, 25))
+
+        # Icon and title
+        title_frame = tk.Frame(header_frame, bg=self.colors['surface'])
+        title_frame.pack()
+
+        # Browser icon (using emoji)
+        icon_label = tk.Label(title_frame, text="🌐", font=('Segoe UI', 32),
+                             bg=self.colors['surface'])
+        icon_label.pack(side=tk.LEFT, padx=(0, 15))
+
+        # Title and subtitle
+        text_frame = tk.Frame(title_frame, bg=self.colors['surface'])
+        text_frame.pack(side=tk.LEFT)
+
+        title_label = tk.Label(text_frame, text="Choose Your Browser",
+                              font=('Segoe UI', 18, 'bold'),
+                              fg=self.colors['text'], bg=self.colors['surface'])
+        title_label.pack(anchor=tk.W)
+
+        subtitle_label = tk.Label(text_frame, text="Click on any browser to open CareConnect immediately",
+                                 font=('Segoe UI', 11),
+                                 fg=self.colors['text_light'], bg=self.colors['surface'])
+        subtitle_label.pack(anchor=tk.W, pady=(3, 0))
+
+        # Browser options with enhanced styling
+        browser_var = tk.StringVar(value="Default Browser")
+
+        browsers = [
+            {"name": "Default Browser", "icon": "🏠", "description": "Use system default browser"},
+            {"name": "Google Chrome", "icon": "🔵", "description": "Fast and reliable browsing"},
+            {"name": "Mozilla Firefox", "icon": "🦊", "description": "Privacy-focused browser"},
+            {"name": "Microsoft Edge", "icon": "💙", "description": "Modern Windows browser"},
+            {"name": "Opera", "icon": "🔴", "description": "Feature-rich browser"},
+            {"name": "Brave Browser", "icon": "🛡️", "description": "Privacy and speed focused"}
+        ]
+
+        # Options container with 2-column layout
+        options_frame = tk.Frame(main_frame, bg=self.colors['surface'])
+        options_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 25))
+
+        # Create two columns
+        left_column = tk.Frame(options_frame, bg=self.colors['surface'])
+        left_column.pack(side=tk.LEFT, fill=tk.Y, expand=True, padx=(0, 15))
+
+        right_column = tk.Frame(options_frame, bg=self.colors['surface'])
+        right_column.pack(side=tk.RIGHT, fill=tk.Y, expand=True, padx=(15, 0))
+
+        # Split browsers into two columns (3 each)
+        left_browsers = browsers[:3]
+        right_browsers = browsers[3:]
+
+        # Get the frontend URL for browser opening
+        url = self.get_frontend_url()
+
+        # Function to open selected browser
+        def open_selected_browser(browser_name):
+            if browser_name == "Default Browser":
                 webbrowser.open(url)
                 self.log_message(f"Opening {url} in default browser", "success")
             else:
@@ -570,25 +713,25 @@ class ProfessionalCareConnectLauncher:
                         'brave'
                     ]
                 }
-                
-                browser_paths = browser_commands.get(browser_choice, [])
+
+                browser_paths = browser_commands.get(browser_name, [])
                 browser_opened = False
-                
+
                 for browser_path in browser_paths:
                     try:
                         if os.path.exists(browser_path):
                             subprocess.Popen([browser_path, url])
                             browser_opened = True
-                            self.log_message(f"Opening {url} in {browser_choice}", "success")
+                            self.log_message(f"Opening {url} in {browser_name}", "success")
                             break
                     except Exception as e:
                         continue
-                
+
                 if not browser_opened:
                     # Try shell execution as fallback
                     try:
                         # For Opera, try additional paths
-                        if browser_choice == "Opera":
+                        if browser_name == "Opera":
                             opera_paths = [
                                 f'C:\\Users\\{os.getenv("USERNAME")}\\AppData\\Local\\Programs\\Opera\\launcher.exe',
                                 f'C:\\Users\\{os.getenv("USERNAME")}\\AppData\\Local\\Programs\\Opera GX\\opera.exe'
@@ -597,110 +740,126 @@ class ProfessionalCareConnectLauncher:
                                 if os.path.exists(opera_path):
                                     subprocess.Popen([opera_path, url])
                                     browser_opened = True
-                                    self.log_message(f"Opening {url} in {browser_choice}", "success")
+                                    self.log_message(f"Opening {url} in {browser_name}", "success")
                                     break
-                        
+
                         if not browser_opened:
                             # Final fallback: try to open via registry/shell association
                             webbrowser.get().open(url)
                             browser_opened = True
-                            self.log_message(f"Opening {url} in {browser_choice} (via system)", "success")
+                            self.log_message(f"Opening {url} in {browser_name} (via system)", "success")
                     except:
                         pass
-                
+
                 if not browser_opened:
                     # Ultimate fallback to default browser
                     webbrowser.open(url)
-                    self.log_message(f"Could not find {browser_choice}, opened in default browser", "warning")
-            
+                    self.log_message(f"Could not find {browser_name}, opened in default browser", "warning")
+
             self.log_message("If the page doesn't load, make sure the frontend server is running", "info")
-        except Exception as e:
-            self.log_message(f"Error opening browser: {str(e)}", "error")
 
-    def get_frontend_url(self):
-        """Detect which port the frontend server is actually running on"""
-        # First, use detected port from server logs
-        if self.detected_frontend_port:
-            self.log_message(f"Using detected frontend port: {self.detected_frontend_port}", "info")
-            return f"http://localhost:{self.detected_frontend_port}"
-        
-        # If not detected yet, scan for active ports
-        self.log_message("Scanning for active frontend port...", "info")
-        ports_to_check = [5173, 5174, 5175, 5176, 5177, 3000, 3001, 8080]
-        
-        for port in ports_to_check:
-            if self.is_port_in_use(port):
-                self.log_message(f"Found active port: {port}", "success")
-                self.detected_frontend_port = port  # Cache the detected port
-                return f"http://localhost:{port}"
-        
-        # Default to 5173 if none are detected
-        self.log_message("No active frontend port found, using default 5173", "warning")
-        return "http://localhost:5173"
+        # Function to create browser option
+        def create_browser_option(parent, browser):
+            # Browser option frame
+            option_frame = tk.Frame(parent, bg=self.colors['background'],
+                                   relief='solid', bd=1, padx=15, pady=12, cursor='hand2')
+            option_frame.pack(fill=tk.X, pady=(0, 10))
 
-    def show_browser_selection_dialog(self):
-        """Show browser selection dialog"""
-        dialog = tk.Toplevel(self.root)
-        dialog.title("Select Browser")
-        dialog.geometry("300x400")
-        dialog.configure(bg=self.colors['surface'])
-        dialog.resizable(False, False)
-        
-        # Center the dialog
-        dialog.transient(self.root)
-        dialog.grab_set()
-        
-        # Title
-        title_label = tk.Label(dialog, text="Choose Browser", 
-                              font=('Segoe UI', 14, 'bold'),
-                              fg=self.colors['text'], bg=self.colors['surface'])
-        title_label.pack(pady=20)
-        
-        # Browser options
-        browser_var = tk.StringVar(value="Default Browser")
-        browsers = [
-            "Default Browser",
-            "Google Chrome", 
-            "Mozilla Firefox",
-            "Microsoft Edge",
-            "Opera",
-            "Brave Browser"
-        ]
-        
-        for browser in browsers:
-            radio = tk.Radiobutton(dialog, text=browser, variable=browser_var, value=browser,
-                                  font=('Segoe UI', 11), fg=self.colors['text'], 
-                                  bg=self.colors['surface'], selectcolor=self.colors['background'])
-            radio.pack(anchor=tk.W, padx=30, pady=5)
-        
-        # Buttons
-        button_frame = tk.Frame(dialog, bg=self.colors['surface'])
-        button_frame.pack(pady=20)
-        
+            # Make the entire frame clickable
+            def on_browser_click():
+                # Set the selected browser
+                browser_var.set(browser["name"])
+                # Open the browser immediately
+                open_selected_browser(browser["name"])
+                # Close the dialog
+                dialog.destroy()
+
+            # Bind click event to the entire frame
+            option_frame.bind('<Button-1>', lambda e: on_browser_click())
+
+            # Radio button and content
+            radio_frame = tk.Frame(option_frame, bg=self.colors['background'])
+            radio_frame.pack(fill=tk.X)
+
+            # Radio button
+            radio = tk.Radiobutton(radio_frame, variable=browser_var, value=browser["name"],
+                                  bg=self.colors['background'], selectcolor=self.colors['primary'],
+                                  activebackground=self.colors['background'],
+                                  command=lambda: on_browser_click())
+            radio.pack(side=tk.LEFT, padx=(0, 15))
+
+            # Browser icon
+            icon_label = tk.Label(radio_frame, text=browser["icon"], font=('Segoe UI', 20),
+                                 bg=self.colors['background'], cursor='hand2')
+            icon_label.pack(side=tk.LEFT, padx=(0, 12))
+            icon_label.bind('<Button-1>', lambda e: on_browser_click())
+
+            # Browser info
+            info_frame = tk.Frame(radio_frame, bg=self.colors['background'], cursor='hand2')
+            info_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+            info_frame.bind('<Button-1>', lambda e: on_browser_click())
+
+            # Browser name
+            name_label = tk.Label(info_frame, text=browser["name"],
+                                 font=('Segoe UI', 12, 'bold'),
+                                 fg=self.colors['text'], bg=self.colors['background'], cursor='hand2')
+            name_label.pack(anchor=tk.W)
+            name_label.bind('<Button-1>', lambda e: on_browser_click())
+
+            # Browser description
+            desc_label = tk.Label(info_frame, text=browser["description"],
+                                 font=('Segoe UI', 10),
+                                 fg=self.colors['text_light'], bg=self.colors['background'], cursor='hand2')
+            desc_label.pack(anchor=tk.W, pady=(2, 0))
+            desc_label.bind('<Button-1>', lambda e: on_browser_click())
+
+        # Create browser options in left column
+        for browser in left_browsers:
+            create_browser_option(left_column, browser)
+
+        # Create browser options in right column
+        for browser in right_browsers:
+            create_browser_option(right_column, browser)
+
+        # Footer with buttons
+        footer_frame = tk.Frame(main_frame, bg=self.colors['surface'])
+        footer_frame.pack(fill=tk.X, pady=(15, 0))
+
+        # Separator line
+        separator = tk.Frame(footer_frame, height=1, bg=self.colors['text_light'])
+        separator.pack(fill=tk.X, pady=(0, 20))
+
+        # Instructions text
+        instructions_label = tk.Label(footer_frame, text="💡 Click on any browser above to open CareConnect",
+                                     font=('Segoe UI', 10),
+                                     fg=self.colors['text_light'], bg=self.colors['surface'])
+        instructions_label.pack(pady=(0, 15))
+
+        # Button container
+        button_frame = tk.Frame(footer_frame, bg=self.colors['surface'])
+        button_frame.pack()
+
         result = {'choice': None}
-        
-        def on_ok():
-            result['choice'] = browser_var.get()
-            dialog.destroy()
-        
+
         def on_cancel():
             result['choice'] = None
             dialog.destroy()
-        
-        ok_btn = tk.Button(button_frame, text="Open", command=on_ok,
-                          font=('Segoe UI', 10, 'bold'),
-                          bg=self.colors['primary'], fg='white',
-                          relief='flat', borderwidth=0,
-                          padx=20, pady=8, cursor='hand2')
-        ok_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        cancel_btn = tk.Button(button_frame, text="Cancel", command=on_cancel,
-                              font=('Segoe UI', 10),
+
+        # Cancel button (centered)
+        cancel_btn = tk.Button(button_frame, text="❌ Cancel",
+                              command=on_cancel,
+                              font=('Segoe UI', 11),
                               bg=self.colors['text_light'], fg='white',
                               relief='flat', borderwidth=0,
-                              padx=20, pady=8, cursor='hand2')
-        cancel_btn.pack(side=tk.LEFT)
-        
+                              padx=25, pady=10, cursor='hand2')
+        cancel_btn.pack()
+
+        # Bind Escape key to cancel
+        dialog.bind('<Escape>', lambda e: on_cancel())
+
+        # Focus on cancel button
+        cancel_btn.focus_set()
+
         # Wait for dialog to close
         dialog.wait_window()
         return result['choice']
@@ -770,15 +929,14 @@ class ProfessionalCareConnectLauncher:
                             "1. Install VS Code from https://code.visualstudio.com\n"
                             "2. Make sure 'code' command is in PATH\n"
                             "3. Or use 'Open Folder' to open in File Explorer")
-                messagebox.showwarning("VS Code Not Found", error_msg)
+                self.show_custom_message_dialog("VS Code Not Found", error_msg, "warning")
                 self.log_message("VS Code not found - see popup for installation instructions", "warning")
                 
         except Exception as e:
             self.log_message(f"Error opening VS Code: {str(e)}", "error")
             # Show user-friendly error message
-            messagebox.showerror("VS Code Error", 
-                               f"Could not open VS Code:\n{str(e)}\n\n"
-                               "Try installing VS Code or check if it's in your PATH.")
+            error_msg = f"Could not open VS Code:\n{str(e)}\n\nTry installing VS Code or check if it's in your PATH."
+            self.show_custom_message_dialog("VS Code Error", error_msg, "error")
 
     def open_folder(self):
         """Open the project folder in Windows Explorer"""
@@ -870,9 +1028,200 @@ class ProfessionalCareConnectLauncher:
 
     def on_closing(self):
         """Handle window closing"""
-        if messagebox.askokcancel("Quit", "Do you want to quit? This will stop all running servers."):
+        # Create custom confirmation dialog instead of basic messagebox
+        result = self.show_custom_confirmation_dialog(
+            "Exit CareConnect Launcher",
+            "Are you sure you want to quit?\n\nThis will stop all running servers and close the application.",
+            "Exit",
+            "Cancel"
+        )
+        if result:
             self.stop_both_servers()
             self.root.destroy()
+
+    def show_custom_confirmation_dialog(self, title, message, confirm_text="Yes", cancel_text="No"):
+        """Show a custom confirmation dialog with professional styling"""
+        # Create dialog window
+        dialog = tk.Toplevel(self.root)
+        dialog.title(title)
+        dialog.geometry("500x220")  # Made slightly larger for better button spacing
+        dialog.resizable(False, False)
+        dialog.configure(bg=self.colors['background'])
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Center the dialog
+        dialog.geometry("+{}+{}".format(
+            self.root.winfo_x() + (self.root.winfo_width() // 2) - 250,  # Adjusted for new width
+            self.root.winfo_y() + (self.root.winfo_height() // 2) - 110  # Adjusted for new height
+        ))
+        
+        # Main container
+        main_frame = tk.Frame(dialog, bg=self.colors['background'], padx=30, pady=30)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title label
+        title_label = tk.Label(main_frame, text=title, 
+                              font=("Segoe UI", 14, "bold"),
+                              fg=self.colors['text'],
+                              bg=self.colors['background'])
+        title_label.pack(pady=(0, 15))
+        
+        # Message label
+        message_label = tk.Label(main_frame, text=message,
+                                font=("Segoe UI", 10),
+                                fg=self.colors['text_light'],
+                                bg=self.colors['background'],
+                                justify=tk.LEFT)
+        message_label.pack(pady=(0, 25))
+        
+        # Button frame
+        button_frame = tk.Frame(main_frame, bg=self.colors['background'])
+        button_frame.pack(fill=tk.X)
+        
+        # Result variable
+        result = [False]  # Use list to modify from inner function
+        
+        def on_confirm():
+            result[0] = True
+            dialog.destroy()
+        
+        def on_cancel():
+            result[0] = False
+            dialog.destroy()
+        
+        # Cancel button (left)
+        cancel_btn = tk.Button(button_frame, text=cancel_text,
+                              font=("Segoe UI", 11, "bold"),  # Slightly larger font
+                              bg=self.colors['surface'],
+                              fg=self.colors['text'],
+                              relief=tk.FLAT,
+                              padx=25, pady=12,  # Increased padding for larger buttons
+                              borderwidth=2,
+                              activebackground=self.colors['border'],
+                              activeforeground=self.colors['text'],
+                              cursor="hand2",  # Hand cursor on hover
+                              command=on_cancel)
+        cancel_btn.pack(side=tk.LEFT, padx=(0, 15))  # More space between buttons
+        
+        # Confirm button (right)
+        confirm_btn = tk.Button(button_frame, text=confirm_text,
+                               font=("Segoe UI", 11, "bold"),  # Slightly larger font
+                               bg=self.colors['danger'],
+                               fg=self.colors['white'],
+                               relief=tk.FLAT,
+                               padx=25, pady=12,  # Increased padding for larger buttons
+                               borderwidth=2,
+                               activebackground=self.colors['warning'],
+                               activeforeground=self.colors['white'],
+                               cursor="hand2",  # Hand cursor on hover
+                               command=on_confirm)
+        confirm_btn.pack(side=tk.RIGHT)
+        
+        # Bind Enter key to confirm, Escape to cancel
+        dialog.bind('<Return>', lambda e: on_confirm())
+        dialog.bind('<Escape>', lambda e: on_cancel())
+        
+        # Focus on cancel button by default
+        cancel_btn.focus_set()
+        
+        # Wait for dialog to close
+        dialog.wait_window()
+        
+        return result[0]
+
+    def show_custom_message_dialog(self, title, message, dialog_type="info", button_text="OK"):
+        """Show a custom message dialog with professional styling"""
+        # Create dialog window
+        dialog = tk.Toplevel(self.root)
+        dialog.title(title)
+        dialog.geometry("500x220")  # Made slightly larger for better button spacing
+        dialog.resizable(False, False)
+        dialog.configure(bg=self.colors['background'])
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Center the dialog
+        dialog.geometry("+{}+{}".format(
+            self.root.winfo_x() + (self.root.winfo_width() // 2) - 250,  # Adjusted for new width
+            self.root.winfo_y() + (self.root.winfo_height() // 2) - 110  # Adjusted for new height
+        ))
+        
+        # Main container
+        main_frame = tk.Frame(dialog, bg=self.colors['background'], padx=30, pady=30)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Icon and title frame
+        header_frame = tk.Frame(main_frame, bg=self.colors['background'])
+        header_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Icon based on dialog type
+        icon_text = ""
+        icon_color = self.colors['info']
+        if dialog_type == "warning":
+            icon_text = "⚠"
+            icon_color = self.colors['warning']
+        elif dialog_type == "error":
+            icon_text = "❌"
+            icon_color = self.colors['danger']
+        elif dialog_type == "success":
+            icon_text = "✅"
+            icon_color = self.colors['success']
+        else:
+            icon_text = "ℹ"
+            icon_color = self.colors['info']
+        
+        icon_label = tk.Label(header_frame, text=icon_text,
+                             font=("Segoe UI", 20),
+                             fg=icon_color,
+                             bg=self.colors['background'])
+        icon_label.pack(side=tk.LEFT, padx=(0, 15))
+        
+        # Title label
+        title_label = tk.Label(header_frame, text=title, 
+                              font=("Segoe UI", 14, "bold"),
+                              fg=self.colors['text'],
+                              bg=self.colors['background'])
+        title_label.pack(side=tk.LEFT)
+        
+        # Message label
+        message_label = tk.Label(main_frame, text=message,
+                                font=("Segoe UI", 10),
+                                fg=self.colors['text_light'],
+                                bg=self.colors['background'],
+                                justify=tk.LEFT)
+        message_label.pack(pady=(0, 25))
+        
+        # Button frame
+        button_frame = tk.Frame(main_frame, bg=self.colors['background'])
+        button_frame.pack(fill=tk.X)
+        
+        def on_ok():
+            dialog.destroy()
+        
+        # OK button
+        ok_btn = tk.Button(button_frame, text=button_text,
+                          font=("Segoe UI", 11, "bold"),  # Slightly larger font
+                          bg=self.colors['primary'],
+                          fg=self.colors['white'],
+                          relief=tk.FLAT,
+                          padx=30, pady=12,  # Increased padding for larger button
+                          borderwidth=2,
+                          activebackground=self.colors['accent'],
+                          activeforeground=self.colors['white'],
+                          cursor="hand2",  # Hand cursor on hover
+                          command=on_ok)
+        ok_btn.pack(side=tk.RIGHT)
+        
+        # Bind Enter and Escape keys
+        dialog.bind('<Return>', lambda e: on_ok())
+        dialog.bind('<Escape>', lambda e: on_ok())
+        
+        # Focus on OK button
+        ok_btn.focus_set()
+        
+        # Wait for dialog to close
+        dialog.wait_window()
 
     def run(self):
         """Start the application"""
