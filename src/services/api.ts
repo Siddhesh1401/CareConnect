@@ -9,6 +9,24 @@ const api = axios.create({
   },
 });
 
+// Helper function to get full image URL
+export const getFullImageUrl = (imagePath: string | undefined | null): string => {
+  if (!imagePath) return '';
+  
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // If it's a relative path starting with /uploads, prepend the backend URL
+  if (imagePath.startsWith('/uploads')) {
+    return `http://localhost:5000${imagePath}`;
+  }
+  
+  // Otherwise, return as is (for fallback images like picsum)
+  return imagePath;
+};
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
@@ -529,6 +547,164 @@ export const storyAPI = {
     featured?: boolean;
   }) => {
     const response = await api.patch(`/stories/admin/${id}/status`, data);
+    return response.data;
+  },
+};
+
+// Community API endpoints
+export const communityAPI = {
+  // Get all communities (public)
+  getAllCommunities: async (params?: {
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/communities', { params });
+    return response.data;
+  },
+
+  // Get specific community
+  getCommunityById: async (communityId: string) => {
+    const response = await api.get(`/communities/${communityId}`);
+    return response.data;
+  },
+
+  // Get user's joined communities
+  getUserCommunities: async () => {
+    const response = await api.get('/communities/user/my-communities');
+    return response.data;
+  },
+
+  // Get NGO's communities
+  getNGOCommunities: async () => {
+    const response = await api.get('/communities/ngo/my-communities');
+    return response.data;
+  },
+
+  // Get NGO's joined communities (not owned)
+  getNGOJoinedCommunities: async () => {
+    const response = await api.get('/communities/ngo/joined-communities');
+    return response.data;
+  },
+
+  // Create community (NGO only)
+  createCommunity: async (data: {
+    name: string;
+    description: string;
+    category: string;
+    image?: File;
+    isPrivate?: boolean;
+  }) => {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('description', data.description);
+    formData.append('category', data.category);
+    if (data.image) formData.append('image', data.image);
+    if (data.isPrivate !== undefined) formData.append('isPrivate', data.isPrivate.toString());
+
+    const response = await api.post('/communities/create', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  // Update community (NGO only)
+  updateCommunity: async (communityId: string, data: {
+    name?: string;
+    description?: string;
+    category?: string;
+    image?: File;
+    isPrivate?: boolean;
+  }) => {
+    const formData = new FormData();
+    if (data.name) formData.append('name', data.name);
+    if (data.description) formData.append('description', data.description);
+    if (data.category) formData.append('category', data.category);
+    if (data.image) formData.append('image', data.image);
+    if (data.isPrivate !== undefined) formData.append('isPrivate', data.isPrivate.toString());
+
+    const response = await api.put(`/communities/${communityId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  // Delete community (NGO only)
+  deleteCommunity: async (communityId: string) => {
+    const response = await api.delete(`/communities/${communityId}`);
+    return response.data;
+  },
+
+  // Join community
+  joinCommunity: async (communityId: string) => {
+    const response = await api.post(`/communities/${communityId}/join`);
+    return response.data;
+  },
+
+  // Leave community
+  leaveCommunity: async (communityId: string) => {
+    const response = await api.delete(`/communities/${communityId}/leave`);
+    return response.data;
+  },
+
+  // Get posts in community
+  getCommunityPosts: async (communityId: string, params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get(`/communities/${communityId}/posts`, { params });
+    return response.data;
+  },
+
+  // Create post in community
+  createPost: async (communityId: string, data: {
+    title: string;
+    content: string;
+    image?: File;
+  }) => {
+    // If there's an image, use FormData
+    if (data.image) {
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('content', data.content);
+      formData.append('image', data.image);
+
+      const response = await api.post(`/communities/${communityId}/posts`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } else {
+      // No image, send JSON
+      const response = await api.post(`/communities/${communityId}/posts`, {
+        title: data.title,
+        content: data.content
+      });
+      return response.data;
+    }
+  },
+
+  // Like a post
+  likePost: async (communityId: string, postId: string) => {
+    const response = await api.post(`/communities/${communityId}/posts/${postId}/like`);
+    return response.data;
+  },
+
+  // Comment on a post
+  commentOnPost: async (communityId: string, postId: string, content: string) => {
+    const response = await api.post(`/communities/${communityId}/posts/${postId}/comment`, { content });
+    return response.data;
+  },
+
+  // Like or unlike a comment
+  likeComment: async (communityId: string, postId: string, commentId: string) => {
+    const response = await api.post(`/communities/${communityId}/posts/${postId}/comments/${commentId}/like`);
+    return response.data;
+  },
+
+  // Delete a comment (moderation)
+  deleteComment: async (communityId: string, postId: string, commentId: string) => {
+    const response = await api.delete(`/communities/${communityId}/posts/${postId}/comments/${commentId}`);
     return response.data;
   },
 };

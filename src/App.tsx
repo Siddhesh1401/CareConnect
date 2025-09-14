@@ -14,6 +14,7 @@ import PendingApprovalPage from './pages/auth/PendingApprovalPage';
 import { RejectionResubmitPage } from './pages/auth/RejectionResubmitPage';
 import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard';
 import { CommunityPage } from './pages/community/CommunityPage';
+import { CommunityDetailPage } from './pages/community/CommunityDetailPage';
 import { EventsPage } from './pages/events/EventsPage';
 import { EventRegistrationPage } from './pages/events/EventRegistrationPage';
 import { NGODashboard } from './pages/ngo/NGODashboard';
@@ -215,6 +216,14 @@ function App() {
             <ProtectedRoute>
               <AppLayout hideFooter>
                 <CommunityPage />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/communities/:communityId" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <CommunityDetailPage />
               </AppLayout>
             </ProtectedRoute>
           } />

@@ -14,6 +14,7 @@ import dashboardRoutes from './routes/dashboard.js';
 import ngoRoutes from './routes/ngos.js';
 import campaignRoutes from './routes/campaigns.js';
 import storyRoutes from './routes/stories.js';
+import communityRoutes from './routes/communities.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 
@@ -40,7 +41,19 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "http://localhost:5173", "http://127.0.0.1:5173"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      fontSrc: ["'self'", "https:", "data:"],
+      connectSrc: ["'self'", "http://localhost:5173", "http://127.0.0.1:5173"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+})); // Security headers
 app.use(limiter); // Apply rate limiting
 app.use(cors({
   origin: [
@@ -77,8 +90,15 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ngos', ngoRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/stories', storyRoutes);
+app.use('/api/communities', communityRoutes);
 
-// Serve uploaded files
+// Serve uploaded files with CORS headers
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Enhanced Health check routes

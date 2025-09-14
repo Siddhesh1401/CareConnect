@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 // Ensure uploads directories exist
 const documentsDir = path.join(__dirname, '../../uploads/documents');
 const eventsDir = path.join(__dirname, '../../uploads/events');
+const communitiesDir = path.join(__dirname, '../../uploads/communities');
 
 if (!fs.existsSync(documentsDir)) {
   fs.mkdirSync(documentsDir, { recursive: true });
@@ -17,6 +18,10 @@ if (!fs.existsSync(documentsDir)) {
 
 if (!fs.existsSync(eventsDir)) {
   fs.mkdirSync(eventsDir, { recursive: true });
+}
+
+if (!fs.existsSync(communitiesDir)) {
+  fs.mkdirSync(communitiesDir, { recursive: true });
 }
 
 // Configure multer for document upload
@@ -43,6 +48,19 @@ const eventImageStorage = multer.diskStorage({
     const extension = path.extname(file.originalname);
     const baseName = path.basename(file.originalname, extension).replace(/[^a-zA-Z0-9]/g, '_');
     cb(null, `event_${baseName}_${uniqueSuffix}${extension}`);
+  }
+});
+
+// Configure multer for community image upload
+const communityImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, communitiesDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, extension).replace(/[^a-zA-Z0-9]/g, '_');
+    cb(null, `community_${baseName}_${uniqueSuffix}${extension}`);
   }
 });
 
@@ -86,6 +104,15 @@ export const uploadEventImages = multer({
   fileFilter: imageFilter
 });
 
+// Configure multer for community images
+export const uploadCommunityImages = multer({
+  storage: communityImageStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit per image
+  },
+  fileFilter: imageFilter
+});
+
 // Middleware for NGO document upload
 export const uploadNGODocuments = upload.fields([
   { name: 'registrationCert', maxCount: 1 },
@@ -103,6 +130,11 @@ export const getEventImageUrl = (filename: string): string => {
   return `/uploads/events/${filename}`;
 };
 
+// Helper function to get community image URL
+export const getCommunityImageUrl = (filename: string): string => {
+  return `/uploads/communities/${filename}`;
+};
+
 // Helper function to delete file
 export const deleteFile = (filename: string): void => {
   const filePath = path.join(documentsDir, filename);
@@ -114,6 +146,14 @@ export const deleteFile = (filename: string): void => {
 // Helper function to delete event image
 export const deleteEventImage = (filename: string): void => {
   const filePath = path.join(eventsDir, filename);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+};
+
+// Helper function to delete community image
+export const deleteCommunityImage = (filename: string): void => {
+  const filePath = path.join(communitiesDir, filename);
   if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
   }
