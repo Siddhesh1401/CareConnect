@@ -3,11 +3,43 @@ import axios from 'axios';
 // Create axios instance with base configuration
 const api = axios.create({
   baseURL: 'http://localhost:5000/api',
-  timeout: 10000,
+  timeout: 15000, // Increased timeout
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Request deduplication map
+const pendingRequests = new Map<string, Promise<any>>();
+const requestTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+
+// Helper function to create request key for deduplication
+const createRequestKey = (config: any) => {
+  return `${config.method?.toUpperCase()}_${config.url}_${JSON.stringify(config.params || {})}_${JSON.stringify(config.data || {})}`;
+};
+
+// Cleanup function for stuck requests
+const cleanupStuckRequest = (requestKey: string) => {
+  console.log(`🧹 Cleaning up stuck request: ${requestKey}`);
+  pendingRequests.delete(requestKey);
+  if (requestTimeouts.has(requestKey)) {
+    clearTimeout(requestTimeouts.get(requestKey)!);
+    requestTimeouts.delete(requestKey);
+    console.log(`⏰ Timeout cleared for request: ${requestKey}`);
+  }
+};
+
+// Enhanced API with cancellation support
+export const createCancellableRequest = (requestFn: Function) => {
+  return async (signal?: AbortSignal) => {
+    if (signal?.aborted) {
+      throw new Error('Request cancelled');
+    }
+
+    const result = await requestFn();
+    return result;
+  };
+};
 
 // Helper function to get full image URL
 export const getFullImageUrl = (imagePath: string | undefined | null): string => {
@@ -27,13 +59,51 @@ export const getFullImageUrl = (imagePath: string | undefined | null): string =>
   return imagePath;
 };
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and handle deduplication
 api.interceptors.request.use(
   (config) => {
+    // Add timestamp for performance monitoring (development only)
+    if (import.meta.env.DEV) {
+      (config as any).startTime = Date.now();
+    }
+
     const token = localStorage.getItem('careconnect_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add request deduplication for GET requests
+    if (config.method?.toUpperCase() === 'GET') {
+      const requestKey = createRequestKey(config);
+      
+      if (pendingRequests.has(requestKey)) {
+        console.log(`🔄 Request deduplicated: ${requestKey}`);
+        // Cancel this request and return the pending one
+        const cancelToken = axios.CancelToken.source();
+        config.cancelToken = cancelToken.token;
+        cancelToken.cancel('Request deduplicated');
+        return pendingRequests.get(requestKey)!;
+      }
+      
+      console.log(`📤 New request: ${requestKey}`);
+      // Store this request
+      const requestPromise = api.request(config);
+      pendingRequests.set(requestKey, requestPromise);
+      
+      // Set a timeout to clean up stuck requests (30 seconds)
+      const timeoutId = setTimeout(() => {
+        console.log(`⏰ Request timeout triggered for: ${requestKey}`);
+        cleanupStuckRequest(requestKey);
+      }, 30000);
+      requestTimeouts.set(requestKey, timeoutId);
+      
+      // Clean up when request completes
+      requestPromise.finally(() => {
+        console.log(`✅ Request completed: ${requestKey}`);
+        cleanupStuckRequest(requestKey);
+      });
+    }
+
     return config;
   },
   (error) => {
@@ -41,18 +111,84 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors
+// Response interceptor to handle errors and retries
 api.interceptors.response.use(
   (response) => {
+    // Monitor slow requests in development
+    if (import.meta.env.DEV && (response.config as any).startTime) {
+      const duration = Date.now() - (response.config as any).startTime;
+      if (duration > 2000) {
+        console.warn(`🐌 Slow API call: ${response.config.method} ${response.config.url} took ${duration}ms`);
+      }
+    }
+
+    // Clean up timeout for successful responses
+    if (response.config?.method?.toUpperCase() === 'GET') {
+      const requestKey = createRequestKey(response.config);
+      console.log(`📥 Response received for: ${requestKey}`);
+      cleanupStuckRequest(requestKey);
+    }
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Clean up timeout for failed responses (but not cancelled ones)
+    if (originalRequest?.method?.toUpperCase() === 'GET' && !axios.isCancel(error)) {
+      const requestKey = createRequestKey(originalRequest);
+      console.log(`❌ Error response for: ${requestKey}`);
+      cleanupStuckRequest(requestKey);
+    }
+
+    // Don't retry if already retried or if it's a cancellation
+    if (originalRequest?._retry || axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
+    // Handle 429 (Too Many Requests) with exponential backoff
+    if (error.response?.status === 429) {
+      const retryCount = originalRequest._retryCount || 0;
+      const maxRetries = 3;
+      
+      if (retryCount < maxRetries) {
+        originalRequest._retry = true;
+        originalRequest._retryCount = retryCount + 1;
+        
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, retryCount) * 1000;
+        
+        console.log(`Retrying request in ${delay}ms due to 429 error (attempt ${retryCount + 1}/${maxRetries})`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return api(originalRequest);
+      }
+    }
+
+    // Handle network errors with retry
+    if (!error.response && error.code === 'NETWORK_ERROR') {
+      const retryCount = originalRequest._retryCount || 0;
+      const maxRetries = 2;
+      
+      if (retryCount < maxRetries) {
+        originalRequest._retry = true;
+        originalRequest._retryCount = retryCount + 1;
+        
+        const delay = (retryCount + 1) * 2000; // 2s, 4s
+        
+        console.log(`Retrying request in ${delay}ms due to network error (attempt ${retryCount + 1}/${maxRetries})`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return api(originalRequest);
+      }
+    }
+
+    // Handle 401 errors (token expired)
     if (error.response?.status === 401) {
-      // Token expired or invalid, clear local storage and redirect to login
       localStorage.removeItem('careconnect_token');
       localStorage.removeItem('careconnect_user');
       window.location.href = '/login';
     }
+
     return Promise.reject(error);
   }
 );

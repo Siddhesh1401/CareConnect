@@ -18,6 +18,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import ReportForm from '../../components/ReportForm';
 import { storyAPI } from '../../services/api';
+import { useCancellableRequest } from '../../hooks/useApiRequest';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Story {
@@ -49,6 +50,7 @@ const statusColors = {
 
 export const StoriesPage: React.FC = () => {
   const { user } = useAuth();
+  const { makeRequest, cancelRequest } = useCancellableRequest();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'all' | 'my'>(() => {
     // Check URL parameter or default to 'all'
@@ -80,13 +82,24 @@ export const StoriesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
-    if (activeTab === 'all') {
-      fetchStories();
-    } else {
-      fetchMyStories();
-    }
+    const debounceTimer = setTimeout(() => {
+      fetchCategories();
+      if (activeTab === 'all') {
+        fetchStories();
+      } else {
+        fetchMyStories();
+      }
+    }, 300); // Debounce API calls
+
+    return () => clearTimeout(debounceTimer);
   }, [selectedCategory, searchTerm, activeTab]);
+
+  // Cleanup effect to cancel pending requests on unmount
+  useEffect(() => {
+    return () => {
+      cancelRequest();
+    };
+  }, [cancelRequest]);
 
   const fetchCategories = async () => {
     try {
@@ -102,18 +115,22 @@ export const StoriesPage: React.FC = () => {
   const fetchStories = async () => {
     try {
       setLoading(true);
-      const response = await storyAPI.getAllStories({
-        category: selectedCategory,
-        search: searchTerm,
-        status: 'published'
+      const result = await makeRequest(async () => {
+        return await storyAPI.getAllStories({
+          category: selectedCategory,
+          search: searchTerm,
+          status: 'published'
+        });
       });
 
-      if (response.success) {
-        setStories(response.data.stories || []);
+      if (result && result.success) {
+        setStories(result.data.stories || []);
       }
-    } catch (error) {
-      console.error('Error fetching stories:', error);
-      setStories([]);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.error('Error fetching stories:', error);
+        setStories([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -122,13 +139,18 @@ export const StoriesPage: React.FC = () => {
   const fetchMyStories = async () => {
     try {
       setLoading(true);
-      const response = await storyAPI.getMyStories();
-      if (response.success) {
-        setMyStories(response.data.stories || []);
+      const result = await makeRequest(async () => {
+        return await storyAPI.getMyStories();
+      });
+
+      if (result && result.success) {
+        setMyStories(result.data.stories || []);
       }
-    } catch (error) {
-      console.error('Error fetching my stories:', error);
-      setMyStories([]);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.error('Error fetching my stories:', error);
+        setMyStories([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -298,20 +320,27 @@ export const StoriesPage: React.FC = () => {
         <Card className="border border-primary-200 shadow-soft mb-12">
           <div className="p-8">
             <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <Input
                   placeholder={activeTab === 'all' ? "Search stories..." : "Search my stories..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   leftIcon={<Search className="w-5 h-5" />}
                   className="w-full h-12 text-lg border-primary-200 focus:border-primary-400 focus:ring-primary-400"
+                  disabled={loading}
                 />
+                {loading && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent"></div>
+                  </div>
+                )}
               </div>
               {activeTab === 'all' ? (
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full lg:w-52 h-12 px-4 py-3 border border-primary-200 rounded-xl text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400 bg-white shadow-soft hover:shadow-medium transition-all duration-300"
+                  disabled={loading}
+                  className="w-full lg:w-52 h-12 px-4 py-3 border border-primary-200 rounded-xl text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400 bg-white shadow-soft hover:shadow-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="all">All Categories</option>
                   {categories.map((category) => (

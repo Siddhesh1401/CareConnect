@@ -116,7 +116,11 @@ export const EventsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchEvents();
+    const debounceTimer = setTimeout(() => {
+      fetchEvents();
+    }, 300); // Debounce API calls
+
+    return () => clearTimeout(debounceTimer);
   }, [searchTerm, selectedCategory, selectedLocation, pagination.page]);
 
   const handleSearch = (value: string) => {

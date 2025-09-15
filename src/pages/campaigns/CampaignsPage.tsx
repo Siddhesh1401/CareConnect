@@ -92,28 +92,32 @@ export const CampaignsPage: React.FC = () => {
 
   // Fetch campaigns from API
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        setLoading(true);
-        const response = await campaignAPI.getAllCampaigns({
-          status: 'active',
-          sortBy: sortBy,
-          category: categoryFilter !== 'all' ? categoryFilter : undefined,
-          search: searchTerm || undefined
-        });
-        
-        if (response.success) {
-          setCampaigns(response.data.campaigns || []);
+    const debounceTimer = setTimeout(() => {
+      const fetchCampaigns = async () => {
+        try {
+          setLoading(true);
+          const response = await campaignAPI.getAllCampaigns({
+            status: 'active',
+            sortBy: sortBy,
+            category: categoryFilter !== 'all' ? categoryFilter : undefined,
+            search: searchTerm || undefined
+          });
+          
+          if (response.success) {
+            setCampaigns(response.data.campaigns || []);
+          }
+        } catch (error) {
+          console.error('Error fetching campaigns:', error);
+          setCampaigns([]);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching campaigns:', error);
-        setCampaigns([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    fetchCampaigns();
+      fetchCampaigns();
+    }, 300); // Debounce API calls
+
+    return () => clearTimeout(debounceTimer);
   }, [categoryFilter, sortBy, searchTerm]);
 
   const filteredCampaigns = campaigns.filter(campaign => {

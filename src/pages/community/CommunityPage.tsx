@@ -252,12 +252,12 @@ export const CommunityPage: React.FC = () => {
       setLoading(false);
     }
 
-    // Polling for real-time updates every 30 seconds
+    // Polling for real-time updates every 60 seconds (increased from 30 to reduce API calls)
     const interval = setInterval(() => {
       if (user && activeTab === 'feed') {
         fetchData();
       }
-    }, 30000);
+    }, 60000); // Changed from 30000 to 60000 milliseconds
 
     return () => clearInterval(interval);
   }, [user, activeTab]);
