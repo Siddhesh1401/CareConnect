@@ -43,7 +43,7 @@ export const createCancellableRequest = (requestFn: Function) => {
 
 // Helper function to get full image URL
 export const getFullImageUrl = (imagePath: string | undefined | null): string => {
-  if (!imagePath) return '';
+  if (!imagePath) return 'https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=600';
   
   // If it's already a full URL, return as is
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
@@ -57,6 +57,25 @@ export const getFullImageUrl = (imagePath: string | undefined | null): string =>
   
   // Otherwise, return as is (for fallback images like picsum)
   return imagePath;
+};
+
+// Helper function to get profile picture URL with UI Avatars fallback
+export const getProfilePictureUrl = (profilePicture: string | undefined | null, userName: string | undefined | null, size: number = 64): string => {
+  if (profilePicture) {
+    // If it's already a full URL, return as is
+    if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
+      return profilePicture;
+    }
+    
+    // If it's a relative path starting with /uploads, prepend the backend URL
+    if (profilePicture.startsWith('/uploads')) {
+      return `http://localhost:5000${profilePicture}`;
+    }
+  }
+  
+  // Generate UI Avatar URL as fallback
+  const name = userName || 'User';
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&size=${size}`;
 };
 
 // Request interceptor to add auth token and handle deduplication
@@ -527,7 +546,7 @@ export const campaignAPI = {
     return response.data;
   },
 
-  createCampaign: async (campaignData: {
+  createCampaign: async (campaignData: FormData | {
     title: string;
     description: string;
     category: string;
@@ -537,7 +556,10 @@ export const campaignAPI = {
     image?: string;
     tags?: string[];
   }) => {
-    const response = await api.post('/campaigns', campaignData);
+    const config = campaignData instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {};
+    const response = await api.post('/campaigns', campaignData, config);
     return response.data;
   },
 
@@ -613,7 +635,7 @@ export const storyAPI = {
   },
 
   // Create new story
-  createStory: async (storyData: {
+  createStory: async (storyData: FormData | {
     title: string;
     excerpt: string;
     content: string;
@@ -622,12 +644,15 @@ export const storyAPI = {
     tags?: string[];
     status?: 'draft' | 'published';
   }) => {
-    const response = await api.post('/stories', storyData);
+    const config = storyData instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {};
+    const response = await api.post('/stories', storyData, config);
     return response.data;
   },
 
   // Update story
-  updateStory: async (id: string, storyData: Partial<{
+  updateStory: async (id: string, storyData: FormData | Partial<{
     title: string;
     excerpt: string;
     content: string;
@@ -636,7 +661,10 @@ export const storyAPI = {
     tags?: string[];
     status: 'draft' | 'published';
   }>) => {
-    const response = await api.put(`/stories/${id}`, storyData);
+    const config = storyData instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {};
+    const response = await api.put(`/stories/${id}`, storyData, config);
     return response.data;
   },
 

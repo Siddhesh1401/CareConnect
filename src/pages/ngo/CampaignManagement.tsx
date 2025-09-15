@@ -20,7 +20,7 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { campaignAPI } from '../../services/api';
+import { campaignAPI, getFullImageUrl } from '../../services/api';
 
 export const CampaignManagement: React.FC = () => {
   const [campaigns, setCampaigns] = useState<any[]>([]);
@@ -228,94 +228,108 @@ export const CampaignManagement: React.FC = () => {
           ) : (
             filteredCampaigns.map((campaign) => (
               <Card key={campaign._id || campaign.id} className="p-6 bg-white border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-semibold text-primary-900">{campaign.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        campaign.status === 'active' ? 'bg-primary-100 text-primary-800 border-primary-200' :
-                        campaign.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
-                        campaign.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                        'bg-gray-100 text-gray-800 border-gray-200'
-                      }`}>
-                        {campaign.status}
-                      </span>
-                    </div>
-                    <p className="text-primary-600 mb-4">{campaign.description}</p>
-                  </div>
-
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Link to={`/campaigns/${campaign._id || campaign.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </Button>
-                    </Link>
-                    <Link to={`/ngo/campaigns/${campaign._id || campaign.id}/edit`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewDonors(campaign)}
-                      className="text-green-600 hover:text-green-700"
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      View Donors
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDeleteCampaign(campaign._id || campaign.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Campaign Progress */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-600 px-2 py-1 bg-primary-50 rounded border border-primary-100">
-                      ₹{campaign.raised.toLocaleString()} raised of ₹{campaign.target.toLocaleString()}
-                    </span>
-                    <span className="text-primary-600 px-2 py-1 bg-primary-50 rounded border border-primary-100">
-                      {Math.round((campaign.raised / campaign.target) * 100)}% complete
-                    </span>
-                  </div>
-                  
-                  <div className="w-full bg-primary-200 rounded-full h-3 border border-primary-300">
-                    <div 
-                      className={`h-3 rounded-full transition-all ${
-                        campaign.status === 'completed' ? 'bg-green-500' : 'bg-primary-500'
-                      }`}
-                      style={{ width: `${Math.min((campaign.raised / campaign.target) * 100, 100)}%` }}
+                <div className="flex items-start space-x-4">
+                  {/* Campaign Image */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={getFullImageUrl(campaign.image)}
+                      alt={campaign.title}
+                      className="w-20 h-20 object-cover rounded-lg border border-primary-200"
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
-                      <div className="text-lg font-semibold text-primary-900">{campaign.donors}</div>
-                      <div className="text-primary-600">Donors</div>
+                  {/* Campaign Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-xl font-semibold text-primary-900 truncate">{campaign.title}</h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium border flex-shrink-0 ${
+                            campaign.status === 'active' ? 'bg-primary-100 text-primary-800 border-primary-200' :
+                            campaign.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
+                            campaign.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                            'bg-gray-100 text-gray-800 border-gray-200'
+                          }`}>
+                            {campaign.status}
+                          </span>
+                        </div>
+                        <p className="text-primary-600 mb-4 line-clamp-2">{campaign.description}</p>
+                      </div>
+
+                      <div className="flex items-center space-x-2 ml-4 flex-shrink-0">
+                        <Link to={`/campaigns/${campaign._id || campaign.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
+                        </Link>
+                        <Link to={`/ngo/campaigns/${campaign._id || campaign.id}/edit`}>
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewDonors(campaign)}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <Users className="w-4 h-4 mr-2" />
+                          View Donors
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteCampaign(campaign._id || campaign.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
-                    <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
-                      <div className="text-lg font-semibold text-primary-900">
-                        {campaign.daysLeft > 0 ? `${campaign.daysLeft} days` : 'Completed'}
+
+                    {/* Campaign Progress */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-primary-600 px-2 py-1 bg-primary-50 rounded border border-primary-100">
+                          ₹{campaign.raised.toLocaleString()} raised of ₹{campaign.target.toLocaleString()}
+                        </span>
+                        <span className="text-primary-600 px-2 py-1 bg-primary-50 rounded border border-primary-100">
+                          {Math.round((campaign.raised / campaign.target) * 100)}% complete
+                        </span>
                       </div>
-                      <div className="text-primary-600">
-                        {campaign.daysLeft > 0 ? 'Remaining' : 'Status'}
+                      
+                      <div className="w-full bg-primary-200 rounded-full h-3 border border-primary-300">
+                        <div 
+                          className={`h-3 rounded-full transition-all ${
+                            campaign.status === 'completed' ? 'bg-green-500' : 'bg-primary-500'
+                          }`}
+                          style={{ width: `${Math.min((campaign.raised / campaign.target) * 100, 100)}%` }}
+                        />
                       </div>
-                    </div>
-                    <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
-                      <div className="text-lg font-semibold text-primary-900">
-                        ₹{campaign.donors > 0 ? Math.round(campaign.raised / campaign.donors).toLocaleString() : '0'}
+
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
+                          <div className="text-lg font-semibold text-primary-900">{campaign.donors}</div>
+                          <div className="text-primary-600">Donors</div>
+                        </div>
+                        <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
+                          <div className="text-lg font-semibold text-primary-900">
+                            {campaign.daysLeft > 0 ? `${campaign.daysLeft} days` : 'Completed'}
+                          </div>
+                          <div className="text-primary-600">
+                            {campaign.daysLeft > 0 ? 'Remaining' : 'Status'}
+                          </div>
+                        </div>
+                        <div className="text-center p-3 bg-primary-50 rounded-lg border border-primary-200">
+                          <div className="text-lg font-semibold text-primary-900">
+                            ₹{campaign.donors > 0 ? Math.round(campaign.raised / campaign.donors).toLocaleString() : '0'}
+                          </div>
+                          <div className="text-primary-600">Avg. Donation</div>
+                        </div>
                       </div>
-                      <div className="text-primary-600">Avg. Donation</div>
                     </div>
                   </div>
                 </div>

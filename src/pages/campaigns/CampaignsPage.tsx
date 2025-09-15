@@ -21,7 +21,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import ReportForm from '../../components/ReportForm';
-import { campaignAPI } from '../../services/api';
+import { campaignAPI, getFullImageUrl } from '../../services/api';
 
 interface Campaign {
   id: string;
@@ -309,7 +309,7 @@ export const CampaignsPage: React.FC = () => {
             <Card key={campaign.id} className="overflow-hidden hover:shadow-medium transition-shadow bg-white border border-primary-200 shadow-soft">
               <div className="relative">
                 <img
-                  src={campaign.image}
+                  src={getFullImageUrl(campaign.image)}
                   alt={campaign.title}
                   className="w-full h-48 object-cover"
                 />

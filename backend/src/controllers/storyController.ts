@@ -4,6 +4,7 @@ import Story from '../models/Story';
 import User from '../models/User';
 import { AppError } from '../utils/AppError';
 import { AuthRequest } from '../middleware/auth';
+import { getStoryImageUrl } from '../middleware/upload';
 
 // Get all stories (public)
 export const getAllStories = async (req: Request, res: Response) => {
@@ -37,7 +38,7 @@ export const getAllStories = async (req: Request, res: Response) => {
       .sort(sortOptions)
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit))
-      .populate('author.id', 'name email avatar organizationName');
+      .populate('author.id', 'name email profilePicture organizationName');
 
     const total = await Story.countDocuments(query);
 
@@ -53,7 +54,7 @@ export const getAllStories = async (req: Request, res: Response) => {
         name: story.author.name,
         email: story.author.email,
         role: story.author.role,
-        avatar: story.author.avatar,
+        profilePicture: story.author.profilePicture,
         organizationName: story.author.organizationName
       },
       category: story.category,
@@ -112,7 +113,7 @@ export const getStoryById = async (req: Request, res: Response) => {
       });
     }
 
-    const story = await Story.findById(id).populate('author.id', 'name email avatar organizationName');
+    const story = await Story.findById(id).populate('author.id', 'name email profilePicture organizationName');
 
     if (!story) {
       return res.status(404).json({
@@ -135,7 +136,7 @@ export const getStoryById = async (req: Request, res: Response) => {
         name: story.author.name,
         email: story.author.email,
         role: story.author.role,
-        avatar: story.author.avatar,
+        profilePicture: story.author.profilePicture,
         organizationName: story.author.organizationName
       },
       category: story.category,
@@ -168,7 +169,7 @@ export const getStoryById = async (req: Request, res: Response) => {
 // Create new story
 export const createStory = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, excerpt, content, image, category, tags, status } = req.body;
+    const { title, excerpt, content, category, tags, status } = req.body;
     const authorId = req.user?.id;
 
     if (!authorId) {
@@ -187,6 +188,12 @@ export const createStory = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Handle image upload
+    let imageUrl = '';
+    if (req.file) {
+      imageUrl = getStoryImageUrl(req.file.filename);
+    }
+
     // Set status based on role and requested status
     let storyStatus = status || 'draft';
     if (author.role === 'volunteer') {
@@ -201,13 +208,13 @@ export const createStory = async (req: AuthRequest, res: Response) => {
       title,
       excerpt,
       content,
-      image,
+      image: imageUrl,
       author: {
         id: authorId,
         name: author.name,
         email: author.email,
         role: author.role,
-        avatar: author.avatar,
+        profilePicture: author.profilePicture,
         organizationName: author.organizationName
       },
       category,
@@ -271,6 +278,11 @@ export const updateStory = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Handle image upload
+    if (req.file) {
+      updates.image = getStoryImageUrl(req.file.filename);
+    }
+
     // Update published date if status changes to published
     if (updates.status === 'published' && story.status !== 'published') {
       updates.publishedDate = new Date();
@@ -280,7 +292,7 @@ export const updateStory = async (req: AuthRequest, res: Response) => {
       id,
       { ...updates, updatedDate: new Date() },
       { new: true }
-    ).populate('author.id', 'name email avatar organizationName');
+    ).populate('author.id', 'name email profilePicture organizationName');
 
     if (!updatedStory) {
       return res.status(404).json({
@@ -302,7 +314,7 @@ export const updateStory = async (req: AuthRequest, res: Response) => {
           name: updatedStory.author.name,
           email: updatedStory.author.email,
           role: updatedStory.author.role,
-          avatar: updatedStory.author.avatar,
+          profilePicture: updatedStory.author.profilePicture,
           organizationName: updatedStory.author.organizationName
         },
         category: updatedStory.category,
@@ -472,7 +484,7 @@ export const getAllStoriesAdmin = async (req: AuthRequest, res: Response) => {
       .sort({ createdDate: -1 })
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit))
-      .populate('author.id', 'name email avatar organizationName');
+      .populate('author.id', 'name email profilePicture organizationName');
 
     const total = await Story.countDocuments(query);
 
@@ -486,7 +498,7 @@ export const getAllStoriesAdmin = async (req: AuthRequest, res: Response) => {
         name: story.author.name,
         email: story.author.email,
         role: story.author.role,
-        avatar: story.author.avatar,
+        profilePicture: story.author.profilePicture,
         organizationName: story.author.organizationName
       },
       category: story.category,

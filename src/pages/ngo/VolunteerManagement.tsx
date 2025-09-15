@@ -10,11 +10,13 @@ import {
   MessageCircle,
   Download,
   UserCheck,
-  Clock
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { getProfilePictureUrl } from '../../services/api';
 import { eventAPI } from '../../services/api';
 
 interface Volunteer {
@@ -56,6 +58,21 @@ export const VolunteerManagement: React.FC = () => {
 
   useEffect(() => {
     fetchVolunteers();
+  }, []);
+
+  // Listen for profile updates from other pages
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'profile_updated' && e.newValue) {
+        console.log('Profile update detected, refreshing volunteer data...');
+        fetchVolunteers();
+        // Clear the flag
+        localStorage.removeItem('profile_updated');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const fetchVolunteers = async () => {
@@ -103,6 +120,15 @@ export const VolunteerManagement: React.FC = () => {
             <p className="text-primary-600 mt-2">Manage and coordinate with your volunteers</p>
           </div>
           <div className="flex space-x-3">
+            <Button 
+              variant="outline" 
+              onClick={fetchVolunteers}
+              disabled={loading}
+              className="border-primary-300 text-primary-700 hover:bg-primary-50"
+            >
+              <RefreshCw className={`mr-2 w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Button variant="outline" className="border-primary-300 text-primary-700 hover:bg-primary-50">
               <Download className="mr-2 w-4 h-4" />
               Export Data
@@ -247,7 +273,7 @@ export const VolunteerManagement: React.FC = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4 flex-1">
                         <img
-                          src={volunteer.avatar}
+                          src={getProfilePictureUrl(volunteer.avatar, volunteer.name, 64)}
                           alt={volunteer.name}
                           className="w-16 h-16 rounded-full object-cover border-2 border-primary-100"
                         />

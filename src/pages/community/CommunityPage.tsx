@@ -14,7 +14,7 @@ import {
   Flag
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { communityAPI, getFullImageUrl } from '../../services/api';
+import { communityAPI, getFullImageUrl, getProfilePictureUrl } from '../../services/api';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -1260,7 +1260,7 @@ export const CommunityPage: React.FC = () => {
                       {/* Post Header */}
                       <div className="flex items-center space-x-3 mb-4">
                         <img
-                          src={post.author?.avatar || 'https://picsum.photos/40/40?random=1'}
+                          src={getProfilePictureUrl(post.author?.profilePicture, post.author?.name, 40)}
                           alt={post.author?.name || 'User'}
                           className="w-10 h-10 rounded-full object-cover"
                         />
@@ -1365,7 +1365,7 @@ export const CommunityPage: React.FC = () => {
                                 return commentsToShow.map((comment) => (
                                   <div key={comment.id || comment._id} className="flex items-start space-x-3">
                                     <img
-                                      src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author?.name || 'User')}&background=6366f1&color=fff&size=32`}
+                                      src={getProfilePictureUrl(comment.author?.profilePicture, comment.author?.name, 32)}
                                       alt={comment.author?.name || 'User'}
                                       className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                     />
@@ -1440,7 +1440,7 @@ export const CommunityPage: React.FC = () => {
                           {/* Comment Input - Only show when expanded */}
                           <div className="flex items-start space-x-3">
                             <img
-                              src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=6366f1&color=fff&size=32`}
+                              src={getProfilePictureUrl(user?.profilePicture, user?.name, 32)}
                               alt={user?.name || 'User'}
                               className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                             />

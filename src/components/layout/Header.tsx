@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Heart, User, LogOut } from 'lucide-react';
+import { Menu, X, Heart, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { LogoutModal } from '../ui/LogoutModal';
+import { getProfilePictureUrl } from '../../services/api';
 
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -108,17 +109,11 @@ export const Header: React.FC = () => {
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                   className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/70 transition-all duration-300 transform hover:scale-105"
                 >
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-9 h-9 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-blue-600" />
-                    </div>
-                  )}
+                  <img
+                    src={getProfilePictureUrl(user.profilePicture, user.name, 36)}
+                    alt={user.name}
+                    className="w-9 h-9 rounded-full object-cover"
+                  />
                   <span className="text-base font-medium text-gray-700">{user.name}</span>
                 </button>
 
@@ -231,17 +226,11 @@ export const Header: React.FC = () => {
                   </Link>
                   
                   <div className="flex items-center px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl mb-4">
-                    {user.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-12 h-12 rounded-full object-cover shadow-md"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
-                        <User className="w-6 h-6 text-white" />
-                      </div>
-                    )}
+                    <img
+                      src={getProfilePictureUrl(user.profilePicture, user.name, 48)}
+                      alt={user.name}
+                      className="w-12 h-12 rounded-full object-cover shadow-md"
+                    />
                     <div className="ml-4">
                       <div className="text-base font-semibold text-gray-800">{user.name}</div>
                       <div className="text-sm text-gray-600">{user.email}</div>

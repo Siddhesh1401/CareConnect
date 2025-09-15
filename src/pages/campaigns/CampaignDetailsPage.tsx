@@ -18,7 +18,7 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { campaignAPI } from '../../services/api';
+import { campaignAPI, getFullImageUrl } from '../../services/api';
 
 interface Campaign {
   id: string;
@@ -184,7 +184,7 @@ export const CampaignDetailsPage: React.FC = () => {
             <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
               <div className="relative h-80">
                 <img
-                  src={campaign.image}
+                  src={getFullImageUrl(campaign.image)}
                   alt={campaign.title}
                   className="w-full h-full object-cover"
                 />

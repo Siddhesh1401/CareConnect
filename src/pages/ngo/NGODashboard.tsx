@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { getProfilePictureUrl } from '../../services/api';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -42,7 +43,7 @@ interface NGODashboardData {
   recentVolunteers: Array<{
     _id: string;
     name: string;
-    avatar: string;
+    profilePicture: string;
     joinedDate: string;
     eventsJoined: number;
   }>;
@@ -366,7 +367,7 @@ export const NGODashboard: React.FC = () => {
                 {recentVolunteers.map((volunteer, index) => (
                   <div key={`volunteer-${volunteer._id}-${index}`} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-50 transition-all duration-300 border border-transparent hover:border-primary-200">
                     <img
-                      src={volunteer.avatar}
+                      src={getProfilePictureUrl(volunteer.profilePicture, volunteer.name, 40)}
                       alt={volunteer.name}
                       className="w-10 h-10 rounded-full object-cover border-2 border-primary-200"
                     />

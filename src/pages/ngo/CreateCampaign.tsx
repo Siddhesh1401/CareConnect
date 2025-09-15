@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Target, DollarSign, Calendar, FileText, Image } from 'lucide-react';
+import { ArrowLeft, DollarSign, Calendar, FileText, Image, X } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -18,8 +18,9 @@ export const CreateCampaign: React.FC = () => {
     targetAmount: '',
     duration: '',
     story: '',
-    images: [] as string[]
+    images: [] as File[]
   });
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   // Fetch categories from API
   useEffect(() => {
@@ -55,22 +56,51 @@ export const CreateCampaign: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageSelect = (files: File[]) => {
+    setFormData(prev => ({ ...prev, images: files }));
+    
+    // Create previews for all selected files
+    const previews: string[] = [];
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          previews.push(e.target.result as string);
+          if (previews.length === files.length) {
+            setImagePreviews(previews);
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, images: newImages }));
+    setImagePreviews(newPreviews);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const campaignData = {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        target: parseInt(formData.targetAmount),
-        location: 'Mumbai, Maharashtra', // This could be made dynamic
-        endDate: new Date(Date.now() + parseInt(formData.duration) * 24 * 60 * 60 * 1000).toISOString(),
-        tags: [] // Could be added to form
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('target', formData.targetAmount);
+      formDataToSend.append('location', 'Mumbai, Maharashtra'); // This could be made dynamic
+      formDataToSend.append('endDate', new Date(Date.now() + parseInt(formData.duration) * 24 * 60 * 60 * 1000).toISOString());
+      
+      // Add images
+      formData.images.forEach((image) => {
+        formDataToSend.append('images', image);
+      });
 
-      const response = await campaignAPI.createCampaign(campaignData);
+      const response = await campaignAPI.createCampaign(formDataToSend);
       
       if (response.success) {
         navigate('/ngo/campaigns');
@@ -225,17 +255,54 @@ export const CreateCampaign: React.FC = () => {
 
           {/* Media Upload */}
           <Card className="p-6 bg-white border-primary-200 shadow-soft">
-            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Campaign Media</h3>
-            <div className="border-2 border-dashed border-primary-200 rounded-lg p-8 text-center bg-primary-50 hover:border-primary-300 transition-all duration-300">
-              <Image className="w-12 h-12 text-primary-400 mx-auto mb-4" />
-              <p className="text-primary-600 mb-2">Upload campaign images or videos</p>
-              <p className="text-sm text-primary-500 mb-4">PNG, JPG, GIF up to 10MB each</p>
-              <Button variant="outline" type="button" className="border-primary-300 hover:border-primary-400">
-                Choose Files
-              </Button>
+            <h3 className="text-lg font-semibold text-primary-900 mb-4 pb-3 border-b border-primary-100">Campaign Images</h3>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-primary-200 rounded-lg p-6 text-center bg-primary-50 hover:border-primary-300 transition-all duration-300">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    handleImageSelect(files);
+                  }}
+                  className="hidden"
+                  id="campaign-images"
+                />
+                <label htmlFor="campaign-images" className="cursor-pointer block">
+                  <Image className="w-12 h-12 text-primary-400 mx-auto mb-4" />
+                  <p className="text-primary-600 mb-2">Click to upload campaign images</p>
+                  <p className="text-sm text-primary-500 mb-4">PNG, JPG, GIF up to 5MB each (max 10 images)</p>
+                  <div className="inline-flex items-center px-4 py-2 border border-primary-300 rounded-lg text-primary-700 bg-white hover:bg-primary-50 hover:border-primary-400 transition-colors">
+                    Choose Images
+                  </div>
+                </label>
+              </div>
+
+              {/* Image Previews */}
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={preview}
+                        alt={`Campaign image ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border border-primary-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="mt-4 text-sm text-primary-500">
-              High-quality images and videos can increase donations by up to 40%. Include photos that show the impact of your work.
+              High-quality images can increase donations by up to 40%. Include photos that show the impact of your work. ({imagePreviews.length}/10 images selected)
             </div>
           </Card>
 

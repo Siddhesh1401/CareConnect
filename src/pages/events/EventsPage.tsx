@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { ChatBot } from '../../components/ChatBot';
 import ReportForm from '../../components/ReportForm';
+import { getFullImageUrl } from '../../services/api';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -43,6 +44,7 @@ interface Event {
   registrationStatus: 'open' | 'filling_fast' | 'full';
   isUserRegistered?: boolean;
   tags?: string[];
+  images?: string[];
 }
 
 export const EventsPage: React.FC = () => {
@@ -300,9 +302,31 @@ export const EventsPage: React.FC = () => {
             {events.map((event) => (
               <Card key={event._id} className="group overflow-hidden hover:shadow-medium hover:-translate-y-2 transition-all duration-500 bg-white border border-primary-200 shadow-soft">
                 <div className="relative">
-                  <div className="w-full h-48 bg-gradient-to-r from-primary-400 to-primary-600 flex items-center justify-center">
-                    <Building className="w-16 h-16 text-white/70" />
-                  </div>
+                  {event.images && event.images.length > 0 ? (
+                    <img
+                      src={getFullImageUrl(event.image)}
+                      alt={event.title}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-48 bg-gradient-to-r from-primary-400 to-primary-600 flex items-center justify-center">
+                              <svg class="w-16 h-16 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gradient-to-r from-primary-400 to-primary-600 flex items-center justify-center">
+                      <Building className="w-16 h-16 text-white/70" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="absolute top-4 left-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${getCategoryColor(event.category)}`}>

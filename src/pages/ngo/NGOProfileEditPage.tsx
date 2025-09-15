@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Save,
-  Upload,
   MapPin,
   Globe,
   Loader2,
@@ -14,6 +13,8 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
+import { ImageUpload } from '../../components/ui/ImageUpload';
+import { getFullImageUrl, getProfilePictureUrl } from '../../services/api';
 import api from '../../services/api';
 
 interface NGOProfile {
@@ -55,6 +56,8 @@ export const NGOProfileEditPage: React.FC = () => {
     website: '',
     foundedYear: ''
   });
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
 
   useEffect(() => {
     fetchProfile();
@@ -79,6 +82,9 @@ export const NGOProfileEditPage: React.FC = () => {
           website: user.website || '',
           foundedYear: user.foundedYear?.toString() || ''
         });
+        if (user.profilePicture) {
+          setProfilePicturePreview(getFullImageUrl(user.profilePicture));
+        }
       }
     } catch (err: any) {
       console.error('Error fetching profile:', err);
@@ -95,6 +101,20 @@ export const NGOProfileEditPage: React.FC = () => {
     }));
   };
 
+  const handleImageUpload = (file: File | null) => {
+    if (file) {
+      setProfilePicture(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePicturePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setProfilePicture(null);
+      setProfilePicturePreview('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -102,26 +122,36 @@ export const NGOProfileEditPage: React.FC = () => {
       setError(null);
       setSuccess(false);
 
-      const updateData = {
-        organizationName: formData.organizationName,
-        organizationType: formData.organizationType,
-        description: formData.description,
-        location: {
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          country: formData.country
-        },
-        phone: formData.phone,
-        website: formData.website,
-        foundedYear: formData.foundedYear ? parseInt(formData.foundedYear) : undefined
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('organizationName', formData.organizationName);
+      formDataToSend.append('organizationType', formData.organizationType);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('location[address]', formData.address);
+      formDataToSend.append('location[city]', formData.city);
+      formDataToSend.append('location[state]', formData.state);
+      formDataToSend.append('location[country]', formData.country);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('website', formData.website);
+      if (formData.foundedYear) {
+        formDataToSend.append('foundedYear', formData.foundedYear);
+      }
+      if (profilePicture) {
+        formDataToSend.append('profilePicture', profilePicture);
+      }
 
-      const response = await api.put('/auth/profile', updateData);
+      const response = await api.put('/auth/profile', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       if (response.data.success) {
         setSuccess(true);
-        setProfile(prev => prev ? { ...prev, ...updateData } : null);
+        setProfile(prev => prev ? { ...prev, ...response.data.data.user } : null);
+        
+        // Notify other pages that NGO profile has been updated
+        localStorage.setItem('ngo_profile_updated', Date.now().toString());
+        
         setTimeout(() => {
           navigate('/ngo/dashboard');
         }, 2000);
@@ -206,20 +236,21 @@ export const NGOProfileEditPage: React.FC = () => {
           <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
               <h2 className="text-lg font-semibold text-primary-900 mb-4">Profile Picture</h2>
-              <div className="flex items-center space-x-6">
+              <div className="flex items-start space-x-6">
                 <img
-                  src={profile.profilePicture || 'https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=600'}
+                  src={profilePicturePreview || getProfilePictureUrl(profile.profilePicture, profile.organizationName, 96)}
                   alt={profile.organizationName}
                   className="w-24 h-24 rounded-xl border-4 border-white shadow-soft object-cover"
                 />
-                <div>
-                  <Button variant="outline" type="button" className="flex items-center space-x-2 border-primary-300 text-primary-700 hover:bg-primary-50">
-                    <Upload className="w-4 h-4" />
-                    <span>Change Picture</span>
-                  </Button>
-                  <p className="text-sm text-primary-500 mt-2">
-                    JPG, PNG or GIF. Max size 2MB.
-                  </p>
+                <div className="flex-1">
+                  <ImageUpload
+                    onImageSelect={handleImageUpload}
+                    currentImage={profile.profilePicture}
+                    placeholder="Click to upload profile picture"
+                    maxSizeMB={2}
+                    acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif']}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>

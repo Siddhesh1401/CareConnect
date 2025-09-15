@@ -611,8 +611,8 @@ export const getCommunityPosts = async (req: Request, res: Response): Promise<vo
     const { page = 1, limit = 10 } = req.query;
 
     const community = await Community.findById(communityId)
-      .populate('posts.author', 'name')
-      .populate('posts.comments.author', 'name');
+      .populate('posts.author', 'name profilePicture')
+      .populate('posts.comments.author', 'name profilePicture');
 
     if (!community) {
       res.status(404).json({

@@ -231,7 +231,9 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
 
       return {
         ...event,
+        _id: event._id.toString(),
         availableSpots,
+        image: event.images && event.images.length > 0 ? event.images[0] : '',
         isUserRegistered,
         registrationStatus: (() => {
           if (confirmedVolunteers >= event.capacity) return 'full';
@@ -359,7 +361,9 @@ export const getNGOEvents = async (req: AuthRequest, res: Response): Promise<voi
     // Add virtual fields
     const eventsWithVirtuals = events.map(event => ({
       ...event,
+      _id: event._id.toString(),
       availableSpots: event.capacity - event.registeredVolunteers.filter(v => v.status === 'confirmed').length,
+      image: event.images && event.images.length > 0 ? event.images[0] : '',
       registrationStatus: (() => {
         const confirmedVolunteers = event.registeredVolunteers.filter(v => v.status === 'confirmed').length;
         if (confirmedVolunteers >= event.capacity) return 'full';

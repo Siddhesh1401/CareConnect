@@ -12,6 +12,7 @@ import {
 } from '../controllers/storyController';
 import { authenticate } from '../middleware/auth';
 import { hasRole } from '../middleware/roleAuth';
+import { uploadStoryImages } from '../middleware/upload';
 
 const router = express.Router();
 
@@ -28,8 +29,8 @@ router.use(authenticate);
 
 // User story management
 router.get('/user/my-stories', getUserStories);
-router.post('/', createStory);
-router.put('/:id', updateStory);
+router.post('/', uploadStoryImages.single('image'), createStory);
+router.put('/:id', uploadStoryImages.single('image'), updateStory);
 router.delete('/:id', deleteStory);
 router.put('/:id/status', hasRole('admin'), updateStoryStatus);
 

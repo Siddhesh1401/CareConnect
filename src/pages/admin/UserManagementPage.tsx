@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { SearchBar, SearchFilters } from '../../components/search/SearchBar';
 import { FilterPanel } from '../../components/search/FilterPanel';
+import { getProfilePictureUrl } from '../../services/api';
 import api from '../../services/api';
 
 interface User {
@@ -36,6 +37,7 @@ export default function UserManagementPage() {
     active: 0,
     suspended: 0
   });
+  const [uploadingAvatar, setUploadingAvatar] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -87,6 +89,32 @@ export default function UserManagementPage() {
       }
     } catch (error) {
       console.error('Failed to toggle user status:', error);
+    }
+  };
+
+  const handleAvatarUpload = async (userId: string, file: File) => {
+    try {
+      setUploadingAvatar(userId);
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+
+      const response = await api.put(`/admin/users/${userId}/avatar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        setUsers(users.map(user => 
+          user._id === userId 
+            ? { ...user, profilePicture: response.data.data.user.profilePicture }
+            : user
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+    } finally {
+      setUploadingAvatar(null);
     }
   };
 
@@ -205,10 +233,28 @@ export default function UserManagementPage() {
                   <div className="flex items-start space-x-4 flex-1">
                     <div className="relative">
                       <img
-                        src={user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=667eea&color=fff&size=64`}
+                        src={getProfilePictureUrl(user.profilePicture, user.name, 64)}
                         alt={user.name}
-                        className="w-16 h-16 rounded-lg object-cover ring-4 ring-white/50 shadow-sm"
+                        className="w-16 h-16 rounded-lg object-cover ring-4 ring-white/50 shadow-sm cursor-pointer hover:ring-primary-300 transition-all"
+                        onClick={() => document.getElementById(`avatar-input-${user._id}`)?.click()}
                       />
+                      <input
+                        id={`avatar-input-${user._id}`}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleAvatarUpload(user._id, file);
+                          }
+                        }}
+                      />
+                      {uploadingAvatar === user._id && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                        </div>
+                      )}
                       <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${
                         user.accountStatus === 'active' ? 'bg-green-500' : 'bg-red-500'
                       }`}></div>

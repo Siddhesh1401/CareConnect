@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import User, { IUser } from '../models/User.js';
 import Message from '../models/Message.js';
 import { AppError } from '../utils/AppError.js';
+import { getUserAvatarUrl } from '../middleware/upload.js';
 import nodemailer from 'nodemailer';
 
 // Email configuration
@@ -732,6 +733,50 @@ export const toggleUserStatus = async (req: AuthRequest, res: Response): Promise
 
   } catch (error) {
     console.error('Toggle user status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error : undefined
+    });
+  }
+};
+
+// Update user avatar (Admin only)
+export const updateUserAvatar = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+      return;
+    }
+
+    // Handle avatar upload
+    let avatarUrl = '';
+    if (req.file) {
+      avatarUrl = getUserAvatarUrl(req.file.filename);
+    }
+
+    user.profilePicture = avatarUrl;
+    await user.save();
+
+    // Log the admin activity
+    console.log(`🔧 Admin action: User ${user.name} (${user.email}) avatar updated by admin ${req.user?.email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'User avatar updated successfully',
+      data: {
+        user: user.toJSON()
+      }
+    });
+
+  } catch (error) {
+    console.error('Update user avatar error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<any>;
   signup: (name: string, email: string, password: string, role: 'volunteer' | 'ngo_admin', additionalData?: any) => Promise<void>;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
   isLoading: boolean;
   isAdmin: () => boolean;
   sendVerificationCode: (email: string) => Promise<void>;
@@ -79,11 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: userData.name,
           email: userData.email,
           role: userData.role,
-          avatar: userData.profilePicture || (
-            userData.role === 'volunteer' ? 
-            'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150' :
-            'https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=150'
-          ),
+          profilePicture: userData.profilePicture,
           points: userData.points || 0,
           achievements: userData.achievements || [],
           joinedDate: new Date(userData.joinedDate || userData.createdAt),
@@ -177,11 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: userData.name,
           email: userData.email,
           role: userData.role,
-          avatar: userData.profilePicture || (
-            userData.role === 'volunteer' ? 
-            'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150' :
-            'https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=150'
-          ),
+          profilePicture: userData.profilePicture,
           points: userData.points || 0,
           achievements: userData.achievements || [],
           joinedDate: new Date(userData.joinedDate || userData.createdAt),
@@ -221,6 +214,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshProfile = async () => {
+    try {
+      const response = await authAPI.getProfile();
+      if (response.success) {
+        const userData = response.data.user;
+        const updatedUser: User = {
+          id: userData._id || userData.id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role,
+          profilePicture: userData.profilePicture,
+          points: userData.points || 0,
+          achievements: userData.achievements || [],
+          joinedDate: new Date(userData.joinedDate || userData.createdAt),
+          phone: userData.phone,
+          location: userData.location,
+          skills: userData.skills,
+          interests: userData.interests,
+          organizationName: userData.organizationName,
+          isVerified: userData.isVerified,
+          isNGOVerified: userData.isNGOVerified
+        };
+        setUser(updatedUser);
+        localStorage.setItem('careconnect_user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Failed to refresh profile:', error);
+    }
+  };
+
   const isAdmin = () => {
     return user?.role === 'admin';
   };
@@ -246,7 +269,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user, 
       login, 
       signup, 
-      logout, 
+      logout,
+      refreshProfile,
       isLoading, 
       isAdmin, 
       sendVerificationCode, 

@@ -17,7 +17,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import ReportForm from '../../components/ReportForm';
-import { storyAPI } from '../../services/api';
+import { storyAPI, getFullImageUrl, getProfilePictureUrl } from '../../services/api';
 import { useCancellableRequest } from '../../hooks/useApiRequest';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -36,7 +36,7 @@ interface Story {
   publishedDate?: string;
   author?: {
     name: string;
-    avatar: string;
+    profilePicture: string;
     role: string;
   };
   date?: string;
@@ -386,7 +386,7 @@ export const StoriesPage: React.FC = () => {
             <div className="lg:flex">
               <div className="lg:w-1/2">
                 <img
-                  src={filteredStories[0].image}
+                  src={getFullImageUrl(filteredStories[0].image)}
                   alt={filteredStories[0].title}
                   className="w-full h-64 lg:h-full object-cover"
                 />
@@ -409,7 +409,7 @@ export const StoriesPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={filteredStories[0].author?.avatar || '/default-avatar.png'}
+                      src={getProfilePictureUrl(filteredStories[0].author?.profilePicture, filteredStories[0].author?.name, 40)}
                       alt={filteredStories[0].author?.name || 'Author'}
                       className="w-10 h-10 rounded-full object-cover"
                     />
@@ -436,7 +436,7 @@ export const StoriesPage: React.FC = () => {
             <Card key={story.id} hover className="overflow-hidden">
               {story.image && (
                 <img
-                  src={story.image}
+                  src={getFullImageUrl(story.image)}
                   alt={story.title}
                   className="w-full h-48 object-cover"
                 />
@@ -489,7 +489,7 @@ export const StoriesPage: React.FC = () => {
                 {activeTab === 'all' && story.author && (
                   <div className="flex items-center space-x-3 mb-4">
                     <img
-                      src={story.author.avatar || '/default-avatar.png'}
+                      src={getProfilePictureUrl(story.author.profilePicture, story.author.name, 32)}
                       alt={story.author.name || 'Author'}
                       className="w-8 h-8 rounded-full object-cover"
                     />

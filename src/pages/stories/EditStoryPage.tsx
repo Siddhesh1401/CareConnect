@@ -11,7 +11,7 @@ interface StoryFormData {
   title: string;
   excerpt: string;
   content: string;
-  image: string;
+  image: File | null;
   category: string;
   tags: string[];
   status: 'draft' | 'published';
@@ -37,13 +37,14 @@ export const EditStoryPage: React.FC = () => {
     title: '',
     excerpt: '',
     content: '',
-    image: '',
+    image: null,
     category: '',
     tags: [],
     status: 'draft'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tagInput, setTagInput] = useState('');
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   useEffect(() => {
     if (id) {
@@ -61,11 +62,15 @@ export const EditStoryPage: React.FC = () => {
           title: story.title,
           excerpt: story.excerpt,
           content: story.content,
-          image: story.image || '',
+          image: null, // Don't set existing image as File, handle separately
           category: story.category,
           tags: story.tags || [],
           status: story.status
         });
+        // Set existing image URL for preview
+        if (story.image) {
+          setImagePreview(story.image);
+        }
       }
     } catch (error: any) {
       console.error('Error fetching story:', error);
@@ -89,11 +94,16 @@ export const EditStoryPage: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Create preview URL for display
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFormData(prev => ({ ...prev, image: e.target?.result as string }));
+        const result = e.target?.result as string;
+        setImagePreview(result);
       };
       reader.readAsDataURL(file);
+      
+      // Store the actual file for upload
+      setFormData(prev => ({ ...prev, image: file }));
     }
   };
 
@@ -139,8 +149,24 @@ export const EditStoryPage: React.FC = () => {
 
     setSaving(true);
     try {
-      const storyData = { ...formData, status };
-      const response = await storyAPI.updateStory(id!, storyData);
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('excerpt', formData.excerpt);
+      formDataToSend.append('content', formData.content);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('status', status);
+      
+      if (formData.tags.length > 0) {
+        formData.tags.forEach(tag => {
+          formDataToSend.append('tags', tag);
+        });
+      }
+      
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
+      const response = await storyAPI.updateStory(id!, formDataToSend);
 
       if (response.success) {
         navigate('/stories?tab=my');
@@ -326,11 +352,11 @@ export const EditStoryPage: React.FC = () => {
               <label className="block text-sm font-medium text-primary-900 mb-2">
                 Story Image
               </label>
-              {formData.image ? (
+              {imagePreview ? (
                 <div className="space-y-4">
                   <div className="aspect-video bg-primary-100 rounded-lg overflow-hidden">
                     <img
-                      src={formData.image}
+                      src={imagePreview}
                       alt="Story preview"
                       className="w-full h-full object-cover"
                     />
@@ -338,7 +364,10 @@ export const EditStoryPage: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                    onClick={() => {
+                      setImagePreview('');
+                      setFormData(prev => ({ ...prev, image: null }));
+                    }}
                     className="w-full"
                   >
                     <X className="w-4 h-4 mr-2" />

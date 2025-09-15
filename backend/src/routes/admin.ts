@@ -8,6 +8,7 @@ import {
   updateNGOStatus,
   getAllUsers,
   toggleUserStatus,
+  updateUserAvatar,
   getDashboardStats,
   getAllMessages,
   respondToMessage,
@@ -21,6 +22,7 @@ import {
 } from '../controllers/documentController.js';
 import { authenticate } from '../middleware/auth.js';
 import { isAdmin } from '../middleware/roleAuth.js';
+import { uploadUserAvatar } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -44,6 +46,7 @@ router.get('/ngos/:ngoId/documents', getDocumentStatus);                        
 // User Management Routes
 router.get('/users', getAllUsers);                          // Get all users with filtering
 router.patch('/users/:userId/toggle-status', toggleUserStatus);  // Toggle user active/suspended status
+router.put('/users/:userId/avatar', uploadUserAvatar.single('profilePicture'), updateUserAvatar);  // Update user avatar
 
 // Dashboard Routes
 router.get('/dashboard/stats', getDashboardStats);          // Get dashboard statistics

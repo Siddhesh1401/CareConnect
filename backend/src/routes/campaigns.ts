@@ -14,6 +14,7 @@ import {
 } from '../controllers/campaignController';
 import { authenticate } from '../middleware/auth';
 import { hasRole } from '../middleware/roleAuth';
+import { uploadCampaignImages } from '../middleware/upload';
 
 const router = express.Router();
 
@@ -31,8 +32,8 @@ router.post('/:id/donate', donateToCampaign);
 // NGO specific routes
 router.get('/ngo/stats', hasRole('ngo_admin'), getCampaignStats);
 router.get('/ngo/my-campaigns', hasRole('ngo_admin'), getCampaignsByNGO);
-router.post('/', hasRole('ngo_admin'), createCampaign);
-router.put('/:id', hasRole('ngo_admin'), updateCampaign);
+router.post('/', hasRole('ngo_admin'), uploadCampaignImages.array('images', 10), createCampaign);
+router.put('/:id', hasRole('ngo_admin'), uploadCampaignImages.single('image'), updateCampaign);
 router.delete('/:id', hasRole('ngo_admin'), deleteCampaign);
 router.post('/:id/updates', hasRole('ngo_admin'), addCampaignUpdate);
 router.get('/:id/donors', hasRole('ngo_admin'), getCampaignDonors);

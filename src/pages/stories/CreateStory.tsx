@@ -11,7 +11,7 @@ interface StoryFormData {
   title: string;
   excerpt: string;
   content: string;
-  image: string;
+  image: File | null;
   category: string;
   tags: string[];
   status: 'draft' | 'published';
@@ -29,7 +29,7 @@ export const CreateStory: React.FC = () => {
     title: '',
     excerpt: '',
     content: '',
-    image: '',
+    image: null,
     category: 'community',
     tags: [],
     status: 'draft'
@@ -62,13 +62,16 @@ export const CreateStory: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Create preview URL for display
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setImagePreview(result);
-        setFormData(prev => ({ ...prev, image: result }));
       };
       reader.readAsDataURL(file);
+      
+      // Store the actual file for upload
+      setFormData(prev => ({ ...prev, image: file }));
     }
   };
 
@@ -106,8 +109,24 @@ export const CreateStory: React.FC = () => {
 
     setLoading(true);
     try {
-      const storyData = { ...formData, status };
-      const response = await storyAPI.createStory(storyData);
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('excerpt', formData.excerpt);
+      formDataToSend.append('content', formData.content);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('status', status);
+      
+      if (formData.tags.length > 0) {
+        formData.tags.forEach(tag => {
+          formDataToSend.append('tags', tag);
+        });
+      }
+      
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
+      const response = await storyAPI.createStory(formDataToSend);
 
       if (response.success) {
         navigate('/stories');
@@ -271,7 +290,7 @@ export const CreateStory: React.FC = () => {
                     <button
                       onClick={() => {
                         setImagePreview('');
-                        setFormData(prev => ({ ...prev, image: '' }));
+                        setFormData(prev => ({ ...prev, image: null }));
                       }}
                       className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                     >

@@ -6,6 +6,7 @@ import User, { IUser } from '../models/User.js';
 import { generateToken } from '../utils/auth.js';
 import { AppError } from '../utils/AppError.js';
 import nodemailer from 'nodemailer';
+import { uploadUserAvatar, getUserAvatarUrl, deleteUserAvatar } from '../middleware/upload.js';
 
 // Email configuration
 const emailConfig = {
@@ -584,6 +585,24 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       description,
       foundedYear
     } = req.body;
+
+    // Handle avatar upload - check both possible field names
+    const uploadedFile = req.files && (
+      (req.files as any).avatar?.[0] || 
+      (req.files as any).profilePicture?.[0]
+    );
+    
+    if (uploadedFile) {
+      // Delete old avatar if exists
+      if (user.profilePicture) {
+        const oldAvatarFilename = user.profilePicture.split('/').pop();
+        if (oldAvatarFilename) {
+          deleteUserAvatar(oldAvatarFilename);
+        }
+      }
+      // Set new avatar URL
+      user.profilePicture = getUserAvatarUrl(uploadedFile.filename);
+    }
 
     // Update basic fields
     if (name) user.name = name.trim();

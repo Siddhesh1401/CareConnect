@@ -21,12 +21,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { ImageUpload } from '../../components/ui/ImageUpload';
+import { getProfilePictureUrl } from '../../services/api';
+import { authAPI } from '../../services/api';
 
 export const ProfilePage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -35,10 +40,59 @@ export const ProfilePage: React.FC = () => {
     bio: ''
   });
 
-  const handleSave = () => {
-    // In a real app, this would update the user profile via API
-    console.log('Saving profile:', formData);
-    setIsEditing(false);
+  const handleAvatarSelect = (file: File | null) => {
+    setSelectedAvatar(file);
+  };
+
+  const handleSave = async () => {
+    setIsUploading(true);
+    try {
+      if (selectedAvatar) {
+        // Use FormData for file upload
+        const formDataToSend = new FormData();
+        formDataToSend.append('name', formData.name);
+        if (formData.phone) formDataToSend.append('phone', formData.phone);
+        if (formData.location) formDataToSend.append('location', JSON.stringify({ city: formData.location }));
+        formDataToSend.append('avatar', selectedAvatar);
+
+        // Direct API call with FormData
+        const response = await fetch('http://localhost:5000/api/auth/profile', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('careconnect_token')}`
+          },
+          body: formDataToSend
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update profile');
+        }
+
+        const result = await response.json();
+        console.log('Profile updated:', result);
+      } else {
+        // Use regular API for non-file updates
+        await authAPI.updateProfile({
+          name: formData.name,
+          phone: formData.phone || undefined,
+          location: formData.location ? { city: formData.location } : undefined
+        });
+      }
+      
+      // Reset state
+      setSelectedAvatar(null);
+      setIsEditing(false);
+      
+      // Refresh user data to show updated profile picture
+      await refreshProfile();
+      
+      // Notify other pages that profile has been updated
+      localStorage.setItem('profile_updated', Date.now().toString());
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -77,18 +131,16 @@ export const ProfilePage: React.FC = () => {
         <Card className="p-8 bg-white border-primary-200">
           <div className="flex flex-col md:flex-row items-start md:items-center space-y-6 md:space-y-0 md:space-x-8">
             <div className="relative group">
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-primary-200"
-                />
-              ) : (
-                <div className="w-32 h-32 bg-primary-600 rounded-full flex items-center justify-center border-4 border-primary-200">
-                  <User className="w-16 h-16 text-white" />
-                </div>
-              )}
-              <button className="absolute bottom-0 right-0 w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-700 transition-all duration-200">
+              <img
+                src={getProfilePictureUrl(user?.profilePicture, user?.name, 128)}
+                alt={user?.name}
+                className="w-32 h-32 rounded-full object-cover border-4 border-primary-200"
+              />
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="absolute bottom-0 right-0 w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-700 transition-all duration-200 shadow-lg"
+                title="Change Profile Picture"
+              >
                 <Camera className="w-5 h-5 text-white" />
               </button>
             </div>
@@ -162,13 +214,15 @@ export const ProfilePage: React.FC = () => {
                 <div className="flex space-x-2">
                   <Button 
                     onClick={handleSave}
+                    disabled={isUploading}
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save
+                    {isUploading ? 'Saving...' : 'Save'}
                   </Button>
                   <Button 
                     variant="outline"
                     onClick={() => setIsEditing(false)}
+                    disabled={isUploading}
                   >
                     Cancel
                   </Button>
@@ -177,6 +231,18 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
+              {isEditing && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                  <ImageUpload
+                    onImageSelect={handleAvatarSelect}
+                    currentImage={user?.profilePicture}
+                    placeholder="Upload a new profile picture"
+                    className="max-w-md"
+                  />
+                </div>
+              )}
+              
               <Input
                 label="Full Name"
                 name="name"

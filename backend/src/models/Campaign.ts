@@ -10,7 +10,7 @@ export interface ICampaign extends Document {
   raised: number;
   donors: number;
   daysLeft: number;
-  image?: string;
+  images?: string[];
   location: string;
   urgency: 'low' | 'medium' | 'high';
   status: 'active' | 'completed' | 'paused' | 'draft';
@@ -100,6 +100,9 @@ const CampaignSchema = new Schema<ICampaign>({
   image: {
     type: String
   },
+  images: [{
+    type: String
+  }],
   location: {
     type: String,
     required: true

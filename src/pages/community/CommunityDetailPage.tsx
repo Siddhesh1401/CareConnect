@@ -14,7 +14,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { communityAPI, getFullImageUrl } from '../../services/api';
+import { communityAPI, getFullImageUrl, getProfilePictureUrl } from '../../services/api';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -745,7 +745,7 @@ export const CommunityDetailPage: React.FC = () => {
                     {/* Post Header */}
                     <div className="flex items-center space-x-3 mb-4">
                       <img
-                        src={post.author?.avatar || 'https://picsum.photos/40/40?random=1'}
+                        src={getProfilePictureUrl(post.author?.profilePicture, post.author?.name, 40)}
                         alt={post.author?.name || 'User'}
                         className="w-10 h-10 rounded-full object-cover"
                       />

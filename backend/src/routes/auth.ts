@@ -15,7 +15,7 @@ import {
   resetPassword
 } from '../controllers/authController.js';
 import { authenticate } from '../middleware/auth.js';
-import { uploadNGODocuments } from '../middleware/upload.js';
+import { uploadNGODocuments, uploadUserAvatar } from '../middleware/upload.js';
 import { validateSignup, validateLogin, validateUpdateProfile, validateChangePassword } from '../middleware/validation.js';
 
 const router = Router();
@@ -37,7 +37,10 @@ router.post('/reset-password', resetPassword);
 router.use(authenticate); // Apply authentication middleware to all routes below
 
 router.get('/profile', getProfile);
-router.put('/profile', validateUpdateProfile, updateProfile);
+router.put('/profile', uploadUserAvatar.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'profilePicture', maxCount: 1 }
+]), validateUpdateProfile, updateProfile);
 router.put('/change-password', validateChangePassword, changePassword);
 router.post('/logout', logout);
 

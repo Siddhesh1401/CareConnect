@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import api from '../../services/api';
+import api, { getFullImageUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface NGO {
@@ -60,6 +60,21 @@ export const NGOProfilePage: React.FC = () => {
       setLoading(false);
     }
   }, [id]);
+
+  // Listen for NGO profile updates
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'ngo_profile_updated' && e.newValue) {
+        console.log('NGO profile update detected, refreshing NGO data...');
+        fetchNGOData();
+        // Clear the flag
+        localStorage.removeItem('ngo_profile_updated');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const fetchNGOData = async () => {
     if (!id || id === 'undefined') {
@@ -169,7 +184,7 @@ export const NGOProfilePage: React.FC = () => {
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="flex items-end space-x-4">
                     <img
-                      src={ngo.image}
+                      src={getFullImageUrl(ngo.image)}
                       alt={ngo.name}
                       className="w-24 h-24 rounded-xl border-4 border-white shadow-lg object-cover"
                       onError={(e) => {

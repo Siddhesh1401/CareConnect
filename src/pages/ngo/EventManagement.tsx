@@ -17,6 +17,7 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { getFullImageUrl } from '../../services/api';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -39,6 +40,7 @@ interface Event {
   registrationStatus: string;
   status: 'draft' | 'published' | 'cancelled' | 'completed';
   registeredVolunteers: any[];
+  image?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -363,78 +365,92 @@ export const EventManagement: React.FC = () => {
             {filteredEvents.map((event) => (
               <Card key={event._id} className="border border-primary-200 shadow-soft hover:shadow-medium transition-shadow">
                 <div className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-xl font-semibold text-primary-900">{event.title}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(event.status)}`}>
-                          {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                          {event.category}
-                        </span>
-                      </div>
+                  <div className="flex items-start space-x-4">
+                    {/* Event Image */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={getFullImageUrl(event.image)}
+                        alt={event.title}
+                        className="w-20 h-20 object-cover rounded-lg border border-primary-200"
+                      />
+                    </div>
 
-                      <p className="text-primary-600 mb-4 line-clamp-2">{event.description}</p>
+                    {/* Event Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-xl font-semibold text-primary-900 truncate">{event.title}</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(event.status)}`}>
+                              {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                              {event.category}
+                            </span>
+                          </div>
+
+                          <p className="text-primary-600 mb-4 line-clamp-2">{event.description}</p>
+                        
+                          <div className="grid md:grid-cols-4 gap-4 text-sm text-primary-600">
+                            <div className="flex items-center space-x-2">
+                              <Calendar className="w-4 h-4 text-primary-500" />
+                              <span>{formatDate(event.date)}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Clock className="w-4 h-4 text-primary-500" />
+                              <span>{event.startTime} - {event.endTime}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <MapPin className="w-4 h-4 text-primary-500" />
+                              <span>{event.location.city}, {event.location.state}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Users className="w-4 h-4 text-primary-500" />
+                              <span>{event.capacity - event.availableSpots}/{event.capacity} registered</span>
+                            </div>
+                        </div>
+                      </div>
                     
-                    <div className="grid md:grid-cols-4 gap-4 text-sm text-primary-600">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-primary-500" />
-                        <span>{formatDate(event.date)}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-primary-500" />
-                        <span>{event.startTime} - {event.endTime}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-primary-500" />
-                        <span>{event.location.city}, {event.location.state}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Users className="w-4 h-4 text-primary-500" />
-                        <span>{event.capacity - event.availableSpots}/{event.capacity} registered</span>
+                      <div className="flex space-x-2 mt-4">
+                        <Link to={`/events/${event._id}`}>
+                          <Button variant="outline" size="sm" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Link to={`/ngo/events/${event._id}/volunteers`}>
+                          <Button variant="outline" size="sm" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                            <Users className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Link to={`/ngo/events/edit/${event._id}`}>
+                          <Button variant="outline" size="sm" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </Link>
+
+                        {event.status !== 'cancelled' && event.registeredVolunteers?.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCancelEvent(event._id)}
+                            className="border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400"
+                            title="Cancel Event"
+                          >
+                            <Ban className="w-4 h-4" />
+                          </Button>
+                        )}
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteEvent(event._id)}
+                          className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                          title="Delete Event"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex space-x-2 ml-4">
-                    <Link to={`/events/${event._id}`}>
-                      <Button variant="outline" size="sm" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                    <Link to={`/ngo/events/${event._id}/volunteers`}>
-                      <Button variant="outline" size="sm" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
-                        <Users className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                    <Link to={`/ngo/events/edit/${event._id}`}>
-                      <Button variant="outline" size="sm" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </Link>
-
-                    {event.status !== 'cancelled' && event.registeredVolunteers?.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCancelEvent(event._id)}
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400"
-                        title="Cancel Event"
-                      >
-                        <Ban className="w-4 h-4" />
-                      </Button>
-                    )}
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteEvent(event._id)}
-                      className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
-                      title="Delete Event"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
                   </div>
                 </div>
                 

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { storyAPI } from '../../services/api';
+import { storyAPI, getFullImageUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Story {
@@ -222,7 +222,7 @@ export const MyStoriesPage: React.FC = () => {
                 <div className="aspect-video bg-primary-100 relative">
                   {story.image ? (
                     <img
-                      src={story.image}
+                      src={getFullImageUrl(story.image)}
                       alt={story.title}
                       className="w-full h-full object-cover"
                     />

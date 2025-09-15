@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, User, Calendar, Clock, Heart, MessageCircle, Share2, Eye } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Heart, MessageCircle, Share2, Eye } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { storyAPI } from '../../services/api';
+import { storyAPI, getFullImageUrl, getProfilePictureUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const StoryDetailPage: React.FC = () => {
@@ -112,17 +112,11 @@ export const StoryDetailPage: React.FC = () => {
           {/* Author Info */}
           <div className="flex items-center justify-between py-6 border-t border-b border-primary-200">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                {story.author.avatar ? (
-                  <img
-                    src={story.author.avatar}
-                    alt={story.author.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="w-6 h-6 text-primary-600" />
-                )}
-              </div>
+              <img
+                src={getProfilePictureUrl(story.author.profilePicture, story.author.name, 48)}
+                alt={story.author.name}
+                className="w-12 h-12 rounded-full object-cover"
+              />
               <div>
                 <div className="font-semibold text-primary-900">{story.author.name}</div>
                 <div className="text-sm text-gray-600">{story.author.role === 'ngo_admin' ? 'NGO Representative' : 'Volunteer'}</div>
@@ -150,7 +144,7 @@ export const StoryDetailPage: React.FC = () => {
         {story.image && (
           <div className="mb-8">
             <img
-              src={story.image}
+              src={getFullImageUrl(story.image)}
               alt={story.title}
               className="w-full h-96 object-cover rounded-xl shadow-lg"
             />

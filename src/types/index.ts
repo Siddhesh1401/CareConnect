@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: 'volunteer' | 'ngo_admin' | 'admin';
-  avatar?: string;
+  profilePicture?: string;
   points?: number;
   achievements?: Achievement[];
   joinedDate: Date;
@@ -46,7 +46,7 @@ export interface Event {
   ngoName: string;
   capacity: number;
   registered: number;
-  image: string;
+  images?: string[];
   category: string;
   isRegistered?: boolean;
 }

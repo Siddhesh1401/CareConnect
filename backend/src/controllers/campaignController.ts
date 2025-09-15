@@ -4,6 +4,7 @@ import Campaign from '../models/Campaign';
 import User from '../models/User';
 import { AppError } from '../utils/AppError';
 import { AuthRequest } from '../middleware/auth';
+import { uploadCampaignImages, getCampaignImageUrl, deleteCampaignImage } from '../middleware/upload';
 
 // Get all campaigns (for volunteers)
 export const getAllCampaigns = async (req: Request, res: Response) => {
@@ -58,7 +59,7 @@ export const getAllCampaigns = async (req: Request, res: Response) => {
       raised: campaign.raised,
       donors: campaign.donors,
       daysLeft: campaign.daysLeft,
-      image: campaign.image,
+      image: campaign.images && campaign.images.length > 0 ? campaign.images[0] : '',
       location: campaign.location,
       urgency: campaign.urgency,
       status: campaign.status,
@@ -121,7 +122,7 @@ export const getCampaignById = async (req: Request, res: Response) => {
       raised: campaign.raised,
       donors: campaign.donors,
       daysLeft: campaign.daysLeft,
-      image: campaign.image,
+      image: campaign.images && campaign.images.length > 0 ? campaign.images[0] : '',
       location: campaign.location,
       urgency: campaign.urgency,
       status: campaign.status,
@@ -179,7 +180,7 @@ export const getCampaignsByNGO = async (req: AuthRequest, res: Response) => {
       raised: campaign.raised,
       donors: campaign.donors,
       daysLeft: campaign.daysLeft,
-      image: campaign.image,
+      image: campaign.images && campaign.images.length > 0 ? campaign.images[0] : '',
       location: campaign.location,
       urgency: campaign.urgency,
       status: campaign.status,
@@ -227,8 +228,19 @@ export const createCampaign = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Handle image uploads
+    let imageUrls: string[] = [];
+    if (req.files && Array.isArray(req.files)) {
+      imageUrls = (req.files as Express.Multer.File[]).map(file => getCampaignImageUrl(file.filename));
+    } else if (req.file) {
+      // Fallback for single file upload
+      imageUrls = [getCampaignImageUrl(req.file.filename)];
+    }
+
     const campaignData = {
       ...req.body,
+      images: imageUrls,
+      image: imageUrls.length > 0 ? imageUrls[0] : '',
       ngoId,
       ngoName: ngo.organizationName || ngo.name,
       createdDate: new Date(),
@@ -250,7 +262,7 @@ export const createCampaign = async (req: AuthRequest, res: Response) => {
       raised: campaign.raised,
       donors: campaign.donors,
       daysLeft: campaign.daysLeft,
-      image: campaign.image,
+      images: campaign.images,
       location: campaign.location,
       urgency: campaign.urgency,
       status: campaign.status,
@@ -293,9 +305,23 @@ export const updateCampaign = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Handle image upload
+    const updateData: any = { ...req.body, updatedDate: new Date() };
+    if (req.file) {
+      // Delete old image if exists
+      if (campaign.image) {
+        const oldImageFilename = campaign.image.split('/').pop();
+        if (oldImageFilename) {
+          deleteCampaignImage(oldImageFilename);
+        }
+      }
+      // Set new image URL
+      updateData.image = getCampaignImageUrl(req.file.filename);
+    }
+
     const updatedCampaign = await Campaign.findByIdAndUpdate(
       id,
-      { ...req.body, updatedDate: new Date() },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -563,7 +589,7 @@ export const donateToCampaign = async (req: AuthRequest, res: Response) => {
       raised: campaign.raised,
       donors: campaign.donors,
       daysLeft: campaign.daysLeft,
-      image: campaign.image,
+      image: campaign.images && campaign.images.length > 0 ? campaign.images[0] : '',
       location: campaign.location,
       urgency: campaign.urgency,
       status: campaign.status,

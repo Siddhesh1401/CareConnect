@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, Calendar, Clock, MapPin, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { getFullImageUrl } from '../../services/api';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -253,7 +254,7 @@ export const EventRegistrationPage: React.FC = () => {
               <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
                 <div className="relative h-80">
                   <img
-                    src={event.images[0]}
+                    src={getFullImageUrl(event.images[0])}
                     alt={event.title}
                     className="w-full h-full object-cover"
                   />

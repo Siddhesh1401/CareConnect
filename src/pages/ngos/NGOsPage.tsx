@@ -18,7 +18,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import ReportForm from '../../components/ReportForm';
-import api from '../../services/api';
+import api, { getFullImageUrl } from '../../services/api';
 
 interface NGO {
   id: string;
@@ -132,6 +132,21 @@ export const NGOsPage: React.FC = () => {
   useEffect(() => {
     fetchNGOs();
   }, []);
+
+  // Listen for NGO profile updates
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'ngo_profile_updated' && e.newValue) {
+        console.log('NGO profile update detected, refreshing NGOs list...');
+        fetchNGOs(currentPage);
+        // Clear the flag
+        localStorage.removeItem('ngo_profile_updated');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [currentPage]);
 
   // Since filtering is now done on the backend, we just use the fetched ngos
   const filteredNGOs = ngos;
@@ -251,7 +266,7 @@ export const NGOsPage: React.FC = () => {
               <Card key={ngo.id} hover className="overflow-hidden">
                 <div className="relative">
                   <img
-                    src={ngo.image}
+                    src={getFullImageUrl(ngo.image)}
                     alt={ngo.name}
                     className="w-full h-48 object-cover"
                     onError={(e) => {
