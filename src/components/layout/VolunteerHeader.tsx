@@ -3,12 +3,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Heart, User, LogOut, Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
+import { LogoutModal } from '../ui/LogoutModal';
 import { HeaderContactSupport } from '../HeaderContactSupport';
 
 export const VolunteerHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -25,18 +26,18 @@ export const VolunteerHeader: React.FC = () => {
   const isActiveLink = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    setShowLogoutConfirm(true);
+    setShowLogoutModal(true);
   };
 
   const confirmLogout = async () => {
     await logout();
     setIsProfileMenuOpen(false);
-    setShowLogoutConfirm(false);
+    setShowLogoutModal(false);
     navigate('/', { replace: true });
   };
 
   const cancelLogout = () => {
-    setShowLogoutConfirm(false);
+    setShowLogoutModal(false);
   };
 
   return (
@@ -208,40 +209,14 @@ export const VolunteerHeader: React.FC = () => {
       </div>
     </header>
 
-    {/* Logout Confirmation Dialog */}
-    {showLogoutConfirm && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg border border-primary-200">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <LogOut className="w-8 h-8 text-red-600" />
-            </div>
-
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to logout? You will be redirected to the home page.
-            </p>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={cancelLogout}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
+    {/* Logout Confirmation Modal */}
+    <LogoutModal
+      isOpen={showLogoutModal}
+      onClose={cancelLogout}
+      onConfirm={confirmLogout}
+      userRole="volunteer"
+      userName={user?.name}
+    />
     </>
   );
 };

@@ -3,10 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Shield, User, LogOut, Settings, Activity, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
+import { LogoutModal } from '../ui/LogoutModal';
 
 export const AdminHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -47,14 +49,22 @@ export const AdminHeader: React.FC = () => {
   const isActiveLink = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout();
-      setIsProfileMenuOpen(false);
-    }
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    await logout();
+    setIsProfileMenuOpen(false);
+    setShowLogoutModal(false);
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   return (
-    <header className="bg-white shadow-lg border-b border-primary-200 sticky top-0 z-50">
+    <>
+      <header className="bg-white shadow-lg border-b border-primary-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -243,5 +253,15 @@ export const AdminHeader: React.FC = () => {
         )}
       </div>
     </header>
+
+    {/* Logout Confirmation Modal */}
+    <LogoutModal
+      isOpen={showLogoutModal}
+      onClose={cancelLogout}
+      onConfirm={confirmLogout}
+      userRole={user?.role}
+      userName={user?.name}
+    />
+    </>
   );
 };

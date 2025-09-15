@@ -3,11 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Heart, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
+import { LogoutModal } from '../ui/LogoutModal';
 
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -31,18 +32,18 @@ export const Header: React.FC = () => {
   const isActiveLink = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    setShowLogoutConfirm(true);
+    setShowLogoutModal(true);
   };
 
   const confirmLogout = async () => {
     await logout();
     setIsProfileMenuOpen(false);
-    setShowLogoutConfirm(false);
+    setShowLogoutModal(false);
     navigate('/', { replace: true });
   };
 
   const cancelLogout = () => {
-    setShowLogoutConfirm(false);
+    setShowLogoutModal(false);
   };
 
   return (
@@ -286,55 +287,14 @@ export const Header: React.FC = () => {
       </div>
     </header>
 
-    {/* Logout Confirmation Dialog */}
-    {showLogoutConfirm && (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-300">
-        <div className="bg-gradient-to-br from-white via-blue-50 to-indigo-50 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-blue-200/50 relative overflow-hidden">
-          {/* Futuristic background effects */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-transparent to-purple-400/10 rounded-2xl"></div>
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-t-2xl"></div>
-          <div className="absolute -top-10 -right-10 w-20 h-20 bg-blue-400/20 rounded-full blur-xl"></div>
-          <div className="absolute -bottom-10 -left-10 w-16 h-16 bg-purple-400/20 rounded-full blur-xl"></div>
-
-          <div className="text-center relative z-10">
-            {/* Enhanced icon with glow effect */}
-            <div className="relative mx-auto mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/25 relative">
-                <LogOut className="w-10 h-10 text-white" />
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur-md opacity-50 -z-10"></div>
-              </div>
-              {/* Pulsing ring animation */}
-              <div className="absolute inset-0 rounded-2xl border-2 border-blue-400/50 animate-ping"></div>
-            </div>
-
-            <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 mb-8 text-sm leading-relaxed">
-              Are you sure you want to logout? You will be redirected to the home page.
-            </p>
-
-            <div className="flex space-x-4">
-              <button
-                onClick={cancelLogout}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-300 transform hover:scale-105 hover:shadow-lg font-medium border border-gray-300/50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmLogout}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 font-medium relative overflow-hidden group"
-              >
-                <span className="relative z-10">Logout</span>
-                {/* Button glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 rounded-xl"></div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
+    {/* Logout Confirmation Modal */}
+    <LogoutModal
+      isOpen={showLogoutModal}
+      onClose={cancelLogout}
+      onConfirm={confirmLogout}
+      userRole={user?.role}
+      userName={user?.name}
+    />
     </>
   );
 };
