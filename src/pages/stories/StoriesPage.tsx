@@ -10,11 +10,13 @@ import {
   Eye,
   Edit,
   Trash2,
-  Filter
+  Filter,
+  Flag
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import ReportForm from '../../components/ReportForm';
 import { storyAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -60,6 +62,10 @@ export const StoriesPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [myStoriesFilter, setMyStoriesFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  // Report modal states
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedStoryForReport, setSelectedStoryForReport] = useState<Story | null>(null);
 
   const handleTabChange = (tab: 'all' | 'my') => {
     setActiveTab(tab);
@@ -139,6 +145,11 @@ export const StoriesPage: React.FC = () => {
       console.error('Error deleting story:', error);
       alert('Failed to delete story');
     }
+  };
+
+  const handleReportStory = (story: Story) => {
+    setSelectedStoryForReport(story);
+    setReportModalOpen(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -494,13 +505,24 @@ export const StoriesPage: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <Link
-                    to={`/stories/${story.id}`}
-                    className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center space-x-1"
-                  >
-                    <span>Read More</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
+                  <div className="flex items-center space-x-2">
+                    <Link
+                      to={`/stories/${story.id}`}
+                      className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center space-x-1"
+                    >
+                      <span>Read More</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 px-2 py-1"
+                      onClick={() => handleReportStory(story)}
+                      title="Report this story"
+                    >
+                      <Flag className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -585,6 +607,20 @@ export const StoriesPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Report Form Modal */}
+      {selectedStoryForReport && (
+        <ReportForm
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setSelectedStoryForReport(null);
+          }}
+          type="story"
+          targetId={selectedStoryForReport.id}
+          targetName={selectedStoryForReport.title}
+        />
+      )}
     </div>
   );
 };

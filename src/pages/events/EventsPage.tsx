@@ -11,12 +11,14 @@ import {
   Star,
   Heart,
   Building,
-  CheckCircle
+  CheckCircle,
+  Flag
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { ChatBot } from '../../components/ChatBot';
+import ReportForm from '../../components/ReportForm';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -48,6 +50,8 @@ export const EventsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedEventForReport, setSelectedEventForReport] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -128,6 +132,11 @@ export const EventsPage: React.FC = () => {
   const handleLocationChange = (value: string) => {
     setSelectedLocation(value);
     setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleReportEvent = (event: Event) => {
+    setSelectedEventForReport(event);
+    setReportModalOpen(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -377,8 +386,14 @@ export const EventsPage: React.FC = () => {
                         </Button>
                       </Link>
                     )}
-                    <Button variant="outline" size="sm" className="border-primary-200 hover:border-primary-300 hover:bg-primary-50 text-primary-600">
-                      <Heart className="w-4 h-4" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600"
+                      onClick={() => handleReportEvent(event)}
+                      title="Report this event"
+                    >
+                      <Flag className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -450,6 +465,20 @@ export const EventsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Report Form Modal */}
+      {selectedEventForReport && (
+        <ReportForm
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setSelectedEventForReport(null);
+          }}
+          type="event"
+          targetId={selectedEventForReport._id}
+          targetName={selectedEventForReport.title}
+        />
+      )}
 
       {/* ChatBot Component */}
       <ChatBot />

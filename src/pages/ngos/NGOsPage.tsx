@@ -11,11 +11,13 @@ import {
   ChevronDown,
   Verified,
   TrendingUp,
-  Loader2
+  Loader2,
+  Flag
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import ReportForm from '../../components/ReportForm';
 import api from '../../services/api';
 
 interface NGO {
@@ -45,6 +47,10 @@ export const NGOsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalNGOs, setTotalNGOs] = useState(0);
+
+  // Report modal states
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedNGOForReport, setSelectedNGOForReport] = useState<NGO | null>(null);
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -106,6 +112,11 @@ export const NGOsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReportNGO = (ngo: NGO) => {
+    setSelectedNGOForReport(ngo);
+    setReportModalOpen(true);
   };
 
   // Fetch NGOs when filters change
@@ -331,6 +342,15 @@ export const NGOsPage: React.FC = () => {
                         <Heart className="w-4 h-4" />
                       </Button>
                     </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 px-3"
+                      onClick={() => handleReportNGO(ngo)}
+                      title="Report this NGO"
+                    >
+                      <Flag className="w-4 h-4" />
+                    </Button>
                   </div>
 
                   {/* Founded */}
@@ -424,6 +444,20 @@ export const NGOsPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Report Form Modal */}
+      {selectedNGOForReport && (
+        <ReportForm
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setSelectedNGOForReport(null);
+          }}
+          type="ngo"
+          targetId={selectedNGOForReport.id}
+          targetName={selectedNGOForReport.name}
+        />
+      )}
     </div>
   );
 };

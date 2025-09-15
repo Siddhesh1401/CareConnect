@@ -10,7 +10,8 @@ import {
   TrendingUp,
   Send,
   UserPlus,
-  MessageSquare
+  MessageSquare,
+  Flag
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { communityAPI, getFullImageUrl } from '../../services/api';
@@ -18,6 +19,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { ImageUpload } from '../../components/ui/ImageUpload';
+import ReportForm from '../../components/ReportForm';
 
 // Type definitions
 interface Community {
@@ -101,6 +103,10 @@ export const CommunityPage: React.FC = () => {
     commentsMade: 0,
     likesReceived: 0
   });
+
+  // Report modal states
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedCommunityForReport, setSelectedCommunityForReport] = useState<Community | null>(null);
 
   // Trending topics
   const [trendingTopics, setTrendingTopics] = useState<Array<{tag: string, count: number}>>([]);
@@ -541,6 +547,11 @@ export const CommunityPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReportCommunity = (community: Community) => {
+    setSelectedCommunityForReport(community);
+    setReportModalOpen(true);
   };
 
   const handleLikePost = async (postId?: string) => {
@@ -1845,6 +1856,15 @@ export const CommunityPage: React.FC = () => {
                                   );
                                 }
                               })()}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 px-3"
+                                onClick={() => handleReportCommunity(community)}
+                                title="Report this community"
+                              >
+                                <Flag className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -2130,6 +2150,20 @@ export const CommunityPage: React.FC = () => {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Report Form Modal */}
+      {selectedCommunityForReport && (
+        <ReportForm
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setSelectedCommunityForReport(null);
+          }}
+          type="community"
+          targetId={selectedCommunityForReport.id || selectedCommunityForReport._id || ''}
+          targetName={selectedCommunityForReport.name}
+        />
       )}
     </div>
   );

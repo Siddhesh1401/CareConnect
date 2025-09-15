@@ -15,6 +15,7 @@ import ngoRoutes from './routes/ngos.js';
 import campaignRoutes from './routes/campaigns.js';
 import storyRoutes from './routes/stories.js';
 import communityRoutes from './routes/communities.js';
+import reportRoutes from './routes/reports.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 
@@ -91,6 +92,7 @@ app.use('/api/ngos', ngoRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/communities', communityRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Serve uploaded files with CORS headers
 app.use('/uploads', (req, res, next) => {

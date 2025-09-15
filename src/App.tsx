@@ -47,6 +47,7 @@ import ActivityLogPage from './pages/admin/ActivityLogPage';
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
 import { AdminStoriesPage } from './pages/admin/AdminStoriesPage';
 import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
+import { AdminReportsPage } from './pages/admin/AdminReportsPage';
 import { CampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CampaignDetailsPage } from './pages/campaigns/CampaignDetailsPage';
 
@@ -414,6 +415,14 @@ function App() {
             <AdminRoute>
               <AppLayout hideFooter>
                 <AdminAnalyticsPage />
+              </AppLayout>
+            </AdminRoute>
+          } />
+          
+          <Route path="/admin/reports" element={
+            <AdminRoute>
+              <AppLayout hideFooter>
+                <AdminReportsPage />
               </AppLayout>
             </AdminRoute>
           } />

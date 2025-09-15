@@ -14,11 +14,13 @@ import {
   Eye,
   CreditCard,
   X,
-  CheckCircle
+  CheckCircle,
+  Flag
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import ReportForm from '../../components/ReportForm';
 import { campaignAPI } from '../../services/api';
 
 interface Campaign {
@@ -48,6 +50,8 @@ export const CampaignsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('urgency');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [selectedCampaignForReport, setSelectedCampaignForReport] = useState<Campaign | null>(null);
   
   // Donation modal state
   const [showDonationModal, setShowDonationModal] = useState(false);
@@ -152,6 +156,11 @@ export const CampaignsPage: React.FC = () => {
   const handleSupportClick = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
     setShowDonationModal(true);
+  };
+
+  const handleReportCampaign = (campaign: Campaign) => {
+    setSelectedCampaignForReport(campaign);
+    setReportModalOpen(true);
   };
 
   const handleDonation = async () => {
@@ -377,6 +386,15 @@ export const CampaignsPage: React.FC = () => {
                     <Heart className="w-4 h-4 mr-2" />
                     Support
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 px-3"
+                    onClick={() => handleReportCampaign(campaign)}
+                    title="Report this campaign"
+                  >
+                    <Flag className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -506,6 +524,20 @@ export const CampaignsPage: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Report Form Modal */}
+      {selectedCampaignForReport && (
+        <ReportForm
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setSelectedCampaignForReport(null);
+          }}
+          type="campaign"
+          targetId={selectedCampaignForReport.id}
+          targetName={selectedCampaignForReport.title}
+        />
       )}
     </div>
   );
