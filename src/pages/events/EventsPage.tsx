@@ -17,6 +17,7 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import MapsButton from '../../components/ui/MapsButton';
 import { ChatBot } from '../../components/ChatBot';
 import ReportForm from '../../components/ReportForm';
 import { getFullImageUrl } from '../../services/api';
@@ -36,8 +37,11 @@ interface Event {
   endTime: string;
   location: {
     address: string;
+    area?: string;
     city: string;
     state: string;
+    pinCode?: string;
+    landmark?: string;
   };
   capacity: number;
   availableSpots: number;
@@ -378,7 +382,24 @@ export const EventsPage: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-3">
                       <MapPin className="w-4 h-4 text-primary-500" />
-                      <span className="font-medium">{event.location.address}, {event.location.city}</span>
+                      <div className="flex-1">
+                        <span className="font-medium">{event.location.address}</span>
+                        {event.location.area && <span className="text-gray-500">, {event.location.area}</span>}
+                        <span className="text-gray-500">, {event.location.city}, {event.location.state}</span>
+                        {event.location.pinCode && <span className="text-gray-500"> - {event.location.pinCode}</span>}
+                      </div>
+                    </div>
+                    <div className="flex justify-end pt-1">
+                      <MapsButton
+                        address={event.location.address}
+                        area={event.location.area}
+                        city={event.location.city}
+                        state={event.location.state}
+                        pinCode={event.location.pinCode}
+                        landmark={event.location.landmark}
+                        variant="ghost"
+                        size="sm"
+                      />
                     </div>
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center space-x-3">

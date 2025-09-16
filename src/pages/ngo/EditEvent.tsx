@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, MapPin, Users, FileText, Tag, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, FileText, Tag, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { TimePicker } from '../../components/ui/TimePicker';
 import MapsButton from '../../components/ui/MapsButton';
+import { EnhancedLocationInput } from '../../components/ui/EnhancedLocationInput';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -18,6 +19,7 @@ export const EditEvent: React.FC = () => {
   const [error, setError] = useState('');
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [isLocationValid, setIsLocationValid] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -48,23 +50,6 @@ export const EditEvent: React.FC = () => {
     'Disaster Relief',
     'Women Empowerment',
     'Youth Development'
-  ];
-
-  const states = [
-    'Maharashtra',
-    'Delhi',
-    'Karnataka',
-    'Tamil Nadu',
-    'Gujarat',
-    'Rajasthan',
-    'Uttar Pradesh',
-    'West Bengal',
-    'Madhya Pradesh',
-    'Andhra Pradesh',
-    'Telangana',
-    'Kerala',
-    'Punjab',
-    'Haryana'
   ];
 
   // Fetch event data
@@ -161,10 +146,8 @@ export const EditEvent: React.FC = () => {
       // Validation
       if (!formData.title.trim() || !formData.description.trim() || !formData.category || 
           !formData.date || !formData.startTime || !formData.endTime || 
-          !formData.location.address || !formData.location.area || !formData.location.city || 
-          !formData.location.state || !formData.location.pinCode ||
-          !formData.capacity) {
-        setError('All required fields must be filled');
+          !isLocationValid || !formData.capacity) {
+        setError('All required fields must be filled and location must be valid');
         setIsSubmitting(false);
         return;
       }
@@ -448,95 +431,11 @@ export const EditEvent: React.FC = () => {
           <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-primary-900 mb-4">Location</h3>
-              <div className="space-y-4">
-                <Input
-                  label="Address *"
-                  name="location.address"
-                  value={formData.location.address}
-                  onChange={handleInputChange}
-                  placeholder="Street address, building name, etc."
-                  leftIcon={<MapPin className="w-5 h-5" />}
-                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
-                  required
-                />
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Input
-                    label="Area/Locality *"
-                    name="location.area"
-                    value={formData.location.area}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Bandra West, Koramangala, Sector 5"
-                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
-                    required
-                  />
-
-                  <Input
-                    label="PIN Code *"
-                    name="location.pinCode"
-                    value={formData.location.pinCode}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 400050, 560095"
-                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
-                    required
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Input
-                    label="City *"
-                    name="location.city"
-                    value={formData.location.city}
-                    onChange={handleInputChange}
-                    placeholder="City"
-                    className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
-                    required
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-primary-700 mb-2">
-                      State *
-                    </label>
-                    <select
-                      name="location.state"
-                      value={formData.location.state}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
-                      required
-                    >
-                      <option value="">Select State</option>
-                      {states.map((state) => (
-                        <option key={state} value={state}>
-                          {state}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <Input
-                  label="Landmark (Optional)"
-                  name="location.landmark"
-                  value={formData.location.landmark}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Near Phoenix Mall, Opposite Metro Station"
-                  className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
-                />
-
-                {/* Google Maps Navigation Button */}
-                <div className="flex justify-end pt-4">
-                  <MapsButton
-                    address={formData.location.address}
-                    area={formData.location.area}
-                    city={formData.location.city}
-                    state={formData.location.state}
-                    pinCode={formData.location.pinCode}
-                    landmark={formData.location.landmark}
-                    variant="outline"
-                    size="sm"
-                  />
-                </div>
-              </div>
+              <EnhancedLocationInput
+                value={formData.location}
+                onChange={(location) => setFormData(prev => ({ ...prev, location }))}
+                onValidationChange={setIsLocationValid}
+              />
             </div>
           </Card>
 

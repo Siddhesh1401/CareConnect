@@ -21,8 +21,11 @@ interface Event {
   endTime: string;
   location: {
     address: string;
+    area?: string;
     city: string;
     state: string;
+    pinCode?: string;
+    landmark?: string;
   };
   capacity: number;
   availableSpots: number;
@@ -350,13 +353,23 @@ export const EventRegistrationPage: React.FC = () => {
                     <div className="flex-1">
                       <p className="text-sm text-gray-600 font-medium">Location</p>
                       <p className="text-gray-900 font-semibold">{event.location.address}</p>
-                      <p className="text-gray-600">{event.location.city}, {event.location.state}</p>
+                      <p className="text-gray-600">
+                        {event.location.area && `${event.location.area}, `}
+                        {event.location.city}, {event.location.state}
+                        {event.location.pinCode && ` - ${event.location.pinCode}`}
+                      </p>
+                      {event.location.landmark && (
+                        <p className="text-xs text-gray-500 mt-1">📍 {event.location.landmark}</p>
+                      )}
                     </div>
                   </div>
                   <MapsButton
                     address={event.location.address}
+                    area={event.location.area}
                     city={event.location.city}
                     state={event.location.state}
+                    pinCode={event.location.pinCode}
+                    landmark={event.location.landmark}
                     variant="ghost"
                     size="sm"
                   />

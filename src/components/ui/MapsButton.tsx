@@ -24,7 +24,10 @@ const MapsButton: React.FC<MapsButtonProps> = ({
   variant = 'default',
   size = 'md'
 }) => {
-  const handleMapsClick = () => {
+  const handleMapsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
+    
     // Construct enhanced location string for maximum Google Maps accuracy
     const locationParts: string[] = [];
     

@@ -48,12 +48,20 @@ export const getVolunteerDashboard = async (req: AuthRequest, res: Response): Pr
         v => v.userId.toString() === userId
       );
 
+      // Build complete location string
+      const locationParts = [];
+      if (event.location.address) locationParts.push(event.location.address);
+      if (event.location.area) locationParts.push(event.location.area);
+      if (event.location.city) locationParts.push(event.location.city);
+      if (event.location.state) locationParts.push(event.location.state);
+      if (event.location.pinCode) locationParts.push(event.location.pinCode);
+
       return {
         _id: event._id,
         title: event.title,
         date: event.date,
         time: event.startTime,
-        location: `${event.location.city}, ${event.location.state}`,
+        location: locationParts.join(', '),
         ngo: event.organizationName,
         status: event.status === 'completed' ? 'completed' : 'upcoming',
         registrationDate: registration?.registrationDate
@@ -64,13 +72,23 @@ export const getVolunteerDashboard = async (req: AuthRequest, res: Response): Pr
     const upcomingEventsList = userEvents
       .filter(event => event.status === 'published' && event.date >= new Date())
       .slice(0, 3)
-      .map(event => ({
-        _id: event._id,
-        title: event.title,
-        ngo: event.organizationName,
-        date: event.date,
-        location: `${event.location.city}, ${event.location.state}`
-      }));
+      .map(event => {
+        // Build complete location string
+        const locationParts = [];
+        if (event.location.address) locationParts.push(event.location.address);
+        if (event.location.area) locationParts.push(event.location.area);
+        if (event.location.city) locationParts.push(event.location.city);
+        if (event.location.state) locationParts.push(event.location.state);
+        if (event.location.pinCode) locationParts.push(event.location.pinCode);
+
+        return {
+          _id: event._id,
+          title: event.title,
+          ngo: event.organizationName,
+          date: event.date,
+          location: locationParts.join(', ')
+        };
+      });
 
     // Calculate achievements based on participation
     const achievements = [];
@@ -167,16 +185,26 @@ export const getNGODashboard = async (req: AuthRequest, res: Response): Promise<
     ).length;
 
     // Get recent events (last 5)
-    const recentEvents = ngoEvents.slice(0, 5).map(event => ({
-      _id: event._id,
-      title: event.title,
-      date: event.date,
-      time: event.startTime,
-      location: `${event.location.city}, ${event.location.state}`,
-      volunteers: event.registeredVolunteers.filter(v => v.status === 'confirmed').length,
-      capacity: event.capacity,
-      status: event.status
-    }));
+    const recentEvents = ngoEvents.slice(0, 5).map(event => {
+      // Build complete location string
+      const locationParts = [];
+      if (event.location.address) locationParts.push(event.location.address);
+      if (event.location.area) locationParts.push(event.location.area);
+      if (event.location.city) locationParts.push(event.location.city);
+      if (event.location.state) locationParts.push(event.location.state);
+      if (event.location.pinCode) locationParts.push(event.location.pinCode);
+
+      return {
+        _id: event._id,
+        title: event.title,
+        date: event.date,
+        time: event.startTime,
+        location: locationParts.join(', '),
+        volunteers: event.registeredVolunteers.filter(v => v.status === 'confirmed').length,
+        capacity: event.capacity,
+        status: event.status
+      };
+    });
 
     // Get recent volunteers (last 5 who registered for NGO's events)
     const recentVolunteers = [];

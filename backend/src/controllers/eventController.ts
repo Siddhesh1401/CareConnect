@@ -39,6 +39,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     if (typeof location === 'string') {
       try {
         location = JSON.parse(location);
+        console.log('Parsed location data:', location);
       } catch (e) {
         console.error('Error parsing location:', e);
         res.status(400).json({
@@ -147,6 +148,19 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
 
     const savedEvent = await newEvent.save();
 
+    console.log('Event created successfully with location data:', {
+      eventId: savedEvent._id,
+      location: savedEvent.location,
+      fullLocation: {
+        address: savedEvent.location?.address,
+        area: savedEvent.location?.area,
+        city: savedEvent.location?.city,
+        state: savedEvent.location?.state,
+        pinCode: savedEvent.location?.pinCode,
+        landmark: savedEvent.location?.landmark
+      }
+    });
+
     res.status(201).json({
       success: true,
       message: 'Event created successfully',
@@ -243,6 +257,21 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
       };
     });
 
+    if (eventsWithVirtuals.length > 0) {
+      console.log('First event in list with location data:', {
+        eventId: eventsWithVirtuals[0]._id,
+        location: eventsWithVirtuals[0].location,
+        fullLocation: {
+          address: eventsWithVirtuals[0].location?.address,
+          area: eventsWithVirtuals[0].location?.area,
+          city: eventsWithVirtuals[0].location?.city,
+          state: eventsWithVirtuals[0].location?.state,
+          pinCode: eventsWithVirtuals[0].location?.pinCode,
+          landmark: eventsWithVirtuals[0].location?.landmark
+        }
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: 'Events retrieved successfully',
@@ -310,6 +339,19 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
       })()
     };
 
+    console.log('Event retrieved with location data:', {
+      eventId: event._id,
+      location: event.location,
+      fullLocation: {
+        address: event.location?.address,
+        area: event.location?.area,
+        city: event.location?.city,
+        state: event.location?.state,
+        pinCode: event.location?.pinCode,
+        landmark: event.location?.landmark
+      }
+    });
+
     res.status(200).json({
       success: true,
       message: 'Event retrieved successfully',
@@ -371,6 +413,21 @@ export const getNGOEvents = async (req: AuthRequest, res: Response): Promise<voi
         return 'open';
       })()
     }));
+
+    if (eventsWithVirtuals.length > 0) {
+      console.log('NGO events retrieved - first event location data:', {
+        eventId: eventsWithVirtuals[0]._id,
+        location: eventsWithVirtuals[0].location,
+        fullLocation: {
+          address: eventsWithVirtuals[0].location?.address,
+          area: eventsWithVirtuals[0].location?.area,
+          city: eventsWithVirtuals[0].location?.city,
+          state: eventsWithVirtuals[0].location?.state,
+          pinCode: eventsWithVirtuals[0].location?.pinCode,
+          landmark: eventsWithVirtuals[0].location?.landmark
+        }
+      });
+    }
 
     res.status(200).json({
       success: true,

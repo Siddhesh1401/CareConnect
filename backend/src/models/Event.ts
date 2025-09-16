@@ -13,8 +13,11 @@ export interface IEvent extends Document {
   endTime: string;
   location: {
     address: string;
+    area?: string;
     city: string;
     state: string;
+    pinCode?: string;
+    landmark?: string;
     coordinates?: {
       latitude: number;
       longitude: number;
@@ -85,6 +88,10 @@ const EventSchema = new Schema<IEvent>({
       type: String,
       required: true
     },
+    area: {
+      type: String,
+      required: false
+    },
     city: {
       type: String,
       required: true
@@ -92,6 +99,14 @@ const EventSchema = new Schema<IEvent>({
     state: {
       type: String,
       required: true
+    },
+    pinCode: {
+      type: String,
+      required: false
+    },
+    landmark: {
+      type: String,
+      required: false
     },
     coordinates: {
       latitude: Number,
