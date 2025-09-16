@@ -4,7 +4,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Users, FileText, Tag, AlertCircle }
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
-import { TimePicker } from '../../components/ui/TimePicker';
+import MapsButton from '../../components/ui/MapsButton';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -258,21 +258,23 @@ export const CreateEvent: React.FC = () => {
                   min={new Date().toISOString().split('T')[0]}
                 />
 
-                <TimePicker
+                <Input
                   label="Start Time *"
                   name="startTime"
+                  type="time"
                   value={formData.startTime}
-                  onChange={(value) => setFormData(prev => ({ ...prev, startTime: value }))}
+                  onChange={handleInputChange}
                   leftIcon={<Clock className="w-5 h-5" />}
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
                 />
 
-                <TimePicker
+                <Input
                   label="End Time *"
                   name="endTime"
+                  type="time"
                   value={formData.endTime}
-                  onChange={(value) => setFormData(prev => ({ ...prev, endTime: value }))}
+                  onChange={handleInputChange}
                   leftIcon={<Clock className="w-5 h-5" />}
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
@@ -327,6 +329,17 @@ export const CreateEvent: React.FC = () => {
                       ))}
                     </select>
                   </div>
+                </div>
+
+                {/* Google Maps Navigation Button */}
+                <div className="flex justify-end pt-4">
+                  <MapsButton
+                    address={formData.location.address}
+                    city={formData.location.city}
+                    state={formData.location.state}
+                    variant="outline"
+                    size="sm"
+                  />
                 </div>
               </div>
             </div>

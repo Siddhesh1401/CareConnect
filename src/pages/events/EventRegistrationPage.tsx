@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, Calendar, Clock, MapPin, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import MapsButton from '../../components/ui/MapsButton';
 import { getFullImageUrl } from '../../services/api';
 import axios from 'axios';
 
@@ -341,15 +342,24 @@ export const EventRegistrationPage: React.FC = () => {
               </div>
 
               <div className="bg-white rounded-lg border border-gray-200 p-4 sm:col-span-2">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-purple-500 rounded-lg">
-                    <MapPin className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-500 rounded-lg">
+                      <MapPin className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 font-medium">Location</p>
+                      <p className="text-gray-900 font-semibold">{event.location.address}</p>
+                      <p className="text-gray-600">{event.location.city}, {event.location.state}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-600 font-medium">Location</p>
-                    <p className="text-gray-900 font-semibold">{event.location.address}</p>
-                    <p className="text-gray-600">{event.location.city}, {event.location.state}</p>
-                  </div>
+                  <MapsButton
+                    address={event.location.address}
+                    city={event.location.city}
+                    state={event.location.state}
+                    variant="ghost"
+                    size="sm"
+                  />
                 </div>
               </div>
             </div>

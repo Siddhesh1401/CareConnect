@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, Calendar, Clock, MapPin, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import MapsButton from '../../components/ui/MapsButton';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -221,11 +222,20 @@ export const EventRegistrationPage: React.FC = () => {
                   </div>
                   <span className="font-medium">{event.startTime} - {event.endTime}</span>
                 </div>
-                <div className="flex items-center space-x-3 text-gray-600 sm:col-span-2">
-                  <div className="p-2 bg-primary-100 rounded-xl">
-                    <MapPin className="w-5 h-5 text-primary-600" />
+                <div className="flex items-center justify-between text-gray-600 sm:col-span-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-primary-100 rounded-xl">
+                      <MapPin className="w-5 h-5 text-primary-600" />
+                    </div>
+                    <span className="font-medium">{event.location.address}, {event.location.city}, {event.location.state}</span>
                   </div>
-                  <span className="font-medium">{event.location.address}, {event.location.city}, {event.location.state}</span>
+                  <MapsButton
+                    address={event.location.address}
+                    city={event.location.city}
+                    state={event.location.state}
+                    variant="ghost"
+                    size="sm"
+                  />
                 </div>
               </div>
 
