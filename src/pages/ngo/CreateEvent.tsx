@@ -24,8 +24,11 @@ export const CreateEvent: React.FC = () => {
     endTime: '',
     location: {
       address: '',
+      area: '',
       city: '',
-      state: ''
+      state: '',
+      pinCode: '',
+      landmark: ''
     },
     capacity: '',
     requirements: '',
@@ -99,7 +102,8 @@ export const CreateEvent: React.FC = () => {
       // Validate required fields
       if (!formData.title || !formData.description || !formData.category || 
           !formData.date || !formData.startTime || !formData.endTime ||
-          !formData.location.address || !formData.location.city || !formData.location.state ||
+          !formData.location.address || !formData.location.area || !formData.location.city || 
+          !formData.location.state || !formData.location.pinCode ||
           !formData.capacity) {
         setError('Please fill in all required fields');
         setIsSubmitting(false);
@@ -362,7 +366,27 @@ export const CreateEvent: React.FC = () => {
                 leftIcon={<MapPin className="w-5 h-5" />}
                 required
               />
-              
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <Input
+                  label="Area/Locality *"
+                  name="location.area"
+                  value={formData.location.area}
+                  onChange={handleInputChange}
+                  placeholder="e.g. Bandra West, Koramangala, Sector 5"
+                  required
+                />
+
+                <Input
+                  label="PIN Code *"
+                  name="location.pinCode"
+                  value={formData.location.pinCode}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 400050, 560095"
+                  required
+                />
+              </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <Input
                   label="City *"
@@ -394,12 +418,23 @@ export const CreateEvent: React.FC = () => {
                 </div>
               </div>
 
+              <Input
+                label="Landmark (Optional)"
+                name="location.landmark"
+                value={formData.location.landmark}
+                onChange={handleInputChange}
+                placeholder="e.g. Near Phoenix Mall, Opposite Metro Station"
+              />
+
               {/* Google Maps Navigation Button */}
               <div className="flex justify-end pt-4">
                 <MapsButton
                   address={formData.location.address}
+                  area={formData.location.area}
                   city={formData.location.city}
                   state={formData.location.state}
+                  pinCode={formData.location.pinCode}
+                  landmark={formData.location.landmark}
                   variant="outline"
                   size="sm"
                 />

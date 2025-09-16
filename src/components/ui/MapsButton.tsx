@@ -3,8 +3,11 @@ import { MapPin } from 'lucide-react';
 
 interface MapsButtonProps {
   address?: string;
+  area?: string;
   city?: string;
   state?: string;
+  pinCode?: string;
+  landmark?: string;
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
@@ -12,15 +15,48 @@ interface MapsButtonProps {
 
 const MapsButton: React.FC<MapsButtonProps> = ({ 
   address, 
+  area,
   city, 
-  state, 
+  state,
+  pinCode,
+  landmark, 
   className = '', 
   variant = 'default',
   size = 'md'
 }) => {
   const handleMapsClick = () => {
-    // Construct the location string from available parts
-    const locationParts = [address, city, state].filter(Boolean);
+    // Construct enhanced location string for maximum Google Maps accuracy
+    const locationParts: string[] = [];
+    
+    // Add address (street, building) first for specificity
+    if (address?.trim()) {
+      locationParts.push(address.trim());
+    }
+    
+    // Add area/locality for neighborhood context
+    if (area?.trim()) {
+      locationParts.push(area.trim());
+    }
+    
+    // Add city for regional context
+    if (city?.trim()) {
+      locationParts.push(city.trim());
+    }
+    
+    // Add state for broader regional context
+    if (state?.trim()) {
+      locationParts.push(state.trim());
+    }
+    
+    // Add PIN code for precise location identification
+    if (pinCode?.trim()) {
+      locationParts.push(pinCode.trim());
+    }
+    
+    // Add landmark if provided for easier recognition
+    if (landmark?.trim()) {
+      locationParts.push(`near ${landmark.trim()}`);
+    }
     
     if (locationParts.length === 0) {
       alert('Location details not available');
@@ -29,7 +65,7 @@ const MapsButton: React.FC<MapsButtonProps> = ({
     
     const locationString = locationParts.join(', ');
     
-    // Create Google Maps URL
+    // Create Google Maps URL with enhanced location data
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationString)}`;
     
     // Open in new tab
