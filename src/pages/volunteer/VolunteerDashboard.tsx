@@ -9,7 +9,8 @@ import {
   MapPin,
   Star,
   ArrowRight,
-  Edit
+  Edit,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
@@ -92,6 +93,13 @@ export const VolunteerDashboard: React.FC = () => {
   }, []);
 
   const stats = [
+    {
+      label: 'Broadcasts',
+      value: 'View Messages',
+      icon: MessageSquare,
+      color: 'text-blue-600 bg-blue-50',
+      link: '/volunteer/broadcasts'
+    },
     {
       label: 'Total Hours',
       value: dashboardData?.stats.totalHours.toString() || '0',
@@ -192,22 +200,29 @@ export const VolunteerDashboard: React.FC = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <Card key={index} className="p-6 bg-white border-primary-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                </div>
-                <div className="p-3 bg-primary-50 rounded-lg">
-                  <stat.icon className="w-6 h-6 text-primary-600" />
-                </div>
-              </div>
-              <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-primary-600 h-2 rounded-full transition-all duration-1000" style={{width: `${Math.min(100, (index + 1) * 25)}%`}}></div>
-              </div>
-            </Card>
-          ))}
+          {stats.map((stat, index) => {
+            const StatCard = stat.link ? Link : 'div';
+            const cardProps = stat.link ? { to: stat.link } : {};
+
+            return (
+              <Card key={index} className={`p-6 bg-white border-primary-200 ${stat.link ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}`}>
+                <StatCard {...cardProps} className="block">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${stat.color}`}>
+                      <stat.icon className={`w-6 h-6 ${stat.color.includes('blue') ? 'text-blue-600' : 'text-primary-600'}`} />
+                    </div>
+                  </div>
+                  <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+                    <div className={`h-2 rounded-full transition-all duration-1000 ${stat.color.includes('blue') ? 'bg-blue-600' : 'bg-primary-600'}`} style={{width: `${Math.min(100, (index + 1) * 25)}%`}}></div>
+                  </div>
+                </StatCard>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Achievements Panel */}

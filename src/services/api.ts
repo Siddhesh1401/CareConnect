@@ -13,6 +13,49 @@ const api = axios.create({
 const pendingRequests = new Map<string, Promise<any>>();
 const requestTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
+// Request queue for throttling concurrent requests
+const requestQueue: Array<() => Promise<any>> = [];
+const MAX_CONCURRENT_REQUESTS = 5; // Limit concurrent requests
+let activeRequests = 0;
+
+// Process request queue
+const processQueue = async () => {
+  if (activeRequests >= MAX_CONCURRENT_REQUESTS || requestQueue.length === 0) {
+    return;
+  }
+
+  activeRequests++;
+  const requestFn = requestQueue.shift();
+  if (requestFn) {
+    try {
+      await requestFn();
+    } catch (error) {
+      console.error('Request queue error:', error);
+    } finally {
+      activeRequests--;
+      // Process next request in queue
+      setTimeout(processQueue, 100); // Small delay to prevent immediate queue processing
+    }
+  }
+};
+
+// Add request to queue
+const queueRequest = (requestFn: () => Promise<any>): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const wrappedRequest = async () => {
+      try {
+        const result = await requestFn();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    requestQueue.push(wrappedRequest);
+    processQueue();
+  });
+};
+
 // Helper function to create request key for deduplication
 const createRequestKey = (config: any) => {
   return `${config.method?.toUpperCase()}_${config.url}_${JSON.stringify(config.params || {})}_${JSON.stringify(config.data || {})}`;
@@ -80,7 +123,7 @@ export const getProfilePictureUrl = (profilePicture: string | undefined | null, 
 
 // Request interceptor to add auth token and handle deduplication
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     // Add timestamp for performance monitoring (development only)
     if (import.meta.env.DEV) {
       (config as any).startTime = Date.now();
@@ -89,6 +132,12 @@ api.interceptors.request.use(
     const token = localStorage.getItem('careconnect_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // For non-GET requests, use queue to throttle concurrent requests
+    if (config.method?.toUpperCase() !== 'GET') {
+      // Add a small delay for non-GET requests to prevent bursts
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 200)); // 0-200ms random delay
     }
 
     // Add request deduplication for GET requests
@@ -164,19 +213,21 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Handle 429 (Too Many Requests) with exponential backoff
+    // Handle 429 (Too Many Requests) with improved exponential backoff
     if (error.response?.status === 429) {
       const retryCount = originalRequest._retryCount || 0;
-      const maxRetries = 3;
+      const maxRetries = 5; // Increased from 3
       
       if (retryCount < maxRetries) {
         originalRequest._retry = true;
         originalRequest._retryCount = retryCount + 1;
         
-        // Exponential backoff: 1s, 2s, 4s
-        const delay = Math.pow(2, retryCount) * 1000;
+        // Improved exponential backoff with jitter: base delay + random jitter
+        const baseDelay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s, 8s, 16s
+        const jitter = Math.random() * 1000; // Up to 1s jitter
+        const delay = baseDelay + jitter;
         
-        console.log(`Retrying request in ${delay}ms due to 429 error (attempt ${retryCount + 1}/${maxRetries})`);
+        console.log(`Retrying request in ${Math.round(delay)}ms due to 429 error (attempt ${retryCount + 1}/${maxRetries})`);
         
         await new Promise(resolve => setTimeout(resolve, delay));
         return api(originalRequest);
@@ -186,13 +237,13 @@ api.interceptors.response.use(
     // Handle network errors with retry
     if (!error.response && error.code === 'NETWORK_ERROR') {
       const retryCount = originalRequest._retryCount || 0;
-      const maxRetries = 2;
+      const maxRetries = 3;
       
       if (retryCount < maxRetries) {
         originalRequest._retry = true;
         originalRequest._retryCount = retryCount + 1;
         
-        const delay = (retryCount + 1) * 2000; // 2s, 4s
+        const delay = (retryCount + 1) * 2000; // 2s, 4s, 6s
         
         console.log(`Retrying request in ${delay}ms due to network error (attempt ${retryCount + 1}/${maxRetries})`);
         
@@ -497,6 +548,64 @@ export const messagesAPI = {
   // Reply to message
   reply: async (messageId: string, messageData: { message: string }) => {
     const response = await api.post(`/messages/${messageId}/reply`, messageData);
+    return response.data;
+  },
+};
+
+// Broadcast API
+export const broadcastAPI = {
+  // NGO sends broadcast to volunteers
+  sendBroadcast: async (broadcastData: {
+    subject: string;
+    message: string;
+    priority?: 'low' | 'medium' | 'high' | 'urgent';
+    targetFilters?: {
+      status?: 'active' | 'inactive';
+      skills?: string[];
+      minEventsJoined?: number;
+      location?: string;
+    };
+  }) => {
+    const response = await api.post('/messages/ngo/broadcast', broadcastData);
+    return response.data;
+  },
+
+  // Get replies to a specific broadcast
+  getBroadcastReplies: async (broadcastId: string) => {
+    const response = await api.get(`/messages/ngo/broadcasts/${broadcastId}/replies`);
+    return response.data;
+  },
+
+  // Get all replies to NGO's broadcasts
+  getAllBroadcastReplies: async (params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/messages/ngo/broadcasts-replies', { params });
+    return response.data;
+  },
+
+  // Get NGO's broadcast history
+  getBroadcastHistory: async (params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/messages/ngo/broadcasts', { params });
+    return response.data;
+  },
+
+  // Get volunteer's received broadcasts
+  getVolunteerBroadcasts: async (params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/messages/volunteer/broadcasts', { params });
+    return response.data;
+  },
+
+  // Volunteer replies to broadcast
+  replyToBroadcast: async (broadcastId: string, replyData: { message: string }) => {
+    const response = await api.post(`/messages/volunteer/broadcasts/${broadcastId}/reply`, replyData);
     return response.data;
   },
 };

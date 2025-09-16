@@ -16,6 +16,7 @@ export const VolunteerHeader: React.FC = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/volunteer/dashboard' },
+    { name: 'Broadcasts', href: '/volunteer/broadcasts', icon: '📢' },
     { name: 'Find Events', href: '/events' },
     { name: 'Campaigns', href: '/campaigns' },
     { name: 'Community', href: '/community' },
@@ -70,6 +71,7 @@ export const VolunteerHeader: React.FC = () => {
                     : 'text-gray-600 hover:text-primary-700 hover:bg-primary-50'
                 }`}
               >
+                {item.icon && <span className="mr-2">{item.icon}</span>}
                 {item.name}
               </Link>
             ))}
@@ -158,6 +160,7 @@ export const VolunteerHeader: React.FC = () => {
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  {item.icon && <span className="mr-2">{item.icon}</span>}
                   {item.name}
                 </Link>
               ))}

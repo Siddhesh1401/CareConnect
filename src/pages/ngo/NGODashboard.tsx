@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Calendar, 
-  Users, 
-  Heart, 
-  Plus, 
+import {
+  Calendar,
+  Users,
+  Heart,
+  Plus,
   Edit,
   Eye,
   MapPin,
@@ -109,37 +109,35 @@ export const NGODashboard: React.FC = () => {
   }, []);
 
   const stats = [
-    { 
-      label: 'Total Volunteers', 
-      value: dashboardData?.stats.totalVolunteers.toString() || '0', 
-      icon: Users, 
-      color: 'text-primary-600 bg-primary-50', 
-      change: '+12%' 
+    {
+      label: 'Total Volunteers',
+      value: dashboardData?.stats.totalVolunteers.toString() || '0',
+      icon: Users,
+      color: 'text-primary-600 bg-primary-50',
+      change: '+12%'
     },
-    { 
-      label: 'Active Events', 
-      value: dashboardData?.stats.activeEvents.toString() || '0', 
-      icon: Calendar, 
-      color: 'text-primary-600 bg-primary-50', 
-      change: '+3' 
+    {
+      label: 'Active Events',
+      value: dashboardData?.stats.activeEvents.toString() || '0',
+      icon: Calendar,
+      color: 'text-primary-600 bg-primary-50',
+      change: '+3'
     },
-    { 
-      label: 'Total Donations', 
-      value: dashboardData?.stats.totalDonations || '₹0L', 
-      icon: Heart, 
-      color: 'text-primary-600 bg-primary-50', 
-      change: '+18%' 
+    {
+      label: 'Total Donations',
+      value: dashboardData?.stats.totalDonations || '₹0L',
+      icon: Heart,
+      color: 'text-primary-600 bg-primary-50',
+      change: '+18%'
     },
-    { 
-      label: 'Impact Score', 
-      value: dashboardData?.stats.impactScore || '0.0', 
-      icon: Star, 
-      color: 'text-primary-600 bg-primary-50', 
-      change: '+0.2' 
+    {
+      label: 'Impact Score',
+      value: dashboardData?.stats.impactScore || '0.0',
+      icon: Star,
+      color: 'text-primary-600 bg-primary-50',
+      change: '+0.2'
     }
-  ];
-
-  const recentEvents = dashboardData?.recentEvents || [];
+  ];  const recentEvents = dashboardData?.recentEvents || [];
   const recentVolunteers = dashboardData?.recentVolunteers || [];
   const campaigns = dashboardData?.campaigns || [];
 
@@ -223,22 +221,47 @@ export const NGODashboard: React.FC = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-4 bg-white rounded-xl border border-primary-100 shadow-soft">
-          {stats.map((stat, index) => (
-            <Card key={`stat-${stat.label}-${index}`} className="p-6 hover:shadow-medium transition-all duration-300 border-primary-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${stat.color} border border-primary-200`}>
-                  <stat.icon className="w-6 h-6" />
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary-900">{stat.value}</div>
-                  <div className="text-xs text-green-600 px-2 py-1 bg-green-50 rounded-full border border-green-200">
-                    {stat.change} this month
+          {stats.map((stat, index) => {
+            if (stat.link) {
+              return (
+                <Link key={`stat-${stat.label}-${index}`} to={stat.link}>
+                  <Card className="p-6 hover:shadow-medium transition-all duration-300 border-primary-200 cursor-pointer">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`p-3 rounded-lg ${stat.color} border border-primary-200`}>
+                        <stat.icon className="w-6 h-6" />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary-900">{stat.value}</div>
+                        {stat.change && (
+                          <div className="text-xs text-green-600 px-2 py-1 bg-green-50 rounded-full border border-green-200">
+                            {stat.change} this month
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-sm text-primary-600 font-medium border-t border-primary-100 pt-2">{stat.label}</div>
+                  </Card>
+                </Link>
+              );
+            }
+
+            return (
+              <Card key={`stat-${stat.label}-${index}`} className="p-6 hover:shadow-medium transition-all duration-300 border-primary-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-lg ${stat.color} border border-primary-200`}>
+                    <stat.icon className="w-6 h-6" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-primary-900">{stat.value}</div>
+                    <div className="text-xs text-green-600 px-2 py-1 bg-green-50 rounded-full border border-green-200">
+                      {stat.change} this month
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="text-sm text-primary-600 font-medium border-t border-primary-100 pt-2">{stat.label}</div>
-            </Card>
-          ))}
+                <div className="text-sm text-primary-600 font-medium border-t border-primary-100 pt-2">{stat.label}</div>
+              </Card>
+            );
+          })}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">

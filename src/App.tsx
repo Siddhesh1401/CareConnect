@@ -13,12 +13,14 @@ import EmailVerificationPage from './pages/auth/EmailVerificationPage';
 import PendingApprovalPage from './pages/auth/PendingApprovalPage';
 import { RejectionResubmitPage } from './pages/auth/RejectionResubmitPage';
 import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard';
+import VolunteerBroadcasts from './pages/volunteer/VolunteerBroadcasts';
 import { CommunityPage } from './pages/community/CommunityPage';
 import { CommunityDetailPage } from './pages/community/CommunityDetailPage';
 import { EventsPage } from './pages/events/EventsPage';
 import { EventRegistrationPage } from './pages/events/EventRegistrationPage';
 import { NGODashboard } from './pages/ngo/NGODashboard';
 import { NGOProfileEditPage } from './pages/ngo/NGOProfileEditPage';
+import NGOBroadcastsPage from './pages/ngo/NGOBroadcastsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { NGOsPage } from './pages/ngos/NGOsPage';
 import { NGOProfilePage } from './pages/ngos/NGOProfilePage';
@@ -197,10 +199,26 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/volunteer/broadcasts" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <VolunteerBroadcasts />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
           <Route path="/ngo/dashboard" element={
             <ProtectedRoute>
               <AppLayout hideFooter>
                 <NGODashboard />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ngo/broadcasts" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <NGOBroadcastsPage />
               </AppLayout>
             </ProtectedRoute>
           } />

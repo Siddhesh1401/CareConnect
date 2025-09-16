@@ -30,7 +30,7 @@ dotenv.config();
 // Rate limiting - IP-based
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '200'), // limit each IP to 200 requests per windowMs
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '500'), // limit each IP to 500 requests per windowMs (increased from 200)
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -39,7 +39,7 @@ const limiter = rateLimit({
 // User-specific rate limiting
 const userLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each user to 100 requests per windowMs
+  max: 300, // limit each user to 300 requests per windowMs (increased from 100)
   message: 'Too many requests from this user, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -72,11 +72,14 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "http://localhost:5173", "http://127.0.0.1:5173"],
-      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "http://localhost:5173", "http://127.0.0.1:5173", "https://ui-avatars.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "blob:", "http://localhost:*", "http://127.0.0.1:*", "chrome-extension://*"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       fontSrc: ["'self'", "https:", "data:"],
-      connectSrc: ["'self'", "http://localhost:5173", "http://127.0.0.1:5173"],
+      connectSrc: ["'self'", "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5000", "http://127.0.0.1:5000", "https://ui-avatars.com"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
     },
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }

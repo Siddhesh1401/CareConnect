@@ -3,7 +3,7 @@ import {
   Users, 
   Search, 
   Filter, 
-  Mail, 
+  Mail,
   Phone, 
   Calendar, 
   Award,
@@ -132,10 +132,6 @@ export const VolunteerManagement: React.FC = () => {
             <Button variant="outline" className="border-primary-300 text-primary-700 hover:bg-primary-50">
               <Download className="mr-2 w-4 h-4" />
               Export Data
-            </Button>
-            <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
-              <Mail className="mr-2 w-4 h-4" />
-              Send Broadcast
             </Button>
           </div>
         </div>
