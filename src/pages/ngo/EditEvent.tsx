@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Users, FileText, Tag, AlertCircle }
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { TimePicker } from '../../components/ui/TimePicker';
 import MapsButton from '../../components/ui/MapsButton';
 import axios from 'axios';
 
@@ -410,22 +411,20 @@ export const EditEvent: React.FC = () => {
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
                 />
-                <Input
+                <TimePicker
                   label="Start Time *"
                   name="startTime"
-                  type="time"
                   value={formData.startTime}
-                  onChange={handleInputChange}
+                  onChange={(value) => setFormData(prev => ({...prev, startTime: value}))}
                   leftIcon={<Clock className="w-5 h-5" />}
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
                 />
-                <Input
+                <TimePicker
                   label="End Time *"
                   name="endTime"
-                  type="time"
                   value={formData.endTime}
-                  onChange={handleInputChange}
+                  onChange={(value) => setFormData(prev => ({...prev, endTime: value}))}
                   leftIcon={<Clock className="w-5 h-5" />}
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
