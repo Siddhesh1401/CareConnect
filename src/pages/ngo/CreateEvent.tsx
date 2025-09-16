@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Users, FileText, Tag, AlertCircle }
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
+import { TimePicker } from '../../components/ui/TimePicker';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -327,22 +328,20 @@ export const CreateEvent: React.FC = () => {
                 min={new Date().toISOString().split('T')[0]}
               />
 
-              <Input
+              <TimePicker
                 label="Start Time *"
                 name="startTime"
-                type="time"
                 value={formData.startTime}
-                onChange={handleInputChange}
+                onChange={(value) => setFormData(prev => ({ ...prev, startTime: value }))}
                 leftIcon={<Clock className="w-5 h-5" />}
                 required
               />
 
-              <Input
+              <TimePicker
                 label="End Time *"
                 name="endTime"
-                type="time"
                 value={formData.endTime}
-                onChange={handleInputChange}
+                onChange={(value) => setFormData(prev => ({ ...prev, endTime: value }))}
                 leftIcon={<Clock className="w-5 h-5" />}
                 required
               />
