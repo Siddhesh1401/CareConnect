@@ -102,8 +102,8 @@ export const getFullImageUrl = (imagePath: string | undefined | null): string =>
   return imagePath;
 };
 
-// Helper function to get profile picture URL with UI Avatars fallback
-export const getProfilePictureUrl = (profilePicture: string | undefined | null, userName: string | undefined | null, size: number = 64): string => {
+// Helper function to get profile picture URL - returns empty string if no profile picture  
+export const getProfilePictureUrl = (profilePicture: string | undefined | null, userName?: string | undefined | null, size?: number): string => {
   if (profilePicture) {
     // If it's already a full URL, return as is
     if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
@@ -116,7 +116,19 @@ export const getProfilePictureUrl = (profilePicture: string | undefined | null, 
     }
   }
   
-  // Generate UI Avatar URL as fallback
+  // Return empty string if no profile picture - no fallback image generation
+  return '';
+};
+
+// Helper function with UI Avatar fallback for display purposes
+export const getProfilePictureWithFallback = (profilePicture: string | undefined | null, userName: string | undefined | null, size: number = 64): string => {
+  // First try to get the actual profile picture
+  const actualPicture = getProfilePictureUrl(profilePicture);
+  if (actualPicture) {
+    return actualPicture;
+  }
+  
+  // Generate UI Avatar URL as fallback for display
   const name = userName || 'User';
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&size=${size}`;
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { MoreVertical, CheckCircle, XCircle, Users, UserCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MoreVertical, CheckCircle, XCircle, Users, UserCheck, BarChart3 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { SearchBar, SearchFilters } from '../../components/search/SearchBar';
@@ -141,14 +142,22 @@ export default function UserManagementPage() {
           <div className="relative bg-primary-600 rounded-lg p-8 text-white overflow-hidden">
             
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-white/20 rounded-lg">
-                  <Users className="h-8 w-8" />
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white/20 rounded-lg">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold">Volunteer Management</h1>
+                    <p className="text-primary-100">Manage volunteer accounts and activities</p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold">Volunteer Management</h1>
-                  <p className="text-primary-100">Manage volunteer accounts and activities</p>
-                </div>
+                <Link to="/admin/volunteers/analytics">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50">
+                    <BarChart3 className="mr-2 w-4 h-4" />
+                    View Analytics
+                  </Button>
+                </Link>
               </div>
 
               {/* Stats Cards */}

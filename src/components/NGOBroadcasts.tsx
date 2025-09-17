@@ -132,7 +132,7 @@ export const NGOBroadcasts: React.FC<NGOBroadcastsProps> = ({
     switch (currentView) {
       case 'dashboard':
         return (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="border border-primary-200 shadow-soft">
@@ -559,77 +559,58 @@ export const NGOBroadcasts: React.FC<NGOBroadcastsProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-primary-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-primary-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link to="/ngo/dashboard">
-                <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-700 hover:bg-primary-50">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-primary-600 rounded-lg">
-                  <MessageSquare className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    {currentView === 'dashboard' && 'Broadcast Dashboard'}
-                    {currentView === 'compose' && 'Send Broadcast'}
-                    {currentView === 'history' && 'Broadcast History'}
-                    {currentView === 'analytics' && 'Broadcast Analytics'}
-                    {currentView === 'replies' && `Replies: ${selectedBroadcastSubject}`}
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    {currentView === 'dashboard' && 'Overview of your broadcast communications'}
-                    {currentView === 'compose' && 'Send messages to your volunteers'}
-                    {currentView === 'history' && 'View and manage your sent broadcasts'}
-                    {currentView === 'analytics' && 'Analyze broadcast performance and engagement'}
-                    {currentView === 'replies' && 'View replies from volunteers'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={currentView === 'dashboard' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={handleDashboardClick}
-                className={currentView === 'dashboard' ? 'bg-primary-600' : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50'}
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
-              <Button
-                variant={currentView === 'compose' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={handleComposeClick}
-                className={currentView === 'compose' ? 'bg-primary-600' : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50'}
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Send Broadcast
-              </Button>
-              <Button
-                variant={currentView === 'history' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={handleHistoryClick}
-                className={currentView === 'history' ? 'bg-primary-600' : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50'}
-              >
-                <History className="w-4 h-4 mr-2" />
-                History
-              </Button>
-            </div>
+    <div className="min-h-screen bg-primary-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100 mb-12">
+          <div>
+            <h1 className="text-3xl font-bold text-primary-900">
+              {currentView === 'dashboard' && 'Broadcast Dashboard'}
+              {currentView === 'compose' && 'Send Broadcast'}
+              {currentView === 'history' && 'Broadcast History'}
+              {currentView === 'analytics' && 'Broadcast Analytics'}
+              {currentView === 'replies' && `Replies: ${selectedBroadcastSubject}`}
+            </h1>
+            <p className="text-primary-600 mt-2">
+              {currentView === 'dashboard' && 'Overview of your broadcast communications'}
+              {currentView === 'compose' && 'Send messages to your volunteers'}
+              {currentView === 'history' && 'View and manage your sent broadcasts'}
+              {currentView === 'analytics' && 'Analyze broadcast performance and engagement'}
+              {currentView === 'replies' && 'View replies from volunteers'}
+            </p>
+          </div>
+          <div className="flex space-x-3">
+            <Button
+              variant={currentView === 'dashboard' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={handleDashboardClick}
+              className={currentView === 'dashboard' ? 'bg-primary-600' : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50'}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Dashboard
+            </Button>
+            <Button
+              variant={currentView === 'compose' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={handleComposeClick}
+              className={currentView === 'compose' ? 'bg-primary-600' : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50'}
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Send Broadcast
+            </Button>
+            <Button
+              variant={currentView === 'history' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={handleHistoryClick}
+              className={currentView === 'history' ? 'bg-primary-600' : 'border-primary-200 hover:border-primary-300 hover:bg-primary-50'}
+            >
+              <History className="w-4 h-4 mr-2" />
+              History
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
         {renderContent()}
       </div>
 

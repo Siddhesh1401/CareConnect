@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Users, 
   Search, 
@@ -7,11 +8,11 @@ import {
   Phone, 
   Calendar, 
   Award,
-  MessageCircle,
   Download,
   UserCheck,
   Clock,
-  RefreshCw
+  RefreshCw,
+  BarChart3
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -102,12 +103,34 @@ export const VolunteerManagement: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleSendMessage = (volunteerId: string) => {
-    console.log('Sending message to volunteer:', volunteerId);
-  };
 
-  const handleGenerateCertificate = (volunteerId: string) => {
-    console.log('Generating certificate for volunteer:', volunteerId);
+
+  const handleExportData = () => {
+    const exportData = {
+      volunteers: filteredVolunteers.map(volunteer => ({
+        name: volunteer.name,
+        email: volunteer.email,
+        phone: volunteer.phone || 'N/A',
+        status: volunteer.status,
+        totalHours: volunteer.totalHours,
+        eventsJoined: volunteer.eventsJoined,
+        joinedDate: volunteer.joinedDate,
+        lastActivity: volunteer.lastActivity,
+        skills: volunteer.skills.join(', ')
+      })),
+      summary: stats,
+      exportedAt: new Date().toISOString(),
+      totalRecords: filteredVolunteers.length
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = `volunteers-data-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
   };
 
   return (
@@ -120,6 +143,12 @@ export const VolunteerManagement: React.FC = () => {
             <p className="text-primary-600 mt-2">Manage and coordinate with your volunteers</p>
           </div>
           <div className="flex space-x-3">
+            <Link to="/ngo/volunteers/analytics">
+              <Button variant="outline" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                <BarChart3 className="mr-2 w-4 h-4" />
+                View Analytics
+              </Button>
+            </Link>
             <Button 
               variant="outline" 
               onClick={fetchVolunteers}
@@ -129,7 +158,11 @@ export const VolunteerManagement: React.FC = () => {
               <RefreshCw className={`mr-2 w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <Button variant="outline" className="border-primary-300 text-primary-700 hover:bg-primary-50">
+            <Button 
+              variant="outline" 
+              onClick={handleExportData}
+              className="border-primary-300 text-primary-700 hover:bg-primary-50"
+            >
               <Download className="mr-2 w-4 h-4" />
               Export Data
             </Button>
@@ -303,16 +336,16 @@ export const VolunteerManagement: React.FC = () => {
                             </div>
 
                             <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span className="text-primary-600">Total Hours:</span>
+                              <div className="flex items-center space-x-3">
+                                <span className="text-primary-600 w-24">Total Hours:</span>
                                 <span className="font-medium text-primary-900">{volunteer.totalHours}</span>
                               </div>
-                              <div className="flex justify-between">
-                                <span className="text-primary-600">Events Joined:</span>
+                              <div className="flex items-center space-x-3">
+                                <span className="text-primary-600 w-24">Events Joined:</span>
                                 <span className="font-medium text-primary-900">{volunteer.eventsJoined}</span>
                               </div>
-                              <div className="flex justify-between">
-                                <span className="text-primary-600">Last Activity:</span>
+                              <div className="flex items-center space-x-3">
+                                <span className="text-primary-600 w-24">Last Activity:</span>
                                 <span className="font-medium text-primary-900">
                                   {new Date(volunteer.lastActivity).toLocaleDateString()}
                                 </span>
@@ -336,25 +369,7 @@ export const VolunteerManagement: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-col space-y-2 ml-4">
-                        <Button
-                          size="sm"
-                          onClick={() => handleSendMessage(volunteer.id)}
-                          className="bg-primary-600 hover:bg-primary-700 border border-primary-700"
-                        >
-                          <MessageCircle className="mr-2 w-4 h-4" />
-                          Message
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleGenerateCertificate(volunteer.id)}
-                          className="border-primary-300 text-primary-700 hover:bg-primary-50"
-                        >
-                          <Award className="mr-2 w-4 h-4" />
-                          Certificate
-                        </Button>
-                      </div>
+
                     </div>
                   </div>
                 </Card>

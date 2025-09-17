@@ -54,7 +54,7 @@ export const getAllStories = async (req: Request, res: Response) => {
         name: story.author.name,
         email: story.author.email,
         role: story.author.role,
-        profilePicture: story.author.profilePicture,
+        profilePicture: story.author.avatar,
         organizationName: story.author.organizationName
       },
       category: story.category,
@@ -136,7 +136,7 @@ export const getStoryById = async (req: Request, res: Response) => {
         name: story.author.name,
         email: story.author.email,
         role: story.author.role,
-        profilePicture: story.author.profilePicture,
+        profilePicture: story.author.avatar,
         organizationName: story.author.organizationName
       },
       category: story.category,
@@ -214,7 +214,7 @@ export const createStory = async (req: AuthRequest, res: Response) => {
         name: author.name,
         email: author.email,
         role: author.role,
-        profilePicture: author.profilePicture,
+        avatar: author.profilePicture || null, // Only set if profilePicture exists, otherwise null
         organizationName: author.organizationName
       },
       category,
@@ -314,7 +314,7 @@ export const updateStory = async (req: AuthRequest, res: Response) => {
           name: updatedStory.author.name,
           email: updatedStory.author.email,
           role: updatedStory.author.role,
-          profilePicture: updatedStory.author.profilePicture,
+          profilePicture: updatedStory.author.avatar,
           organizationName: updatedStory.author.organizationName
         },
         category: updatedStory.category,
@@ -498,7 +498,7 @@ export const getAllStoriesAdmin = async (req: AuthRequest, res: Response) => {
         name: story.author.name,
         email: story.author.email,
         role: story.author.role,
-        profilePicture: story.author.profilePicture,
+        profilePicture: story.author.avatar,
         organizationName: story.author.organizationName
       },
       category: story.category,

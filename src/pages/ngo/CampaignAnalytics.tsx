@@ -101,6 +101,161 @@ export const CampaignAnalytics: React.FC = () => {
     linkElement.click();
   };
 
+  const handleExportCSV = () => {
+    if (!analytics) return;
+
+    // Create CSV content
+    const csvContent = [
+      // Header
+      ['Metric', 'Value'],
+      ['Total Campaigns', analytics.totalCampaigns],
+      ['Total Raised', `$${analytics.totalRaised.toLocaleString()}`],
+      ['Total Donors', analytics.totalDonors],
+      ['Average Donation', `$${analytics.averageDonation.toFixed(2)}`],
+      ['Success Rate', `${analytics.successRate}%`],
+      ['Active Rate', `${analytics.activeRate}%`],
+      [''],
+      // Top campaigns
+      ['Top Campaigns by Fundraising', ''],
+      ['Campaign Title', 'Amount Raised', 'Target', 'Donors', 'Status'],
+      ...analytics.topCampaigns.map(campaign => [
+        campaign.title,
+        `$${campaign.raised.toLocaleString()}`,
+        `$${campaign.target.toLocaleString()}`,
+        campaign.donors,
+        campaign.status
+      ]),
+      [''],
+      // Monthly trends
+      ['Monthly Trends', ''],
+      ['Month', 'Campaigns', 'Raised', 'Donors'],
+      ...analytics.monthlyTrends.map(month => [
+        month.month,
+        month.campaigns,
+        `$${month.raised.toLocaleString()}`,
+        month.donors
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `campaign-analytics-${timeRange}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPDF = () => {
+    if (!analytics) return;
+
+    // Create a comprehensive HTML report for PDF conversion
+    const reportHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Campaign Analytics Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+          .metric-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+          .metric-value { font-size: 24px; font-weight: bold; color: #1e40af; }
+          .metric-label { color: #6b7280; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f3f4f6; }
+          .section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Campaign Analytics Report</h1>
+          <p>Time Period: ${timeRange} | Generated: ${new Date().toLocaleDateString()}</p>
+        </div>
+        
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-value">${analytics.totalCampaigns}</div>
+            <div class="metric-label">Total Campaigns</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">$${analytics.totalRaised.toLocaleString()}</div>
+            <div class="metric-label">Total Raised</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${analytics.totalDonors}</div>
+            <div class="metric-label">Total Donors</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">$${analytics.averageDonation.toFixed(2)}</div>
+            <div class="metric-label">Average Donation</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${analytics.successRate}%</div>
+            <div class="metric-label">Success Rate</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${analytics.activeRate}%</div>
+            <div class="metric-label">Active Rate</div>
+          </div>
+        </div>
+
+        <div class="section-title">Top Performing Campaigns</div>
+        <table>
+          <tr>
+            <th>Campaign Title</th>
+            <th>Amount Raised</th>
+            <th>Target</th>
+            <th>Donors</th>
+            <th>Status</th>
+          </tr>
+          ${analytics.topCampaigns.map(campaign => `
+            <tr>
+              <td>${campaign.title}</td>
+              <td>$${campaign.raised.toLocaleString()}</td>
+              <td>$${campaign.target.toLocaleString()}</td>
+              <td>${campaign.donors}</td>
+              <td>${campaign.status}</td>
+            </tr>
+          `).join('')}
+        </table>
+
+        <div class="section-title">Monthly Trends</div>
+        <table>
+          <tr>
+            <th>Month</th>
+            <th>Campaigns</th>
+            <th>Amount Raised</th>
+            <th>Donors</th>
+          </tr>
+          ${analytics.monthlyTrends.map(month => `
+            <tr>
+              <td>${month.month}</td>
+              <td>${month.campaigns}</td>
+              <td>$${month.raised.toLocaleString()}</td>
+              <td>${month.donors}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Create blob and trigger download
+    const blob = new Blob([reportHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `campaign-analytics-report-${timeRange}-${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-primary-50 flex items-center justify-center">
@@ -470,10 +625,18 @@ export const CampaignAnalytics: React.FC = () => {
                 <p className="text-primary-600">Download detailed reports for your records and stakeholders</p>
               </div>
               <div className="flex space-x-4">
-                <Button variant="outline" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                <Button 
+                  onClick={handleExportPDF}
+                  variant="outline" 
+                  className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400"
+                >
                   Export PDF Report
                 </Button>
-                <Button variant="outline" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                <Button 
+                  onClick={handleExportCSV}
+                  variant="outline" 
+                  className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400"
+                >
                   Export CSV Data
                 </Button>
               </div>

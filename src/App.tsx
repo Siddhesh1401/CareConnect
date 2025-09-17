@@ -43,6 +43,7 @@ import { StoryDetailPage } from './pages/stories/StoryDetailPage';
 import { EditStoryPage } from './pages/stories/EditStoryPage';
 import { NGORequestsPage } from './pages/admin/NGORequestsPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import VolunteerAnalytics from './pages/admin/VolunteerAnalytics';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { DemoPage } from './pages/auth/DemoPage';
 import { SystemSettingsPage } from './pages/admin/SystemSettingsPage';
@@ -53,6 +54,7 @@ import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { AdminReportsPage } from './pages/admin/AdminReportsPage';
 import { CampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CampaignDetailsPage } from './pages/campaigns/CampaignDetailsPage';
+import { NGOVolunteerAnalytics } from './pages/ngo/NGOVolunteerAnalytics';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -263,20 +265,20 @@ function App() {
           } />
 
           <Route path="/stories" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <StoriesPage />
             </AppLayout>
           } />
 
           <Route path="/stories/create" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <CreateStory />
             </AppLayout>
           } />
 
           <Route path="/stories/:id/edit" element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppLayout hideFooter>
                 <EditStoryPage />
               </AppLayout>
             </ProtectedRoute>
@@ -382,6 +384,14 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/ngo/volunteers/analytics" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <NGOVolunteerAnalytics />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
           <Route path="/admin/dashboard" element={
             <AdminRoute>
               <AppLayout hideFooter>
@@ -402,6 +412,14 @@ function App() {
             <AdminRoute>
               <AppLayout hideFooter>
                 <UserManagementPage />
+              </AppLayout>
+            </AdminRoute>
+          } />
+          
+          <Route path="/admin/volunteers/analytics" element={
+            <AdminRoute>
+              <AppLayout hideFooter>
+                <VolunteerAnalytics />
               </AppLayout>
             </AdminRoute>
           } />

@@ -19,6 +19,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { campaignAPI, getFullImageUrl } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Campaign {
   id: string;
@@ -49,6 +50,7 @@ interface Campaign {
 export const CampaignDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDonationModal, setShowDonationModal] = useState(false);
@@ -329,18 +331,33 @@ export const CampaignDetailsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <Button
-                  className="w-full bg-primary-600 hover:bg-primary-700 border border-primary-700 text-lg py-3 mb-3"
-                  onClick={() => setShowDonationModal(true)}
-                >
-                  <Heart className="w-5 h-5 mr-2" />
-                  Support Campaign
-                </Button>
+                {/* Only show donation functionality for non-NGO users */}
+                {user?.role !== 'ngo_admin' && (
+                  <Button
+                    className="w-full bg-primary-600 hover:bg-primary-700 border border-primary-700 text-lg py-3 mb-3"
+                    onClick={() => setShowDonationModal(true)}
+                  >
+                    <Heart className="w-5 h-5 mr-2" />
+                    Support Campaign
+                  </Button>
+                )}
 
-                <Button variant="outline" className="w-full border-primary-300 text-primary-700 hover:bg-primary-50">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share Campaign
-                </Button>
+                {/* Dynamic button based on user role */}
+                {user?.role === 'ngo_admin' ? (
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-primary-300 text-primary-700 hover:bg-primary-50"
+                    onClick={() => navigate(`/ngo/campaigns/${campaign.id}/edit`)}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Manage Campaign
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="w-full border-primary-300 text-primary-700 hover:bg-primary-50">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Campaign
+                  </Button>
+                )}
               </div>
             </Card>
 

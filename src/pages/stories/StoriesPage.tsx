@@ -214,16 +214,22 @@ export const StoriesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-primary-50 py-8">
+    <div className="min-h-screen bg-primary-50 py-8 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center items-center mb-6">
-            <h1 className="text-4xl lg:text-5xl font-bold text-primary-900 animate-fade-in">
-              Stories
-            </h1>
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-primary-900">Stories</h1>
+            <p className="text-primary-600 mt-2">
+              {activeTab === 'all'
+                ? "Discover inspiring stories of change, impact, and transformation from our community"
+                : "Manage your published stories and drafts"
+              }
+            </p>
+          </div>
+          <div className="flex space-x-3">
             {user && (
-              <Link to="/stories/create" className="ml-6">
+              <Link to="/stories/create">
                 <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700 shadow-soft">
                   <Plus className="w-4 h-4 mr-2" />
                   Share Your Story
@@ -231,12 +237,6 @@ export const StoriesPage: React.FC = () => {
               </Link>
             )}
           </div>
-          <p className="text-xl text-primary-600 max-w-3xl mx-auto animate-fade-in-up">
-            {activeTab === 'all'
-              ? "Discover inspiring stories of change, impact, and transformation from our community"
-              : "Manage your published stories and drafts"
-            }
-          </p>
         </div>
 
         {/* Tab Navigation */}

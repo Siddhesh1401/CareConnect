@@ -955,25 +955,20 @@ export const CommunityPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-primary-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white rounded-xl p-6 shadow-soft border border-primary-100 mb-12">
           <div>
-            <h1 className="text-4xl lg:text-5xl font-bold flex items-center space-x-3 text-primary-700 animate-fade-in">
-              <div className="p-3 bg-primary-600 rounded-lg">
-                <Users className="w-8 h-8 text-white" />
-              </div>
-              <span>Community</span>
-            </h1>
-            <p className="text-gray-600 mt-3 text-lg animate-fade-in-up">
+            <h1 className="text-3xl font-bold text-primary-900">Community Hub</h1>
+            <p className="text-primary-600 mt-2">
               {user?.role === 'ngo_admin' 
-                ? 'Manage and engage with your communities' 
-                : 'Connect, share, and grow together with fellow volunteers'
+                ? 'Manage and engage with your communities to build stronger connections' 
+                : 'Connect, share, and grow together with fellow volunteers in meaningful discussions'
               }
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex space-x-3">
             <Button 
               onClick={() => setShowCreatePost(!showCreatePost)} 
               className="bg-primary-600 hover:bg-primary-700"
@@ -995,36 +990,37 @@ export const CommunityPage: React.FC = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-2 bg-white p-2 rounded-lg mb-12 shadow-lg border border-primary-200">
-          <button
-            onClick={() => setActiveTab('feed')}
-            className={`py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-200 ${
-              activeTab === 'feed' 
-                ? 'bg-primary-600 text-white' 
-                : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
-            }`}
-          >
-            Feed
-          </button>
+        <Card className="p-6 mb-12 bg-white border border-primary-200 shadow-soft">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setActiveTab('feed')}
+              className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                activeTab === 'feed' 
+                  ? 'bg-primary-600 text-white shadow-medium' 
+                  : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50 border border-primary-200'
+              }`}
+            >
+              Feed
+            </button>
           
           {user?.role === 'ngo_admin' ? (
             <>
               <button
                 onClick={() => setActiveTab('my-owned-communities')}
-                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   activeTab === 'my-owned-communities' 
-                    ? 'bg-primary-600 text-white' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-primary-600 text-white shadow-medium' 
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50 border border-primary-200'
                 }`}
               >
                 My Communities
               </button>
               <button
                 onClick={() => setActiveTab('my-joined-communities')}
-                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   activeTab === 'my-joined-communities' 
-                    ? 'bg-primary-600 text-white' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-primary-600 text-white shadow-medium' 
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50 border border-primary-200'
                 }`}
               >
                 Joined Communities
@@ -1034,20 +1030,20 @@ export const CommunityPage: React.FC = () => {
             <>
               <button
                 onClick={() => setActiveTab('my-communities')}
-                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   activeTab === 'my-communities' 
-                    ? 'bg-primary-600 text-white' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-primary-600 text-white shadow-medium' 
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50 border border-primary-200'
                 }`}
               >
                 My Communities
               </button>
               <button
                 onClick={() => setActiveTab('volunteer-hub')}
-                className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   activeTab === 'volunteer-hub' 
-                    ? 'bg-green-600 text-white' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-green-600 text-white shadow-medium' 
+                    : 'text-gray-600 hover:text-green-600 hover:bg-green-50 border border-green-200'
                 }`}
               >
                 🏆 Volunteer Hub
@@ -1056,10 +1052,10 @@ export const CommunityPage: React.FC = () => {
           ) : (
             <button
               onClick={() => setActiveTab('my-communities')}
-              className={`py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
                 activeTab === 'my-communities' 
-                  ? 'bg-primary-600 text-white' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                  ? 'bg-primary-600 text-white shadow-medium' 
+                  : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50 border border-primary-200'
               }`}
             >
               My Communities
@@ -1068,20 +1064,21 @@ export const CommunityPage: React.FC = () => {
           
           <button
             onClick={() => setActiveTab('discover')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            className={`py-3 px-6 rounded-xl text-sm font-semibold transition-all duration-300 ${
               activeTab === 'discover' 
-                ? 'bg-primary-600 text-white' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                ? 'bg-primary-600 text-white shadow-medium' 
+                : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50 border border-primary-200'
             }`}
           >
             Discover
           </button>
-        </div>
+          </div>
+        </Card>
 
         {/* Create Post Modal */}
         {showCreatePost && (
-          <Card className="p-6 mb-8 bg-primary-50 border-primary-200">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Create a New Post</h3>
+          <Card className="p-8 mb-12 bg-white border border-primary-200 shadow-soft">
+            <h3 className="text-xl font-semibold mb-6 text-primary-900">Create a New Post</h3>
             <div className="space-y-4">
               <Input
                 placeholder="Post title"
@@ -1127,8 +1124,8 @@ export const CommunityPage: React.FC = () => {
 
         {/* Create Community Modal */}
         {showCreateCommunity && user?.role === 'ngo_admin' && (
-          <Card className="p-6 mb-8 bg-primary-50 border-primary-200">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Create a New Community</h3>
+          <Card className="p-8 mb-12 bg-white border border-primary-200 shadow-soft">
+            <h3 className="text-xl font-semibold mb-6 text-primary-900">Create a New Community</h3>
             <div className="space-y-4">
               <Input
                 placeholder="Community name"
@@ -1241,7 +1238,8 @@ export const CommunityPage: React.FC = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {activeTab === 'feed' && (
-              <div className="space-y-6">
+              <Card className="border border-primary-200 shadow-soft p-6">
+                <div className="space-y-6">
                 {loading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -1256,11 +1254,11 @@ export const CommunityPage: React.FC = () => {
                   </div>
                 ) : Array.isArray(posts) && posts.length > 0 ? (
                   posts.map((post) => (
-                    <Card key={post.id || post._id} className="p-6">
+                    <Card key={post.id || post._id} className="border border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300 p-6">
                       {/* Post Header */}
                       <div className="flex items-center space-x-3 mb-4">
                         <img
-                          src={getProfilePictureUrl(post.author?.profilePicture, post.author?.name, 40)}
+                          src={getProfilePictureUrl(post.author?.avatar, post.author?.name, 40)}
                           alt={post.author?.name || 'User'}
                           className="w-10 h-10 rounded-full object-cover"
                         />
@@ -1483,12 +1481,14 @@ export const CommunityPage: React.FC = () => {
                     <p className="text-sm text-gray-500 mt-1">Join communities to see posts from others!</p>
                   </div>
                 )}
-              </div>
+                </div>
+              </Card>
             )}
 
             {/* NGO Owned Communities Tab */}
             {activeTab === 'my-owned-communities' && user?.role === 'ngo_admin' && (
-              <div className="space-y-4">
+              <Card className="border border-primary-200 shadow-soft p-6">
+                <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">
                     My Created Communities ({Array.isArray(ownedCommunities) ? ownedCommunities.length : 0})
@@ -1500,7 +1500,7 @@ export const CommunityPage: React.FC = () => {
                 </div>
                 {Array.isArray(ownedCommunities) && ownedCommunities.length > 0 ? (
                   ownedCommunities.map((community) => (
-                    <Card key={community.id || community._id} className="p-6">
+                    <Card key={community.id || community._id} className="p-6 border border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300">
                       <div className="flex items-start space-x-4">
                         {getFullImageUrl(community.image) ? (
                           <img
@@ -1580,12 +1580,14 @@ export const CommunityPage: React.FC = () => {
                     </Button>
                   </div>
                 )}
-              </div>
+                </div>
+              </Card>
             )}
 
             {/* NGO Joined Communities Tab */}
             {activeTab === 'my-joined-communities' && user?.role === 'ngo_admin' && (
-              <div className="space-y-4">
+              <Card className="border border-primary-200 shadow-soft p-6">
+                <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">
                     Joined Communities ({Array.isArray(joinedCommunities) ? joinedCommunities.length : 0})
@@ -1597,7 +1599,7 @@ export const CommunityPage: React.FC = () => {
                 </div>
                 {Array.isArray(joinedCommunities) && joinedCommunities.length > 0 ? (
                   joinedCommunities.map((community) => (
-                    <Card key={community.id || community._id} className="p-6">
+                    <Card key={community.id || community._id} className="p-6 border border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300">
                       <div className="flex items-start space-x-4">
                         {getFullImageUrl(community.image) ? (
                           <img
@@ -1650,12 +1652,14 @@ export const CommunityPage: React.FC = () => {
                     <p className="text-sm text-gray-500 mt-1">Check out the Discover tab to find communities to join!</p>
                   </div>
                 )}
-              </div>
+                </div>
+              </Card>
             )}
 
             {/* Regular User My Communities Tab */}
             {activeTab === 'my-communities' && user?.role !== 'ngo_admin' && (
-              <div className="space-y-4">
+              <Card className="border border-primary-200 shadow-soft p-6">
+                <div className="space-y-4">
                 {loading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -1681,7 +1685,7 @@ export const CommunityPage: React.FC = () => {
                     </div>
                     {Array.isArray(myCommunities) && myCommunities.length > 0 ? (
                       myCommunities.map((community) => (
-                        <Card key={community.id || community._id} className="p-6">
+                        <Card key={community.id || community._id} className="p-6 border border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300">
                           <div className="flex items-start space-x-4">
                             {getFullImageUrl(community.image) ? (
                               <img
@@ -1767,11 +1771,13 @@ export const CommunityPage: React.FC = () => {
                     )}
                   </>
                 )}
-              </div>
+                </div>
+              </Card>
             )}
 
             {activeTab === 'discover' && (
-              <div className="space-y-4">
+              <Card className="border border-primary-200 shadow-soft p-6">
+                <div className="space-y-4">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Discover Communities</h2>
                   <div className="flex items-center space-x-2">
@@ -1796,7 +1802,7 @@ export const CommunityPage: React.FC = () => {
                   </div>
                 ) : Array.isArray(discoverCommunities) && discoverCommunities.length > 0 ? (
                   discoverCommunities.map((community) => (
-                    <Card key={community.id || community._id} className="p-6">
+                    <Card key={community.id || community._id} className="p-6 border border-primary-200 shadow-soft hover:shadow-medium transition-all duration-300">
                       <div className="flex items-start space-x-4">
                         {getFullImageUrl(community.image) ? (
                           <img
@@ -1877,12 +1883,14 @@ export const CommunityPage: React.FC = () => {
                     <p className="text-sm text-gray-500 mt-1">Check back later or create your own community!</p>
                   </div>
                 )}
-              </div>
+                </div>
+              </Card>
             )}
 
             {/* Volunteer Hub Tab */}
             {activeTab === 'volunteer-hub' && user?.role === 'volunteer' && (
-              <div className="space-y-6">
+              <Card className="border border-primary-200 shadow-soft p-6">
+                <div className="space-y-6">
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">🏆 Volunteer Hub</h2>
                   <p className="text-gray-600">Track your volunteer journey and connect with like-minded individuals</p>
@@ -1989,7 +1997,8 @@ export const CommunityPage: React.FC = () => {
                     </Button>
                   </div>
                 </Card>
-              </div>
+                </div>
+              </Card>
             )}
           </div>
 
