@@ -33,6 +33,7 @@ import { EventVolunteers } from './pages/ngo/EventVolunteers';
 import { CampaignManagement } from './pages/ngo/CampaignManagement';
 import { CreateCampaign } from './pages/ngo/CreateCampaign';
 import { EditCampaign } from './pages/ngo/EditCampaign';
+import CampaignAnalytics from './pages/ngo/CampaignAnalytics';
 import { VolunteerManagement } from './pages/ngo/VolunteerManagement';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
@@ -345,6 +346,14 @@ function App() {
             <ProtectedRoute>
               <AppLayout hideFooter>
                 <CampaignManagement />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/ngo/campaigns/analytics" element={
+            <ProtectedRoute>
+              <AppLayout hideFooter>
+                <CampaignAnalytics />
               </AppLayout>
             </ProtectedRoute>
           } />

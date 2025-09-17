@@ -17,7 +17,7 @@ export const NGOHeader: React.FC = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/ngo/dashboard' },
-    { name: 'Broadcasts', href: '/ngo/broadcasts', icon: '📢' },
+    { name: 'Broadcasts', href: '/ngo/broadcasts' },
     { name: 'Events', href: '/ngo/events' },
     { name: 'Campaigns', href: '/ngo/campaigns' },
     { name: 'Volunteers', href: '/ngo/volunteers' },
@@ -72,7 +72,6 @@ export const NGOHeader: React.FC = () => {
                     : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                 }`}
               >
-                {item.icon && <span className="mr-2">{item.icon}</span>}
                 {item.name}
               </Link>
             ))}
@@ -208,7 +207,6 @@ export const NGOHeader: React.FC = () => {
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {item.icon && <span className="mr-2">{item.icon}</span>}
                   {item.name}
                 </Link>
               ))}

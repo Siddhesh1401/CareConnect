@@ -407,30 +407,38 @@ export const CreateEvent: React.FC = () => {
           </Card>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6 bg-white rounded-xl p-6 border border-primary-100 shadow-soft">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              disabled={isSubmitting}
-              className="border-primary-300 hover:border-primary-400"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-primary-600 hover:bg-primary-700 min-w-[200px] border border-primary-700"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Creating Event...</span>
-                </div>
-              ) : (
-                'Create Event'
-              )}
-            </Button>
+          <div className="pt-6 bg-white rounded-xl p-6 border border-primary-100 shadow-soft">
+            <div className="w-full flex justify-center relative">
+              {/* Create Event Button - Centered */}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 min-w-[220px] px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border border-primary-700"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating Event...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-5 h-5" />
+                    <span>Create Event</span>
+                  </div>
+                )}
+              </Button>
+              
+              {/* Cancel Button - Right Corner */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                disabled={isSubmitting}
+                className="absolute right-0 top-0 border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </form>
       </div>

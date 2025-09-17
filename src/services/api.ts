@@ -655,6 +655,11 @@ export const campaignAPI = {
     return response.data;
   },
 
+  getCampaignAnalytics: async (params?: { timeRange?: string }) => {
+    const response = await api.get('/campaigns/ngo/analytics', { params });
+    return response.data;
+  },
+
   createCampaign: async (campaignData: FormData | {
     title: string;
     description: string;

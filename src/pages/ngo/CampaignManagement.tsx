@@ -9,6 +9,7 @@ import {
   Users, 
   Calendar,
   TrendingUp,
+  BarChart3,
   Search,
   Filter,
   Trash2,
@@ -112,12 +113,20 @@ export const CampaignManagement: React.FC = () => {
             <h1 className="text-3xl font-bold text-primary-900">Campaign Management</h1>
             <p className="text-primary-600 mt-2">Create and manage your fundraising campaigns</p>
           </div>
-          <Link to="/ngo/campaigns/create">
-            <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
-              <Plus className="mr-2 w-4 h-4" />
-              Create Campaign
-            </Button>
-          </Link>
+          <div className="flex gap-3">
+            <Link to="/ngo/campaigns/analytics">
+              <Button variant="outline" className="border-primary-300 text-primary-600 hover:bg-primary-50 hover:border-primary-400">
+                <BarChart3 className="mr-2 w-4 h-4" />
+                View Analytics
+              </Button>
+            </Link>
+            <Link to="/ngo/campaigns/create">
+              <Button className="bg-primary-600 hover:bg-primary-700 border border-primary-700">
+                <Plus className="mr-2 w-4 h-4" />
+                Create Campaign
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards */}

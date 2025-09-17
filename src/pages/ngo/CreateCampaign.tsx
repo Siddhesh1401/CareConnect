@@ -324,29 +324,36 @@ export const CreateCampaign: React.FC = () => {
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-end bg-white rounded-xl p-6 border border-primary-100 shadow-soft">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="border-primary-300 hover:border-primary-400"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="border-primary-300 hover:border-primary-400"
-            >
-              Save as Draft
-            </Button>
-            <Button
-              type="submit"
-              isLoading={isSubmitting}
-              className="bg-primary-600 hover:bg-primary-700 border border-primary-700"
-            >
-              {isSubmitting ? 'Creating Campaign...' : 'Launch Campaign'}
-            </Button>
+          <div className="bg-white rounded-xl p-6 border border-primary-100 shadow-soft">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+              {/* Save as Draft - Left */}
+              <Button
+                type="button"
+                variant="outline"
+                className="border-primary-300 hover:border-primary-400 w-full sm:w-auto order-2 sm:order-1"
+              >
+                Save as Draft
+              </Button>
+              
+              {/* Launch Campaign - Center */}
+              <Button
+                type="submit"
+                isLoading={isSubmitting}
+                className="bg-primary-600 hover:bg-primary-700 border border-primary-700 px-8 w-full sm:w-auto order-1 sm:order-2"
+              >
+                {isSubmitting ? 'Creating Campaign...' : 'Launch Campaign'}
+              </Button>
+              
+              {/* Cancel - Right */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className="border-primary-300 hover:border-primary-400 w-full sm:w-auto order-3"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </form>
       </div>

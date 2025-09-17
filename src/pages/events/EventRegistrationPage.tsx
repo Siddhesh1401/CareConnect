@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle, Calendar, Clock, MapPin, Users, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Calendar, Clock, MapPin, Users, ArrowLeft, Eye } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import MapsButton from '../../components/ui/MapsButton';
 import { getFullImageUrl } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -14,6 +15,7 @@ interface Event {
   title: string;
   description: string;
   category: string;
+  organizerId: string;
   organizerName: string;
   organizationName: string;
   date: string;
@@ -40,12 +42,15 @@ interface Event {
 export const EventRegistrationPage: React.FC = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Hide registration for NGO admins - they should use the management interface
+  const isNGOAdmin = user?.role === 'ngo_admin';
 
   // Fetch event details
   useEffect(() => {
@@ -456,10 +461,68 @@ export const EventRegistrationPage: React.FC = () => {
             )}
           </div>
 
-          {/* Registration Sidebar */}
+          {/* Event Information Sidebar */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              {event.isUserRegistered ? (
+              {isNGOAdmin ? (
+                // NGO Admin View (Hide registration functionality)
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Calendar className="w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    Event Details
+                  </h3>
+                  <p className="text-gray-600 mb-6">Event information and statistics</p>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Event Date</span>
+                        <span className="text-primary-900 font-semibold">{formatDate(event.date)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Time</span>
+                        <span className="text-primary-900 font-semibold">{event.startTime} - {event.endTime}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Registrations</span>
+                        <span className="text-primary-900 font-semibold">{event.capacity - event.availableSpots} / {event.capacity}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-medium">Available Spots</span>
+                        <span className="text-primary-900 font-semibold">{event.availableSpots} remaining</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => navigate('/ngo/events')}
+                      className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white"
+                    >
+                      Manage Events
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/ngo/dashboard')}
+                      className="w-full border-primary-200 text-primary-600 hover:bg-primary-50"
+                    >
+                      Back to Dashboard
+                    </Button>
+                  </div>
+                </div>
+              ) : event.isUserRegistered ? (
                 // Registered User View
                 <div className="text-center">
                   <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -512,7 +575,7 @@ export const EventRegistrationPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                // Registration Form
+                // Registration Form for Volunteers
                 <>
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center mx-auto mb-4">

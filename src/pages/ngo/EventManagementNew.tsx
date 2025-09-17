@@ -10,8 +10,6 @@ import {
   Users, 
   Clock,
   Search,
-  Filter,
-  AlertCircle,
   CheckCircle
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
@@ -122,11 +120,47 @@ export const EventManagement: React.FC = () => {
     fetchStats();
   }, [statusFilter]);
 
-  // Filter events based on search term
+  // Calculate event status counts
+  const getEventStatusCounts = () => {
+    const now = new Date();
+    
+    const active = events.filter(event => {
+      const eventDate = new Date(event.date);
+      return (event.status === 'draft' || event.status === 'published') && eventDate >= now;
+    }).length;
+
+    const finished = events.filter(event => {
+      const eventDate = new Date(event.date);
+      return event.status === 'completed' || (event.status === 'published' && eventDate < now);
+    }).length;
+
+    const deleted = events.filter(event => event.status === 'cancelled').length;
+
+    return { active, finished, deleted };
+  };
+
+  const statusCounts = getEventStatusCounts();
+
+  // Filter events based on search term and status
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+    
+    if (!matchesSearch) return false;
+
+    const now = new Date();
+    const eventDate = new Date(event.date);
+
+    // Filter by status category
+    if (statusFilter === 'active') {
+      return (event.status === 'draft' || event.status === 'published') && eventDate >= now;
+    } else if (statusFilter === 'finished') {
+      return event.status === 'completed' || (event.status === 'published' && eventDate < now);
+    } else if (statusFilter === 'deleted') {
+      return event.status === 'cancelled';
+    }
+
+    return true; // Show all if no filter
   });
 
   const handleDeleteEvent = async (eventId: string) => {
@@ -160,6 +194,45 @@ export const EventManagement: React.FC = () => {
       } else {
         alert('Failed to delete event. Please try again.');
       }
+    }
+  };
+
+  const handleClearDeletedEvents = async () => {
+    const deletedEvents = events.filter(event => event.status === 'cancelled');
+    
+    if (deletedEvents.length === 0) {
+      alert('No deleted events to clear.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to permanently clear ${deletedEvents.length} deleted event(s)? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('careconnect_token');
+      
+      if (!token) {
+        navigate('/auth/login');
+        return;
+      }
+
+      // Delete all cancelled events permanently
+      const deletePromises = deletedEvents.map(event => 
+        axios.delete(`${API_BASE_URL}/events/${event._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+      );
+
+      await Promise.all(deletePromises);
+      alert('All deleted events cleared successfully');
+      fetchEvents(); // Refresh the list
+      fetchStats(); // Refresh stats
+    } catch (error: any) {
+      console.error('Error clearing deleted events:', error);
+      alert('Failed to clear deleted events. Please try again.');
     }
   };
 
@@ -258,33 +331,97 @@ export const EventManagement: React.FC = () => {
           </Card>
         </div>
 
-        {/* Search and Filters */}
+        {/* Search Bar */}
         <Card className="border border-primary-200 shadow-soft">
           <div className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4 items-center">
               <div className="flex-1">
                 <Input
-                  placeholder="Search events..."
+                  placeholder="Search events by title or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   leftIcon={<Search className="w-5 h-5" />}
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                 />
               </div>
+            </div>
+          </div>
+        </Card>
 
-              <div className="flex space-x-4">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+        {/* Event Status Filter Tabs */}
+        <Card className="border border-primary-200 shadow-soft">
+          <div className="p-6">
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+              <button
+                onClick={() => setStatusFilter('all')}
+                className={`flex items-center justify-center px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  statusFilter === 'all'
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100 bg-white border border-gray-200'
+                }`}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                All Events
+                <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
+                  {events.length}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setStatusFilter('active')}
+                className={`flex items-center justify-center px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  statusFilter === 'active'
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-blue-50 bg-white border border-gray-200'
+                }`}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Active Events
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {statusCounts.active}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setStatusFilter('finished')}
+                className={`flex items-center justify-center px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  statusFilter === 'finished'
+                    ? 'bg-green-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-green-50 bg-white border border-gray-200'
+                }`}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Finished Events
+                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  {statusCounts.finished}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setStatusFilter('deleted')}
+                className={`flex items-center justify-center px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  statusFilter === 'deleted'
+                    ? 'bg-red-500 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-red-50 bg-white border border-gray-200'
+                }`}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Deleted Events
+                <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                  {statusCounts.deleted}
+                </span>
+              </button>
+
+              {statusFilter === 'deleted' && statusCounts.deleted > 0 && (
+                <Button
+                  onClick={handleClearDeletedEvents}
+                  variant="outline"
+                  className="ml-4 border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600"
                 >
-                  <option value="all">All Status</option>
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear All Deleted
+                </Button>
+              )}
             </div>
           </div>
         </Card>

@@ -10,7 +10,8 @@ import {
   getCampaignStats,
   getCampaignCategories,
   donateToCampaign,
-  getCampaignDonors
+  getCampaignDonors,
+  getCampaignAnalytics
 } from '../controllers/campaignController';
 import { authenticate } from '../middleware/auth';
 import { hasRole } from '../middleware/roleAuth';
@@ -31,6 +32,7 @@ router.post('/:id/donate', donateToCampaign);
 
 // NGO specific routes
 router.get('/ngo/stats', hasRole('ngo_admin'), getCampaignStats);
+router.get('/ngo/analytics', hasRole('ngo_admin'), getCampaignAnalytics);
 router.get('/ngo/my-campaigns', hasRole('ngo_admin'), getCampaignsByNGO);
 router.post('/', hasRole('ngo_admin'), uploadCampaignImages.array('images', 10), createCampaign);
 router.put('/:id', hasRole('ngo_admin'), uploadCampaignImages.single('image'), updateCampaign);
