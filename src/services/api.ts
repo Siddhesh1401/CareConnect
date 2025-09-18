@@ -102,7 +102,7 @@ export const getFullImageUrl = (imagePath: string | undefined | null): string =>
   return imagePath;
 };
 
-// Helper function to get profile picture URL - returns empty string if no profile picture  
+// Helper function to get profile picture URL - returns default avatar if no profile picture  
 export const getProfilePictureUrl = (profilePicture: string | undefined | null, userName?: string | undefined | null, size?: number): string => {
   if (profilePicture) {
     // If it's already a full URL, return as is
@@ -116,8 +116,11 @@ export const getProfilePictureUrl = (profilePicture: string | undefined | null, 
     }
   }
   
-  // Return empty string if no profile picture - no fallback image generation
-  return '';
+  // Return size-specific default avatar if available, otherwise use standard default
+  if (size && [32, 40, 48, 64, 96, 128].includes(size)) {
+    return `/default-avatar-${size}.webp`;
+  }
+  return '/default-avatar.webp';
 };
 
 // Helper function with UI Avatar fallback for display purposes
