@@ -48,7 +48,7 @@ interface Post {
     id?: string;
     _id?: string;
     name?: string;
-    avatar?: string;
+    profilePicture?: string;
   };
   createdAt?: string;
   date?: Date;
@@ -63,7 +63,7 @@ interface Post {
       id?: string;
       _id?: string;
       name?: string;
-      avatar?: string;
+      profilePicture?: string;
     };
     createdAt?: string;
     date?: Date;
@@ -850,7 +850,7 @@ export const CommunityDetailPage: React.FC = () => {
                               return commentsToShow.map((comment) => (
                                 <div key={comment.id || comment._id} className="flex items-start space-x-3">
                                   <img
-                                    src={comment.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author?.name || 'User')}&background=6366f1&color=fff&size=32`}
+                                    src={getProfilePictureUrl(comment.author?.profilePicture, comment.author?.name, 32)}
                                     alt={comment.author?.name || 'User'}
                                     className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                                   />
@@ -925,7 +925,7 @@ export const CommunityDetailPage: React.FC = () => {
                         {/* Comment Input - Only show when expanded */}
                         <div className="flex items-start space-x-3">
                           <img
-                            src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=6366f1&color=fff&size=32`}
+                            src={getProfilePictureUrl(user?.profilePicture, user?.name, 32)}
                             alt={user?.name || 'User'}
                             className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                           />

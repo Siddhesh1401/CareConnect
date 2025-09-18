@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { LogoutModal } from '../ui/LogoutModal';
 import { HeaderContactSupport } from '../HeaderContactSupport';
+import { getProfilePictureUrl } from '../../services/api';
 
 export const VolunteerHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,12 +61,12 @@ export const VolunteerHeader: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-2">
+          <nav className="hidden md:flex items-center space-x-3">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`text-sm font-medium transition-all duration-200 px-4 py-2 rounded-lg ${
+                className={`text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg whitespace-nowrap ${
                   isActiveLink(item.href)
                     ? 'text-primary-700 bg-primary-50 border border-primary-200'
                     : 'text-gray-600 hover:text-primary-700 hover:bg-primary-50'
@@ -78,7 +79,7 @@ export const VolunteerHeader: React.FC = () => {
           </nav>
 
           {/* Desktop Profile & Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-5 ml-6">
             {/* Contact Support */}
             <HeaderContactSupport userType="volunteer" />
             
@@ -94,17 +95,11 @@ export const VolunteerHeader: React.FC = () => {
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-50 transition-all duration-200"
               >
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover border-2 border-primary-200"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary-600" />
-                  </div>
-                )}
+                <img
+                  src={getProfilePictureUrl(user?.profilePicture, user?.name, 32)}
+                  alt={user?.name}
+                  className="w-8 h-8 rounded-full object-cover border-2 border-primary-200"
+                />
                 <div className="text-left">
                   <div className="text-sm font-semibold text-gray-900">{user?.name}</div>
                   <div className="text-xs text-primary-600 font-medium">{user?.points} points</div>
@@ -167,17 +162,11 @@ export const VolunteerHeader: React.FC = () => {
               
               <div className="border-t border-primary-200 pt-4 mt-4">
                 <div className="flex items-center px-3 py-2">
-                  {user?.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-primary-600" />
-                    </div>
-                  )}
+                  <img
+                    src={getProfilePictureUrl(user?.profilePicture, user?.name, 40)}
+                    alt={user?.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
                   <div className="ml-3">
                     <div className="text-base font-medium text-gray-900">{user?.name}</div>
                     <div className="text-sm text-primary-600">{user?.points} points</div>

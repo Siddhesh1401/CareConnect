@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from './Button';
-import { getFullImageUrl } from '../../services/api';
+import { getFullImageUrl, getProfilePictureUrl } from '../../services/api';
 
 interface ImageUploadProps {
   onImageSelect: (file: File | null) => void;
@@ -10,6 +10,7 @@ interface ImageUploadProps {
   className?: string;
   maxSizeMB?: number;
   acceptedTypes?: string[];
+  useDefaultImage?: boolean; // Show default avatar when no image is selected
 }
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -18,9 +19,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   placeholder = "Click to upload image",
   className = "",
   maxSizeMB = 5,
-  acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+  acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
+  useDefaultImage = false
 }) => {
-  const [preview, setPreview] = useState<string | null>(getFullImageUrl(currentImage) || null);
+  const getInitialPreview = () => {
+    if (currentImage) return getFullImageUrl(currentImage);
+    if (useDefaultImage) return getProfilePictureUrl(null, null, 128);
+    return null;
+  };
+  
+  const [preview, setPreview] = useState<string | null>(getInitialPreview());
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,7 +38,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
     if (!file) {
       onImageSelect(null);
-      setPreview(getFullImageUrl(currentImage) || null);
+      const fallbackPreview = currentImage ? getFullImageUrl(currentImage) : (useDefaultImage ? getProfilePictureUrl(null, null, 128) : null);
+      setPreview(fallbackPreview);
       return;
     }
 
@@ -59,7 +68,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const handleRemoveImage = () => {
-    setPreview(getFullImageUrl(currentImage) || null);
+    const fallbackPreview = currentImage ? getFullImageUrl(currentImage) : (useDefaultImage ? getProfilePictureUrl(null, null, 128) : null);
+    setPreview(fallbackPreview);
     setError(null);
     onImageSelect(null);
     if (fileInputRef.current) {
@@ -134,7 +144,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           <Upload className="w-4 h-4 mr-2" />
           {preview ? 'Change Image' : 'Upload Image'}
         </Button>
-        {preview && preview !== getFullImageUrl(currentImage) && (
+        {preview && preview !== (currentImage ? getFullImageUrl(currentImage) : (useDefaultImage ? getProfilePictureUrl(null, null, 128) : null)) && (
           <Button
             type="button"
             variant="outline"

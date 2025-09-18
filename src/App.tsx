@@ -16,6 +16,7 @@ import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard';
 import VolunteerBroadcasts from './pages/volunteer/VolunteerBroadcasts';
 import { CommunityPage } from './pages/community/CommunityPage';
 import { CommunityDetailPage } from './pages/community/CommunityDetailPage';
+import { CreatePostPage } from './pages/community/CreatePostPage';
 import { EventsPage } from './pages/events/EventsPage';
 import { EventRegistrationPage } from './pages/events/EventRegistrationPage';
 import { NGODashboard } from './pages/ngo/NGODashboard';
@@ -238,6 +239,14 @@ function App() {
             <ProtectedRoute>
               <AppLayout hideFooter>
                 <CommunityPage />
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/community/create-post" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CreatePostPage />
               </AppLayout>
             </ProtectedRoute>
           } />

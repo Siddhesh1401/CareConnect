@@ -69,10 +69,6 @@ interface Post {
 export const CommunityPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('feed');
-  const [newPostTitle, setNewPostTitle] = useState('');
-  const [newPostContent, setNewPostContent] = useState('');
-  const [newPostImage, setNewPostImage] = useState<File | null>(null);
-  const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [newCommunityName, setNewCommunityName] = useState('');
   const [newCommunityDescription, setNewCommunityDescription] = useState('');
@@ -405,55 +401,6 @@ export const CommunityPage: React.FC = () => {
       .slice(0, 5); // Top 5 trending topics
     
     setTrendingTopics(sortedTopics);
-  };
-
-  const handleCreatePost = async () => {
-    if (newPostTitle.trim() && newPostContent.trim()) {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Get the first community ID from user's communities
-        const userCommunities = await communityAPI.getUserCommunities();
-        const communities = userCommunities?.data || [];
-
-        if (Array.isArray(communities) && communities.length > 0) {
-          const firstCommunity = communities[0];
-          const communityId = firstCommunity?.id || firstCommunity?._id;
-
-          if (communityId) {
-            const postData = {
-              title: newPostTitle.trim(),
-              content: newPostContent.trim(),
-              image: newPostImage || undefined,
-            };
-
-            await communityAPI.createPost(communityId, postData);
-
-            // Clear form
-            setNewPostTitle('');
-            setNewPostContent('');
-            setNewPostImage(null);
-            setShowCreatePost(false);
-
-            // Refresh posts data
-            const communityPostsResponse = await communityAPI.getCommunityPosts(communityId);
-            const communityPosts = communityPostsResponse?.data || [];
-            setPosts(Array.isArray(communityPosts) ? communityPosts : []);
-          } else {
-            setError('Unable to determine community for posting');
-          }
-        } else {
-          setError('You must join a community before creating posts');
-        }
-      } catch (error) {
-        console.error('Error creating post:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    }
   };
 
   const handleCreateCommunity = async () => {
@@ -969,13 +916,12 @@ export const CommunityPage: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3">
-            <Button 
-              onClick={() => setShowCreatePost(!showCreatePost)} 
-              className="bg-primary-600 hover:bg-primary-700"
-            >
-              <Plus className="mr-2 w-4 h-4" />
-              Create Post
-            </Button>
+            <Link to="/community/create-post">
+              <Button className="bg-primary-600 hover:bg-primary-700">
+                <Plus className="mr-2 w-4 h-4" />
+                Create Post
+              </Button>
+            </Link>
             {user?.role === 'ngo_admin' && (
               <Button 
                 onClick={() => setShowCreateCommunity(!showCreateCommunity)} 
@@ -1074,53 +1020,6 @@ export const CommunityPage: React.FC = () => {
           </button>
           </div>
         </Card>
-
-        {/* Create Post Modal */}
-        {showCreatePost && (
-          <Card className="p-8 mb-12 bg-white border border-primary-200 shadow-soft">
-            <h3 className="text-xl font-semibold mb-6 text-primary-900">Create a New Post</h3>
-            <div className="space-y-4">
-              <Input
-                placeholder="Post title"
-                value={newPostTitle}
-                onChange={(e) => setNewPostTitle(e.target.value)}
-              />
-              <div>
-                <textarea
-                  placeholder="Share your thoughts, experiences, or ask questions..."
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <ImageUpload
-                onImageSelect={setNewPostImage}
-                placeholder="Add a photo to your post"
-                className="w-full"
-              />
-              <div className="flex items-center justify-between">
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowCreatePost(false)}
-                    className="text-gray-600"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    size="sm"
-                    onClick={handleCreatePost}
-                  >
-                    <Send className="mr-2 w-4 h-4" />
-                    Post
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
 
         {/* Create Community Modal */}
         {showCreateCommunity && user?.role === 'ngo_admin' && (
