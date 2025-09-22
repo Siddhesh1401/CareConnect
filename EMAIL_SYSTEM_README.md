@@ -1,6 +1,6 @@
 # CareConnect - Email Verification & Notification System
 
-## Overview
+## Overview 1
 This document outlines the comprehensive email functionality implemented in CareConnect, including email verification for users and automated notifications for NGO status updates.
 
 ## Features Implemented
