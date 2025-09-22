@@ -314,16 +314,16 @@ export const NGOProfilePage: React.FC = () => {
             {/* Quick Actions */}
             <Card>
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Get Involved</h3>
-                <div className="space-y-3">
-                  <Link to={`/events?ngo=${ngo.id}`}>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Get Involved</h3>
+                <div className="space-y-4">
+                  <Link to={`/events?ngo=${ngo.id}`} className="block">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3">
                       <Calendar className="w-4 h-4 mr-2" />
                       View Events
                     </Button>
                   </Link>
-                  <Link to={`/ngos/${ngo.id}/donate`}>
-                    <Button variant="outline" className="w-full">
+                  <Link to={`/ngos/${ngo.id}/donate`} className="block">
+                    <Button variant="outline" className="w-full py-3 border-2 hover:bg-gray-50">
                       <Heart className="w-4 h-4 mr-2" />
                       Make a Donation
                     </Button>

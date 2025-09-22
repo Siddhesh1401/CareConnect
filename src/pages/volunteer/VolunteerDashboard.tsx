@@ -175,19 +175,19 @@ export const VolunteerDashboard: React.FC = () => {
     <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="bg-white rounded-lg border border-primary-200 p-8">
+        <div className="bg-white rounded-lg border border-primary-200 p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-            <div>
-              <h1 className="text-4xl font-bold text-primary-900 mb-2">
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl font-bold text-primary-900 mb-2">
                 Welcome back, {user?.name}! 👋
               </h1>
-              <p className="text-gray-600 text-lg">Here's your impact overview and upcoming activities</p>
+              <p className="text-gray-600 text-base sm:text-lg">Here's your impact overview and upcoming activities</p>
             </div>
             
-            <div className="bg-primary-50 rounded-lg p-6 border border-primary-200">
-              <div className="flex items-center space-x-4">
+            <div className="bg-primary-50 rounded-lg p-4 sm:p-6 border border-primary-200 w-full sm:w-auto">
+              <div className="flex items-center justify-center sm:justify-start space-x-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-primary-900">{dashboardData?.stats.totalPoints || 0}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-primary-900">{dashboardData?.stats.totalPoints || 0}</div>
                   <div className="text-sm text-primary-600">Total Points</div>
                 </div>
                 <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
@@ -199,27 +199,36 @@ export const VolunteerDashboard: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, index) => {
-            const StatCard = stat.link ? Link : 'div';
-            const cardProps = stat.link ? { to: stat.link } : {};
+            const content = (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
+                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                  </div>
+                  <div className={`p-3 rounded-lg ${stat.color}`}>
+                    <stat.icon className={`w-6 h-6 ${stat.color.includes('blue') ? 'text-blue-600' : 'text-primary-600'}`} />
+                  </div>
+                </div>
+                <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+                  <div className={`h-2 rounded-full transition-all duration-1000 ${stat.color.includes('blue') ? 'bg-blue-600' : 'bg-primary-600'}`} style={{width: `${Math.min(100, (index + 1) * 25)}%`}}></div>
+                </div>
+              </>
+            );
 
             return (
               <Card key={index} className={`p-6 bg-white border-primary-200 ${stat.link ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}`}>
-                <StatCard {...cardProps} className="block">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 rounded-lg ${stat.color}`}>
-                      <stat.icon className={`w-6 h-6 ${stat.color.includes('blue') ? 'text-blue-600' : 'text-primary-600'}`} />
-                    </div>
+                {stat.link ? (
+                  <Link to={stat.link} className="block">
+                    {content}
+                  </Link>
+                ) : (
+                  <div className="block">
+                    {content}
                   </div>
-                  <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-                    <div className={`h-2 rounded-full transition-all duration-1000 ${stat.color.includes('blue') ? 'bg-blue-600' : 'bg-primary-600'}`} style={{width: `${Math.min(100, (index + 1) * 25)}%`}}></div>
-                  </div>
-                </StatCard>
+                )}
               </Card>
             );
           })}
@@ -242,19 +251,19 @@ export const VolunteerDashboard: React.FC = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {dashboardData?.achievements.map((achievement) => (
               <div key={achievement.id} className="bg-primary-50 rounded-lg p-4 border border-primary-200">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="text-2xl">{achievement.icon}</div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{achievement.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{achievement.description}</p>
+                <div className="flex items-start space-x-3 mb-3">
+                  <div className="text-2xl flex-shrink-0">{achievement.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">{achievement.title}</h3>
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{achievement.description}</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">{formatDate(achievement.earnedDate)}</span>
-                  <div className="flex items-center space-x-2 bg-primary-600 text-white px-3 py-1 rounded-full">
+                <div className="flex items-center justify-between text-sm gap-2">
+                  <span className="text-gray-500 truncate flex-1">{formatDate(achievement.earnedDate)}</span>
+                  <div className="flex items-center space-x-2 bg-primary-600 text-white px-3 py-1 rounded-full flex-shrink-0">
                     <Star className="w-4 h-4" />
                     <span className="font-medium">{achievement.points} pts</span>
                   </div>
@@ -264,7 +273,7 @@ export const VolunteerDashboard: React.FC = () => {
           </div>
         </Card>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Recent Activity */}
           <div className="lg:col-span-2">
             <Card className="p-6 h-full bg-white border-primary-200">
@@ -290,18 +299,18 @@ export const VolunteerDashboard: React.FC = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 mb-2">{event.title}</h3>
                         <p className="text-primary-600 font-medium mb-3">{event.ngo}</p>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4" />
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-gray-500">
+                          <div className="flex items-center space-x-2 whitespace-nowrap">
+                            <Calendar className="w-4 h-4 flex-shrink-0" />
                             <span>{formatDate(event.date)}</span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <Clock className="w-4 h-4" />
+                          <div className="flex items-center space-x-2 whitespace-nowrap">
+                            <Clock className="w-4 h-4 flex-shrink-0" />
                             <span>{event.time}</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <MapPin className="w-4 h-4" />
-                            <span>{event.location}</span>
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{event.location}</span>
                           </div>
                         </div>
                       </div>

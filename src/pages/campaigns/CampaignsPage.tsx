@@ -422,12 +422,14 @@ export const CampaignsPage: React.FC = () => {
           <p className="text-primary-100 mb-6">
             Join our volunteer community and contribute your time and skills to these amazing causes.
           </p>
-          <Link to="/events">
-            <Button className="bg-white text-primary-600 hover:bg-gray-100">
-              <ArrowRight className="w-4 h-4 mr-2" />
-              Explore Volunteer Opportunities
-            </Button>
-          </Link>
+          <div className="flex justify-center">
+            <Link to="/events">
+              <button className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold flex items-center justify-center shadow-2xl border-2 border-blue-400 transform hover:scale-105 transition-transform duration-200 ring-4 ring-blue-200 ring-opacity-50">
+                <ArrowRight className="w-5 h-5 mr-3" />
+                Explore Volunteer Opportunities
+              </button>
+            </Link>
+          </div>
         </Card>
       </div>
 

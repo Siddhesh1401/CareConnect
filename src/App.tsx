@@ -176,7 +176,7 @@ function App() {
             </AppLayout>
           } />
           <Route path="/ngos" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <NGOsPage />
             </AppLayout>
           } />
@@ -260,7 +260,7 @@ function App() {
           } />
           
           <Route path="/events" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <EventsPage />
             </AppLayout>
           } />
@@ -301,7 +301,7 @@ function App() {
           
           {/* Campaign Routes */}
           <Route path="/campaigns" element={
-            <AppLayout>
+            <AppLayout hideFooter>
               <CampaignsPage />
             </AppLayout>
           } />
