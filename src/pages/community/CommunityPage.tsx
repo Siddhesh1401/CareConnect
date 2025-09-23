@@ -923,14 +923,15 @@ export const CommunityPage: React.FC = () => {
               </Button>
             </Link>
             {user?.role === 'ngo_admin' && (
-              <Button 
-                onClick={() => setShowCreateCommunity(!showCreateCommunity)} 
-                variant="outline"
-                className="border-primary-600 text-primary-600 hover:bg-primary-50"
-              >
-                <Users className="mr-2 w-4 h-4" />
-                Create Community
-              </Button>
+              <Link to="/community/create-community">
+                <Button 
+                  variant="outline"
+                  className="border-primary-600 text-primary-600 hover:bg-primary-50"
+                >
+                  <Users className="mr-2 w-4 h-4" />
+                  Create Community
+                </Button>
+              </Link>
             )}
           </div>
         </div>

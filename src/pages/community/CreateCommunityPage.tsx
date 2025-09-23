@@ -1,21 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, AlertCircle, FileText } from 'lucide-react';
+import { ArrowLeft, Send, AlertCircle, Users } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { ImageUpload } from '../../components/ui/ImageUpload';
 import { communityAPI } from '../../services/api';
 
-export const CreatePostPage: React.FC = () => {
+export const CreateCommunityPage: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    content: ''
+    name: '',
+    description: '',
+    category: 'general'
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  const categories = [
+    { value: 'general', label: 'General Discussion' },
+    { value: 'volunteer', label: 'Volunteering' },
+    { value: 'environment', label: 'Environment' },
+    { value: 'education', label: 'Education' },
+    { value: 'healthcare', label: 'Healthcare' },
+    { value: 'animals', label: 'Animal Welfare' },
+    { value: 'elderly', label: 'Elderly Care' },
+    { value: 'children', label: 'Children & Youth' },
+    { value: 'disaster', label: 'Disaster Relief' },
+    { value: 'other', label: 'Other' }
+  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -26,9 +40,9 @@ export const CreatePostPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title.trim() || !formData.content.trim()) {
-      setError('Please fill in both title and content fields');
+
+    if (!formData.name.trim() || !formData.description.trim()) {
+      setError('Please fill in both name and description fields');
       return;
     }
 
@@ -36,34 +50,20 @@ export const CreatePostPage: React.FC = () => {
       setIsSubmitting(true);
       setError(null);
 
-      // Get the first community ID from user's communities
-      const userCommunities = await communityAPI.getUserCommunities();
-      const communities = userCommunities?.data || [];
+      const communityData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        category: formData.category,
+        image: selectedImage || undefined,
+      };
 
-      if (Array.isArray(communities) && communities.length > 0) {
-        const firstCommunity = communities[0];
-        const communityId = firstCommunity?.id || firstCommunity?._id;
+      await communityAPI.createCommunity(communityData);
 
-        if (communityId) {
-          const postData = {
-            title: formData.title.trim(),
-            content: formData.content.trim(),
-            image: selectedImage || undefined,
-          };
-
-          await communityAPI.createPost(communityId, postData);
-
-          // Navigate back to community page
-          navigate('/community');
-        } else {
-          setError('Unable to determine community for posting');
-        }
-      } else {
-        setError('You must join a community before creating posts');
-      }
+      // Navigate back to community page
+      navigate('/community');
     } catch (error) {
-      console.error('Error creating post:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
+      console.error('Error creating community:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create community';
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -83,8 +83,8 @@ export const CreatePostPage: React.FC = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-primary-900">Create New Post</h1>
-            <p className="text-primary-600 mt-2">Share your thoughts, experiences, or ask questions with the community</p>
+            <h1 className="text-3xl font-bold text-primary-900">Create New Community</h1>
+            <p className="text-primary-600 mt-2">Build a community around your cause and connect with like-minded people</p>
           </div>
         </div>
 
@@ -101,35 +101,53 @@ export const CreatePostPage: React.FC = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Post Information */}
+          {/* Community Information */}
           <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-primary-900 mb-4">Post Information</h3>
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Community Information</h3>
               <div className="space-y-4">
                 <Input
-                  label="Post Title *"
-                  name="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Enter a descriptive title for your post"
-                  leftIcon={<FileText className="w-5 h-5" />}
+                  label="Community Name *"
+                  name="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  placeholder="Enter a descriptive name for your community"
+                  leftIcon={<Users className="w-5 h-5" />}
                   className="border-primary-200 focus:border-primary-400 focus:ring-primary-400"
                   required
                 />
 
                 <div>
                   <label className="block text-sm font-medium text-primary-900 mb-2">
-                    Content *
+                    Description *
                   </label>
                   <textarea
-                    name="content"
-                    value={formData.content}
-                    onChange={(e) => handleInputChange('content', e.target.value)}
-                    placeholder="Share your thoughts, experiences, or ask questions..."
-                    rows={6}
+                    name="description"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Describe what your community is about and what members can expect..."
+                    rows={4}
                     className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-900 mb-2">
+                    Category
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={(e) => handleInputChange('category', e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-primary-200 rounded-lg text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-400"
+                  >
+                    {categories.map(category => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -138,10 +156,10 @@ export const CreatePostPage: React.FC = () => {
           {/* Image Upload */}
           <Card className="border border-primary-200 shadow-soft">
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-primary-900 mb-4">Post Image (Optional)</h3>
+              <h3 className="text-lg font-semibold text-primary-900 mb-4">Community Image (Optional)</h3>
               <ImageUpload
                 onImageSelect={setSelectedImage}
-                placeholder="Add a photo to make your post more engaging"
+                placeholder="Add a cover image to make your community more attractive"
                 className="w-full"
               />
             </div>
@@ -160,7 +178,7 @@ export const CreatePostPage: React.FC = () => {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || !formData.title.trim() || !formData.content.trim()}
+              disabled={isSubmitting || !formData.name.trim() || !formData.description.trim()}
               className="bg-primary-600 hover:bg-primary-700 border border-primary-700 min-w-[150px]"
             >
               {isSubmitting ? (
@@ -171,7 +189,7 @@ export const CreatePostPage: React.FC = () => {
               ) : (
                 <div className="flex items-center space-x-2">
                   <Send className="w-4 h-4" />
-                  <span>Create Post</span>
+                  <span>Create Community</span>
                 </div>
               )}
             </Button>
@@ -182,4 +200,4 @@ export const CreatePostPage: React.FC = () => {
   );
 };
 
-export default CreatePostPage;
+export default CreateCommunityPage;

@@ -384,14 +384,16 @@ export const StoriesPage: React.FC = () => {
         {activeTab === 'all' && filteredStories.length > 0 && (
           <Card className="mb-8 overflow-hidden">
             <div className="lg:flex">
-              <div className="lg:w-1/2">
-                <img
-                  src={getFullImageUrl(filteredStories[0].image)}
-                  alt={filteredStories[0].title}
-                  className="w-full h-64 lg:h-full object-cover"
-                />
-              </div>
-              <div className="lg:w-1/2 p-8">
+              {filteredStories[0].image && (
+                <div className="lg:w-1/2">
+                  <img
+                    src={getFullImageUrl(filteredStories[0].image)}
+                    alt={filteredStories[0].title}
+                    className="w-full h-64 lg:h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className={`${filteredStories[0].image ? 'lg:w-1/2' : 'w-full'} p-8`}>
                 <div className="flex items-center space-x-2 mb-3">
                   <span className="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded-full font-medium">
                     FEATURED
@@ -464,7 +466,7 @@ export const StoriesPage: React.FC = () => {
                   )}
                   {activeTab === 'my' && (
                     <div className="flex items-center space-x-2">
-                      <Link to={`/stories/edit/${story.id}`}>
+                      <Link to={`/stories/${story.id}/edit`}>
                         <button className="p-1 text-gray-400 hover:text-primary-600 transition-colors">
                           <Edit className="w-4 h-4" />
                         </button>

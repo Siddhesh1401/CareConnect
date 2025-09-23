@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Event from '../models/Event.js';
 import User from '../models/User.js';
-import mongoose from 'mongoose';
+import Campaign from '../models/Campaign';
 
 interface AuthRequest extends Request {
   user?: {
@@ -209,20 +209,15 @@ export const getNGODashboard = async (req: AuthRequest, res: Response): Promise<
     // Get recent volunteers (last 5 who registered for NGO's events)
     const recentVolunteers = [];
     for (const event of ngoEvents.slice(0, 3)) {
-      for (const volunteer of event.registeredVolunteers.slice(0, 2)) {
-        const volunteerDetails = await User.findById(volunteer.userId)
-          .select('name profilePicture')
-          .lean();
-
-        if (volunteerDetails) {
-          recentVolunteers.push({
-            _id: volunteer.userId,
-            name: volunteerDetails.name,
-            avatar: volunteerDetails.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(volunteerDetails.name)}&background=random`,
-            joinedDate: volunteer.registrationDate,
-            eventsJoined: 1 // This would need more complex calculation
-          });
-        }
+      for (const volunteer of event.registeredVolunteers.filter(v => v.status === 'confirmed').slice(0, 2)) {
+        // Use the data already stored in the event instead of fetching from User collection
+        recentVolunteers.push({
+          _id: volunteer.userId,
+          name: volunteer.userName,
+          profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(volunteer.userName)}&background=random`,
+          joinedDate: volunteer.registrationDate,
+          eventsJoined: 1 // This would need more complex calculation
+        });
 
         if (recentVolunteers.length >= 5) break;
       }
@@ -234,6 +229,21 @@ export const getNGODashboard = async (req: AuthRequest, res: Response): Promise<
 
     // Mock donation data (would need a donations model)
     const totalDonations = Math.floor(totalVolunteers * 150); // Mock calculation
+
+    // Get NGO's campaigns
+    const ngoCampaigns = await Campaign.find({ 
+      ngoId: ngoId,
+      status: 'active' 
+    }).sort({ createdDate: -1 }).limit(5);
+
+    const campaigns = ngoCampaigns.map(campaign => ({
+      id: campaign._id,
+      title: campaign.title,
+      raised: campaign.raised,
+      target: campaign.target,
+      donors: campaign.donors,
+      daysLeft: Math.ceil((campaign.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    }));
 
     res.status(200).json({
       success: true,
@@ -249,7 +259,7 @@ export const getNGODashboard = async (req: AuthRequest, res: Response): Promise<
         },
         recentEvents,
         recentVolunteers,
-        campaigns: [] // Would need campaigns model
+        campaigns
       }
     });
 

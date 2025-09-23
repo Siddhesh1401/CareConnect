@@ -9,8 +9,7 @@ import {
   MapPin,
   Star,
   ArrowRight,
-  Edit,
-  MessageSquare
+  Edit
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
@@ -93,13 +92,6 @@ export const VolunteerDashboard: React.FC = () => {
   }, []);
 
   const stats = [
-    {
-      label: 'Broadcasts',
-      value: 'View Messages',
-      icon: MessageSquare,
-      color: 'text-blue-600 bg-blue-50',
-      link: '/volunteer/broadcasts'
-    },
     {
       label: 'Total Hours',
       value: dashboardData?.stats.totalHours.toString() || '0',
@@ -364,21 +356,21 @@ export const VolunteerDashboard: React.FC = () => {
                 ))}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-primary-200 space-y-3">
-                <Link to="/stories/create">
-                  <Button className="w-full bg-green-600 hover:bg-green-700">
+              <div className="mt-6 pt-4 border-t border-primary-200 space-y-4">
+                <Link to="/stories/create" className="block">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 py-3">
                     <Heart className="mr-2 w-4 h-4" />
                     Share Your Story
                   </Button>
                 </Link>
-                <Link to="/stories?tab=my">
-                  <Button variant="outline" className="w-full border-primary-200 hover:border-primary-300 hover:bg-primary-50">
+                <Link to="/stories?tab=my" className="block">
+                  <Button variant="outline" className="w-full border-primary-200 hover:border-primary-300 hover:bg-primary-50 py-3">
                     <Edit className="mr-2 w-4 h-4" />
                     My Stories
                   </Button>
                 </Link>
                 <Link to="/community" className="block">
-                  <Button variant="outline" className="w-full border-primary-200 hover:border-primary-300 hover:bg-primary-50">
+                  <Button variant="outline" className="w-full border-primary-200 hover:border-primary-300 hover:bg-primary-50 py-3">
                     <Users className="mr-2 w-4 h-4" />
                     Join Community Discussions
                   </Button>

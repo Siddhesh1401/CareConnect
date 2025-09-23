@@ -54,10 +54,18 @@ interface NGODashboardData {
 }
 
 export const NGODashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [dashboardData, setDashboardData] = useState<NGODashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Debug user object
+  useEffect(() => {
+    console.log('NGO Dashboard - User object:', user);
+    console.log('NGO Dashboard - User ID:', user?.id);
+    console.log('NGO Dashboard - User _id:', user?._id);
+    console.log('NGO Dashboard - Auth loading:', authLoading);
+  }, [user, authLoading]);
 
   // Chart data states
   const [volunteerGrowthData, setVolunteerGrowthData] = useState<any[]>([]);
@@ -197,6 +205,28 @@ export const NGODashboard: React.FC = () => {
     });
   };
 
+  // Show loading if auth is still loading or user is not available
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-20 bg-white rounded-xl mb-8 shadow-soft border border-primary-100"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-white rounded-xl shadow-soft border border-primary-100"></div>
+              ))}
+            </div>
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 h-96 bg-white rounded-xl shadow-soft border border-primary-100"></div>
+              <div className="h-96 bg-white rounded-xl shadow-soft border border-primary-100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-primary-50 p-4 sm:p-6 lg:p-8">
@@ -251,12 +281,14 @@ export const NGODashboard: React.FC = () => {
                 <span>Edit Profile</span>
               </Button>
             </Link>
-            <Link to={`/ngos/${user?.id}`}>
-              <Button variant="outline" className="flex items-center space-x-2">
-                <Eye className="w-4 h-4" />
-                <span>View Public Profile</span>
-              </Button>
-            </Link>
+            {user && (user.id || user._id) && (
+              <Link to={`/ngos/${user.id || user._id}`}>
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <Eye className="w-4 h-4" />
+                  <span>View Public Profile</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -355,9 +387,9 @@ export const NGODashboard: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Event Management */}
           <div className="lg:col-span-2">
-            <Card className="p-6 h-full border-primary-200">
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-primary-100">
-                <h2 className="text-xl font-semibold text-primary-900">Event Management</h2>
+            <Card className="p-4 h-full border-primary-200">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-primary-100">
+                <h2 className="text-lg font-semibold text-primary-900">Event Management</h2>
                 <div className="flex space-x-2">
                   <Link to="/ngo/events">
                     <Button variant="outline" size="sm">
@@ -374,13 +406,13 @@ export const NGODashboard: React.FC = () => {
                 </div>
               </div>
               
-              <div className="space-y-4">
-                {recentEvents.map((event, index) => (
-                  <div key={`event-${event._id}-${index}`} className="bg-primary-50 rounded-lg p-4 border border-primary-200 hover:border-primary-300 transition-all duration-300 shadow-sm">
-                    <div className="flex items-start justify-between mb-3">
+              <div className="space-y-3">
+                {recentEvents.slice(0, 3).map((event, index) => (
+                  <div key={`event-${event._id}-${index}`} className="bg-primary-50 rounded-lg p-3 border border-primary-200 hover:border-primary-300 transition-all duration-300 shadow-sm">
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-primary-900 mb-1 pb-1 border-b border-primary-100">{event.title}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-primary-500 mb-2 pt-2">
+                        <h3 className="font-medium text-primary-900 mb-2">{event.title}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-primary-500 mb-3">
                           <div className="flex items-center space-x-1 px-2 py-1 bg-white rounded border border-primary-100">
                             <Calendar className="w-4 h-4" />
                             <span>{formatDate(event.date)}</span>
@@ -394,7 +426,7 @@ export const NGODashboard: React.FC = () => {
                             <span>{event.location}</span>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 pt-2 border-t border-primary-100">
+                        <div className="flex items-center space-x-2">
                           <div className="flex items-center space-x-1 text-sm text-primary-600">
                             <Users className="w-4 h-4" />
                             <span>{event.volunteers}/{event.capacity} volunteers</span>
@@ -407,7 +439,7 @@ export const NGODashboard: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2 ml-4">
+                      <div className="flex flex-col items-end space-y-2 ml-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
                           event.status === 'upcoming' 
                             ? 'bg-primary-100 text-primary-800 border-primary-200' 
@@ -415,7 +447,7 @@ export const NGODashboard: React.FC = () => {
                         }`}>
                           {event.status}
                         </span>
-                        <Button variant="ghost" size="sm" className="text-primary-400 hover:text-primary-600 border border-transparent hover:border-primary-200">
+                        <Button variant="ghost" size="sm" className="text-primary-400 hover:text-primary-600 border border-transparent hover:border-primary-200 p-1">
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -455,9 +487,9 @@ export const NGODashboard: React.FC = () => {
                 </div>
               </div>
             </Card>
-            <Card className="p-6 border-primary-200">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-primary-100">
-                <h3 className="text-lg font-semibold text-primary-900">Active Campaigns</h3>
+            <Card className="p-4 border-primary-200">
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-primary-100">
+                <h3 className="text-base font-semibold text-primary-900">Active Campaigns</h3>
                 <Link to="/ngo/campaigns">
                   <Button variant="outline" size="sm">
                     View All
@@ -465,9 +497,9 @@ export const NGODashboard: React.FC = () => {
                 </Link>
               </div>
               
-              <div className="space-y-4">
-                {campaigns.map((campaign, index) => (
-                  <div key={`campaign-${campaign.id}-${index}`} className="bg-primary-50 rounded-lg p-4 border border-primary-200 hover:border-primary-300 transition-all duration-300 shadow-sm">
+              <div className="space-y-3">
+                {campaigns.slice(0, 3).map((campaign, index) => (
+                  <div key={`campaign-${campaign.id}-${index}`} className="bg-primary-50 rounded-lg p-3 border border-primary-200 hover:border-primary-300 transition-all duration-300 shadow-sm">
                     <h4 className="font-medium text-primary-900 mb-2 pb-2 border-b border-primary-100">{campaign.title}</h4>
                     <div className="space-y-2 pt-2">
                       <div className="flex justify-between text-sm">
@@ -495,14 +527,14 @@ export const NGODashboard: React.FC = () => {
             </Card>
 
             {/* Recent Volunteers */}
-            <Card className="p-6 border-primary-200">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-primary-100">
-                <h3 className="text-lg font-semibold text-primary-900">New Volunteers</h3>
+            <Card className="p-4 border-primary-200">
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-primary-100">
+                <h3 className="text-base font-semibold text-primary-900">New Volunteers</h3>
                 <Activity className="w-5 h-5 text-primary-600" />
               </div>
               
               <div className="space-y-3">
-                {recentVolunteers.map((volunteer, index) => (
+                {recentVolunteers.slice(0, 3).map((volunteer, index) => (
                   <div key={`volunteer-${volunteer._id}-${index}`} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-50 transition-all duration-300 border border-transparent hover:border-primary-200">
                     <img
                       src={getProfilePictureUrl(volunteer.profilePicture, volunteer.name, 40)}
@@ -533,17 +565,17 @@ export const NGODashboard: React.FC = () => {
             </Card>
 
             {/* Stories Section */}
-            <Card className="p-6 border-primary-200">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-primary-100">
-                <h3 className="text-lg font-semibold text-primary-900">Your Stories</h3>
+            <Card className="p-4 border-primary-200">
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-primary-100">
+                <h3 className="text-base font-semibold text-primary-900">Your Stories</h3>
                 <Heart className="w-5 h-5 text-green-600" />
               </div>
               
-              <p className="text-sm text-primary-600 mb-6 p-3 bg-primary-50 rounded border border-primary-200">
+              <p className="text-sm text-primary-600 mb-4 p-3 bg-primary-50 rounded border border-primary-200">
                 Share your impact stories and inspire others in the community.
               </p>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Primary Action - Create New Story */}
                 <Link to="/stories/create">
                   <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 p-4 h-auto rounded-xl border-2 border-green-600">
@@ -582,9 +614,9 @@ export const NGODashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <Card className="p-6 border-primary-200">
-          <h3 className="text-lg font-semibold mb-4 text-primary-900 pb-3 border-b border-primary-100">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="p-4 border-primary-200">
+          <h3 className="text-base font-semibold mb-3 text-primary-900 pb-2 border-b border-primary-100">Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <Link to="/ngo/events/create">
               <Button variant="outline" className="w-full p-4 h-auto flex-col hover:bg-primary-50 border-primary-200 hover:border-primary-300 shadow-sm hover:shadow-medium">
                 <Calendar className="w-6 h-6 mb-2 text-primary-600" />
