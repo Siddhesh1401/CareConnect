@@ -67,9 +67,9 @@ export const AdminHeader: React.FC = () => {
     <>
       <header className="bg-white shadow-lg border-b border-primary-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 gap-6">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Link to="/admin/dashboard" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
@@ -82,12 +82,12 @@ export const AdminHeader: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-2">
+          <nav className="hidden md:flex items-center space-x-4 flex-1 justify-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg ${
+                className={`text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg whitespace-nowrap ${
                   isActiveLink(item.href)
                     ? 'text-white bg-primary-600'
                     : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'

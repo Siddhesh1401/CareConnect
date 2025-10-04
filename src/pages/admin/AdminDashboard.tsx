@@ -158,7 +158,7 @@ export const AdminDashboard: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/admin/ngo-requests">
-                <Button className="bg-white text-primary-600 hover:bg-primary-50 border border-primary-200">
+                <Button className="bg-primary-500 text-white hover:bg-primary-700 border border-primary-600">
                   <AlertTriangle className="mr-2 w-4 h-4" />
                   Review NGO Requests
                 </Button>
