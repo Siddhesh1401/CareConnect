@@ -89,8 +89,8 @@ export const AdminHeader: React.FC = () => {
                 to={item.href}
                 className={`text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg whitespace-nowrap ${
                   isActiveLink(item.href)
-                    ? 'text-white bg-primary-600'
-                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
+                    ? 'text-white bg-blue-600 shadow-md'
+                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
                 }`}
               >
                 {item.name}
@@ -104,8 +104,8 @@ export const AdminHeader: React.FC = () => {
               to="/admin/messages"
               className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActiveLink('/admin/messages')
-                  ? 'text-white bg-primary-600'
-                  : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
+                  ? 'text-white bg-blue-600 shadow-md'
+                  : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
               }`}
             >
               <MessageSquare className="w-4 h-4" />
