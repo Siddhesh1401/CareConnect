@@ -45,32 +45,32 @@ export const NGOHeader: React.FC = () => {
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-blue-100 sticky top-0 z-50">
+      <header className="bg-white shadow-lg border-b border-primary-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex justify-between items-center h-16 gap-6">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/ngo/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <Building className="w-5 h-5 text-white" />
+          <div className="flex items-center flex-shrink-0">
+            <Link to="/ngo/dashboard" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+                <Building className="w-6 h-6 text-white" />
               </div>
               <div className="text-gray-900">
-                <span className="text-xl font-semibold">CareConnect</span>
-                <div className="text-xs text-blue-600">NGO Portal</div>
+                <span className="text-xl font-bold text-primary-700">CareConnect</span>
+                <div className="text-xs text-primary-600 font-semibold">NGO Portal</div>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-4">
+          <nav className="hidden md:flex items-center space-x-4 flex-1 justify-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`text-sm font-medium transition-colors duration-200 px-3 py-2 rounded-md whitespace-nowrap ${
+                className={`text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg whitespace-nowrap ${
                   isActiveLink(item.href)
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    ? 'text-white bg-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
                 }`}
               >
                 {item.name}
@@ -141,16 +141,16 @@ export const NGOHeader: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-primary-50 transition-colors"
               >
                 <img
                   src={getProfilePictureUrl(user?.profilePicture, user?.name, 32)}
                   alt={user?.name}
-                  className="w-8 h-8 rounded-full object-cover border-2 border-blue-200"
+                  className="w-8 h-8 rounded-lg object-cover border-2 border-primary-200"
                 />
                 <div className="text-left">
                   <div className="text-sm font-medium text-gray-900">{user?.name}</div>
-                  <div className="text-xs text-blue-600">NGO Admin</div>
+                  <div className="text-xs text-primary-600 font-medium">NGO Admin</div>
                 </div>
               </button>
 

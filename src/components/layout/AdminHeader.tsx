@@ -71,12 +71,12 @@ export const AdminHeader: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <Link to="/admin/dashboard" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-5 h-5 text-white" />
               </div>
               <div className="text-gray-900">
                 <span className="text-xl font-bold text-primary-700">CareConnect</span>
-                <div className="text-xs text-primary-600 font-semibold">Admin Panel</div>
+                <div className="text-xs text-primary-600 font-medium">Admin Panel</div>
               </div>
             </Link>
           </div>
@@ -87,7 +87,7 @@ export const AdminHeader: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`text-sm font-semibold transition-all duration-200 px-4 py-2 rounded-lg whitespace-nowrap ${
+                className={`text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg whitespace-nowrap ${
                   isActiveLink(item.href)
                     ? 'text-white bg-primary-600'
                     : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
@@ -102,7 +102,7 @@ export const AdminHeader: React.FC = () => {
           <div className="hidden md:flex items-center">
             <Link
               to="/admin/messages"
-              className={`relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+              className={`relative flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActiveLink('/admin/messages')
                   ? 'text-white bg-primary-600'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
@@ -119,21 +119,24 @@ export const AdminHeader: React.FC = () => {
           </div>
 
           {/* Desktop Profile */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center">
             <div className="relative">
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center space-x-3 p-3 rounded-lg hover:bg-primary-50 transition-all duration-200"
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-primary-50 transition-all duration-200 min-w-0"
               >
                 <img
-                  src={getProfilePictureUrl(user?.profilePicture, user?.name, 40)}
+                  src={getProfilePictureUrl(user?.profilePicture, user?.name, 32)}
                   alt={user?.name}
-                  className="w-10 h-10 rounded-lg object-cover border-2 border-primary-200"
+                  className="w-8 h-8 rounded-lg object-cover border-2 border-primary-200 flex-shrink-0"
                 />
-                <div className="text-left">
-                  <div className="text-sm font-bold text-gray-900">{user?.name}</div>
-                  <div className="text-xs text-primary-600 font-semibold">System Admin</div>
+                <div className="text-left min-w-0 flex-1">
+                  <div className="text-sm font-medium text-gray-900 truncate">System Admin</div>
+                  <div className="text-xs text-primary-600 font-medium truncate">Admin Panel</div>
                 </div>
+                <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
 
               {/* Profile Dropdown */}
