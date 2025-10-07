@@ -153,7 +153,7 @@ export default function UserManagementPage() {
                   </div>
                 </div>
                 <Link to="/admin/volunteers/analytics">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50">
+                  <Button variant="primary" className="bg-primary-500 text-white hover:bg-primary-700 border border-primary-600">
                     <BarChart3 className="mr-2 w-4 h-4" />
                     View Analytics
                   </Button>
