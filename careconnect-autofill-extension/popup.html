@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect Auto-Fill</title>
+    <style>
+        body {
+            width: 320px;
+            padding: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            border: 1px solid #2563eb;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .status {
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 12px;
+        }
+        
+        .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+        
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎯 CareConnect Auto-Fill</div>
+        <div class="subtitle">Demo Data Extension</div>
+    </div>
+    
+    <div class="warning">
+        ⚠️ Only works on CareConnect pages
+    </div>
+    
+    <div class="section">
+        <div class="section-title">
+            📅 Create Event Form
+        </div>
+        <button class="btn btn-primary" id="fillEventForm">
+            Fill Event Demo Data
+        </button>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">
+            🏢 NGO Registration
+        </div>
+        <button class="btn" id="fillNGOForm">
+            Fill NGO Demo Data
+        </button>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">
+            👤 Profile Forms
+        </div>
+        <button class="btn" id="fillProfileForm">
+            Fill Profile Demo Data
+        </button>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">
+            🎯 Campaign Forms
+        </div>
+        <button class="btn" id="fillCampaignForm">
+            Fill Campaign Demo Data
+        </button>
+    </div>
+    
+    <div class="status" id="status">
+        Ready to auto-fill forms
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
