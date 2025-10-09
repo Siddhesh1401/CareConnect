@@ -1002,6 +1002,48 @@ export const communityAPI = {
   },
 };
 
+// API Admin API endpoints
+export const apiAdminAPI = {
+  // Get API admin dashboard data
+  getAPIDashboard: async () => {
+    const response = await api.get('/api-admin/dashboard');
+    return response.data;
+  },
+
+  // Generate new API key
+  generateAPIKey: async (data: {
+    name: string;
+    organization: string;
+    permissions: string[];
+    expiresAt?: string;
+  }) => {
+    const response = await api.post('/api-admin/keys', data);
+    return response.data;
+  },
+
+  // Get all API keys
+  getAPIKeys: async (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await api.get('/api-admin/keys', { params });
+    return response.data;
+  },
+
+  // Revoke API key
+  revokeAPIKey: async (keyId: string) => {
+    const response = await api.delete(`/api-admin/keys/${keyId}`);
+    return response.data;
+  },
+
+  // Get API usage analytics
+  getAPIUsageAnalytics: async () => {
+    const response = await api.get('/api-admin/analytics');
+    return response.data;
+  },
+};
+
 // Export api instance both as named and default export
 export { api };
 export default api;

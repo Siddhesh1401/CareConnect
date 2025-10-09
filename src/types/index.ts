@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'volunteer' | 'ngo_admin' | 'admin';
+  role: 'volunteer' | 'ngo_admin' | 'admin' | 'api_admin';
   profilePicture?: string;
   points?: number;
   achievements?: Achievement[];

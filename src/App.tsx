@@ -48,6 +48,7 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import VolunteerAnalytics from './pages/admin/VolunteerAnalytics';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { DemoPage } from './pages/auth/DemoPage';
+import { APIAdminDashboard } from './pages/api-admin/APIAdminDashboard.tsx';
 import { SystemSettingsPage } from './pages/admin/SystemSettingsPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
@@ -57,6 +58,7 @@ import { AdminReportsPage } from './pages/admin/AdminReportsPage';
 import { CampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CampaignDetailsPage } from './pages/campaigns/CampaignDetailsPage';
 import { NGOVolunteerAnalytics } from './pages/ngo/NGOVolunteerAnalytics';
+import GovernmentAccessPage from './pages/GovernmentAccessPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -94,6 +96,27 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (!user || !isAdmin()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const APIAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isLoading, isAPIAdmin } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-center text-white">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !isAPIAdmin()) {
     return <Navigate to="/login" replace />;
   }
 
@@ -174,6 +197,11 @@ function App() {
           <Route path="/about" element={
             <AppLayout>
               <AboutPage />
+            </AppLayout>
+          } />
+          <Route path="/government-access" element={
+            <AppLayout>
+              <GovernmentAccessPage />
             </AppLayout>
           } />
           <Route path="/ngos" element={
@@ -488,6 +516,15 @@ function App() {
                 <AdminReportsPage />
               </AppLayout>
             </AdminRoute>
+          } />
+          
+          {/* API Admin Routes */}
+          <Route path="/admin/api-dashboard" element={
+            <APIAdminRoute>
+              <AppLayout hideFooter>
+                <APIAdminDashboard />
+              </AppLayout>
+            </APIAdminRoute>
           } />
           
           <Route path="/notifications" element={

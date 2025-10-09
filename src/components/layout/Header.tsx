@@ -15,7 +15,11 @@ export const Header: React.FC = () => {
   const { user, logout } = useAuth();
 
   const navigation = user ? [
-    { name: 'Dashboard', href: user.role === 'volunteer' ? '/volunteer/dashboard' : '/ngo/dashboard' },
+    { name: 'Dashboard', href: 
+      user.role === 'volunteer' ? '/volunteer/dashboard' : 
+      user.role === 'api_admin' ? '/api-admin/dashboard' :
+      '/ngo/dashboard' 
+    },
     { name: 'Events', href: '/events' },
     { name: 'Campaigns', href: '/campaigns' },
     { name: 'Community', href: '/community' },

@@ -61,6 +61,8 @@ export const LoginPage: React.FC = () => {
           navigate('/ngo/dashboard');
         } else if (userRole === 'admin') {
           navigate('/admin/dashboard');
+        } else if (userRole === 'api_admin') {
+          navigate('/admin/api-dashboard');
         } else {
           // Fallback
           navigate('/dashboard');

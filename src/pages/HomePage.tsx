@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Heart, Calendar, Award, TrendingUp, MapPin, Clock } from 'lucide-react';
+import { ArrowRight, Users, Heart, Calendar, Award, TrendingUp, MapPin, Clock, Shield } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ChatBot } from '../components/ChatBot';
@@ -134,6 +134,31 @@ export const HomePage: React.FC = () => {
                     Browse Events
                   </Button>
                 </Link>
+              </div>
+
+              {/* Government Access Section */}
+              <div className="mt-8 p-4 bg-white/80 backdrop-blur-sm rounded-lg border border-blue-200 animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Shield className="mr-2 w-5 h-5 text-blue-600" />
+                      Government Data Access
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Official government agencies can request secure access to CareConnect platform data for research and policy purposes.
+                    </p>
+                  </div>
+                  <Link to="/government-access">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="ml-4 border-2 border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transform hover:scale-105 transition-all duration-300"
+                    >
+                      Request Access
+                      <ArrowRight className="ml-1 w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
               {/* Quick Stats */}
@@ -420,6 +445,88 @@ export const HomePage: React.FC = () => {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Government Access Section */}
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <div className="grid lg:grid-cols-2 gap-0">
+              <div className="p-8 lg:p-12">
+                <div className="flex items-center mb-6">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Shield className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-2xl font-bold text-gray-900">Government Data Access</h3>
+                    <p className="text-sm text-blue-600 font-medium">Secure • Compliant • Authorized</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 mb-8">
+                  <p className="text-gray-600 leading-relaxed">
+                    Federal, state, and local government agencies can request secure access to anonymized CareConnect platform data for research, policy development, and public health initiatives.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      GDPR and HIPAA compliant data handling
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      Comprehensive audit logging and monitoring
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      Role-based access with authorized officials only
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      Real-time API access with rate limiting
+                    </div>
+                  </div>
+                </div>
+                
+                <Link to="/government-access">
+                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                    Submit Access Request
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
+              </div>
+              
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 lg:p-12 flex items-center">
+                <div className="w-full">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">9</div>
+                      <div className="text-sm text-gray-600">Data Categories Available</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+                      <div className="text-sm text-gray-600">API Availability</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">256-bit</div>
+                      <div className="text-sm text-gray-600">Encryption Standard</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">SOC 2</div>
+                      <div className="text-sm text-gray-600">Type II Certified</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8 p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
+                    <p className="text-sm text-gray-700 text-center">
+                      <strong>Average Review Time:</strong> 5-7 business days for complete requests
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

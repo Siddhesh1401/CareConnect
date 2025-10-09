@@ -1,0 +1,22 @@
+{
+  "name": "careconnect-government-portal",
+  "version": "1.0.0",
+  "description": "Standalone government portal for accessing CareConnect API data",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "keywords": [
+    "government",
+    "api",
+    "portal",
+    "careconnect"
+  ],
+  "author": "CareConnect Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

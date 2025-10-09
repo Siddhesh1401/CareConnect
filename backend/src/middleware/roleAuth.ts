@@ -94,6 +94,34 @@ export const isVolunteer = (req: AuthRequest, res: Response, next: NextFunction)
   }
 };
 
+// Middleware to check if user is API admin
+export const isAPIAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+      return;
+    }
+
+    if (req.user.role !== 'api_admin') {
+      res.status(403).json({
+        success: false,
+        message: 'API admin access required'
+      });
+      return;
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 // Middleware to check multiple roles
 export const hasRole = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {

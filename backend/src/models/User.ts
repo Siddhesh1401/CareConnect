@@ -4,7 +4,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'volunteer' | 'ngo_admin' | 'admin';
+  role: 'volunteer' | 'ngo_admin' | 'admin' | 'api_admin';
   isVerified: boolean;
   profilePicture?: string;
   phone?: string;
@@ -112,7 +112,7 @@ const userSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['volunteer', 'ngo_admin', 'admin'],
+    enum: ['volunteer', 'ngo_admin', 'admin', 'api_admin'],
     required: [true, 'Role is required'],
     default: 'volunteer'
   },

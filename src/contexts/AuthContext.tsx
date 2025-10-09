@@ -10,6 +10,7 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
   isLoading: boolean;
   isAdmin: () => boolean;
+  isAPIAdmin: () => boolean;
   sendVerificationCode: (email: string) => Promise<void>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
 }
@@ -248,6 +249,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user?.role === 'admin';
   };
 
+  const isAPIAdmin = () => {
+    return user?.role === 'api_admin';
+  };
+
   const sendVerificationCode = async (email: string) => {
     try {
       await authAPI.sendVerificationCode({ email });
@@ -273,6 +278,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       refreshProfile,
       isLoading, 
       isAdmin, 
+      isAPIAdmin,
       sendVerificationCode, 
       resetPassword 
     }}>
