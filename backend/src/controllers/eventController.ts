@@ -3,6 +3,7 @@ import Event, { IEvent } from '../models/Event.js';
 import User from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { getEventImageUrl } from '../middleware/upload.js';
+import { sendBulkEventCancellationEmails } from '../services/emailService.js';
 import mongoose from 'mongoose';
 
 interface AuthRequest extends Request {
@@ -758,7 +759,7 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
         res.status(400).json({
           success: false,
           message: 'Invalid location format',
-          error: e.message
+          error: e instanceof Error ? e.message : 'Unknown error'
         });
         return;
       }
@@ -840,11 +841,12 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
   }
 };
 
-// Delete event (NGO only)
+// Delete event (NGO only) - with email notification support
 export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId } = req.params;
-    console.log('Delete event request:', { eventId, userId: req.user?.id });
+    const { customMessage } = req.body; // Get custom cancellation message from request body
+    console.log('Delete event request:', { eventId, userId: req.user?.id, hasCustomMessage: !!customMessage });
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       console.log('Invalid event ID:', eventId);
@@ -879,22 +881,71 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
       return;
     }
 
-    // Don't allow deleting events with registered volunteers
+    // Handle events with registered volunteers
     if (event.registeredVolunteers.length > 0) {
-      console.log('Cannot delete event with volunteers:', event.registeredVolunteers.length);
-      res.status(400).json({
-        success: false,
-        message: `Cannot delete event with ${event.registeredVolunteers.length} registered volunteer(s). Please cancel the event instead or contact volunteers to unregister first.`,
-        data: {
-          registeredVolunteers: event.registeredVolunteers.length,
-          canCancel: true
-        }
-      });
-      return;
+      console.log('Event has volunteers, sending cancellation emails:', event.registeredVolunteers.length);
+      
+      try {
+        // Get the NGO/organizer information
+        const organizer = await User.findById(req.user.id).select('name organizationName');
+        const organizationName = organizer?.organizationName || organizer?.name || 'CareConnect';
+
+        // Prepare volunteer data for email sending (fetch from their registration)
+        const volunteers = event.registeredVolunteers.map(volunteer => ({
+          email: volunteer.userEmail, // Email from volunteer registration
+          name: volunteer.userName     // Name from volunteer registration
+        }));
+
+        // Prepare event data for email
+        const eventData = {
+          eventTitle: event.title,
+          eventDate: event.date.toISOString(),
+          eventTime: `${event.startTime} - ${event.endTime}`,
+          eventLocation: `${event.location.address}, ${event.location.city}, ${event.location.state}`,
+          organizationName: organizationName,
+          customMessage: customMessage || `We regret to inform you that the "${event.title}" event has been cancelled due to unforeseen circumstances. We sincerely apologize for any inconvenience this may cause and appreciate your understanding.`
+        };
+
+        // Send bulk emails
+        console.log(`📧 Sending cancellation emails to ${volunteers.length} volunteers before deletion`);
+        const emailResults = await sendBulkEventCancellationEmails(volunteers, eventData);
+        console.log(`📧 Email notification results: ${emailResults.sent} sent, ${emailResults.failed} failed`);
+
+        // Delete the event after sending emails
+        await Event.findByIdAndDelete(eventId);
+        console.log('Event deleted successfully with email notifications sent');
+
+        res.status(200).json({
+          success: true,
+          message: 'Event deleted successfully. Cancellation emails sent to all registered volunteers.',
+          data: {
+            deletedVolunteers: event.registeredVolunteers.length,
+            emailNotifications: emailResults,
+            customMessageSent: !!customMessage
+          }
+        });
+        return;
+
+      } catch (emailError) {
+        console.error('Failed to send cancellation emails during deletion:', emailError);
+        // Still delete the event even if emails fail
+        await Event.findByIdAndDelete(eventId);
+        
+        res.status(200).json({
+          success: true,
+          message: 'Event deleted successfully, but failed to send some cancellation emails.',
+          data: {
+            deletedVolunteers: event.registeredVolunteers.length,
+            emailError: 'Some emails may not have been delivered'
+          }
+        });
+        return;
+      }
     }
 
+    // No registered volunteers - safe to delete without emails
     await Event.findByIdAndDelete(eventId);
-    console.log('Event deleted successfully');
+    console.log('Event deleted successfully (no volunteers to notify)');
 
     res.status(200).json({
       success: true,

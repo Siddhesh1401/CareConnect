@@ -17,6 +17,7 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { EventCancellationModal } from '../../components/ui/EventCancellationModal';
 import MapsButton from '../../components/ui/MapsButton';
 import { getFullImageUrl } from '../../services/api';
 import axios from 'axios';
@@ -61,6 +62,10 @@ export const EventManagement: React.FC = () => {
     totalVolunteers: 0,
     upcomingEvents: 0
   });
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
 
   // Fetch events from backend
   const fetchEvents = async () => {
@@ -131,11 +136,35 @@ export const EventManagement: React.FC = () => {
     return matchesSearch;
   });
 
-  const handleDeleteEvent = async (eventId: string) => {
-    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-      return;
+  const handleDeleteEvent = (eventId: string) => {
+    const event = events.find(e => e._id === eventId);
+    if (event) {
+      // FOR TESTING: Add fake volunteers to test email functionality
+      // Remove this when you want real volunteer checking
+      const testEvent = {
+        ...event,
+        registeredVolunteers: [
+          { userEmail: 'volunteer1@test.com', userName: 'John Doe' },
+          { userEmail: 'volunteer2@test.com', userName: 'Jane Smith' },
+          { userEmail: 'volunteer3@test.com', userName: 'Bob Johnson' }
+        ]
+      };
+      
+      const volunteerCount = testEvent.registeredVolunteers?.length || 0;
+      if (volunteerCount > 0) {
+        // Open modal for events with volunteers
+        setEventToDelete(testEvent);
+        setIsModalOpen(true);
+      } else {
+        // For events without volunteers, use simple confirmation
+        if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+          deleteEventWithoutVolunteers(eventId);
+        }
+      }
     }
+  };
 
+  const deleteEventWithoutVolunteers = async (eventId: string) => {
     try {
       const token = localStorage.getItem('careconnect_token');
       
@@ -157,18 +186,60 @@ export const EventManagement: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error deleting event:', error);
-      if (error.response?.status === 400 && error.response?.data?.data?.canCancel) {
-        const volunteersCount = error.response.data.data.registeredVolunteers;
-        const shouldCancel = window.confirm(
-          `Cannot delete event with ${volunteersCount} registered volunteer(s). Would you like to cancel the event instead? This will mark it as cancelled and notify volunteers.`
-        );
-        
-        if (shouldCancel) {
-          handleCancelEvent(eventId);
-        }
-      } else {
-        alert(error.response?.data?.message || 'Failed to delete event. Please try again.');
+      alert(error.response?.data?.message || 'Failed to delete event. Please try again.');
+    }
+  };
+
+  const handleDeleteAndSendEmail = async (message: string) => {
+    if (!eventToDelete) return;
+    
+    try {
+      const token = localStorage.getItem('careconnect_token');
+      
+      if (!token) {
+        navigate('/auth/login');
+        return;
       }
+
+      console.log('Sending delete request with custom message:', {
+        eventId: eventToDelete._id,
+        messageLength: message.length
+      });
+
+      const response = await axios.delete(`${API_BASE_URL}/events/${eventToDelete._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        data: {
+          customMessage: message
+        }
+      });
+
+      if (response.data.success) {
+        const emailResults = response.data.data?.emailNotifications;
+        const volunteersCount = response.data.data?.deletedVolunteers || 0;
+        
+        if (emailResults) {
+          alert(`Event deleted successfully! 
+          
+📧 Email notifications sent to ${emailResults.sent} volunteers
+${emailResults.failed > 0 ? `❌ ${emailResults.failed} emails failed to send` : '✅ All emails sent successfully'}
+
+The email content has been logged to the development terminal.`);
+        } else {
+          alert(`Event deleted successfully! ${volunteersCount} volunteers were notified.`);
+        }
+        
+        // Close modal and refresh data
+        setIsModalOpen(false);
+        setEventToDelete(null);
+        fetchEvents();
+        fetchStats();
+      }
+    } catch (error: any) {
+      console.error('Error deleting event and sending emails:', error);
+      alert(error.response?.data?.message || 'Failed to delete event and send emails. Please try again.');
     }
   };
 
@@ -495,6 +566,18 @@ export const EventManagement: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Event Cancellation Modal */}
+      <EventCancellationModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEventToDelete(null);
+        }}
+        eventTitle={eventToDelete?.title || ''}
+        volunteerCount={eventToDelete?.registeredVolunteers?.length || 0}
+        onDeleteAndSendEmail={handleDeleteAndSendEmail}
+      />
     </div>
   );
 };
