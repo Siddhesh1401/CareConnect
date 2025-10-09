@@ -176,6 +176,22 @@ export const EditEvent: React.FC = () => {
       // Prepare FormData for file upload
       const formDataToSend = new FormData();
       
+      console.log('Form data being sent:', {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        date: formData.date,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        location: formData.location, // Show full location object
+        capacity: formData.capacity,
+        requirements: formData.requirements,
+        whatToExpect: formData.whatToExpect,
+        tags: formData.tags,
+        existingImages: existingImages,
+        selectedImagesCount: selectedImages.length
+      });
+      
       // Add form fields
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
@@ -209,10 +225,14 @@ export const EditEvent: React.FC = () => {
 
     } catch (error: any) {
       console.error('Update event error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       if (error.response?.status === 401) {
         navigate('/auth/login');
       } else {
-        setError(error.response?.data?.message || 'Failed to update event. Please try again.');
+        const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to update event. Please try again.';
+        console.error('Final error message:', errorMessage);
+        setError(errorMessage);
       }
     } finally {
       setIsSubmitting(false);
