@@ -755,60 +755,70 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
     
     const updatedEvent = await event.save();
 
+    // Detect changes for email notifications
+    const changes: string[] = [];
+    const updatedFields: Record<string, any> = {};
+    let hasChanges = false;
+    
+    // Check each field for changes
+    if (originalEvent.title !== updatedEvent.title) {
+      changes.push(`Title changed from "${originalEvent.title}" to "${updatedEvent.title}"`);
+      updatedFields.title = updatedEvent.title;
+      hasChanges = true;
+    }
+    if (originalEvent.description !== updatedEvent.description) {
+      changes.push('Description was updated');
+      updatedFields.description = updatedEvent.description;
+      hasChanges = true;
+    }
+    if (originalEvent.category !== updatedEvent.category) {
+      changes.push(`Category changed from "${originalEvent.category}" to "${updatedEvent.category}"`);
+      updatedFields.category = updatedEvent.category;
+      hasChanges = true;
+    }
+    if (originalEvent.date.toISOString() !== updatedEvent.date.toISOString()) {
+      const oldDate = new Date(originalEvent.date).toLocaleDateString();
+      const newDate = new Date(updatedEvent.date).toLocaleDateString();
+      changes.push(`Date changed from ${oldDate} to ${newDate}`);
+      updatedFields.date = updatedEvent.date;
+      hasChanges = true;
+    }
+    if (originalEvent.startTime !== updatedEvent.startTime || originalEvent.endTime !== updatedEvent.endTime) {
+      changes.push(`Time changed from ${originalEvent.startTime} - ${originalEvent.endTime} to ${updatedEvent.startTime} - ${updatedEvent.endTime}`);
+      updatedFields.startTime = updatedEvent.startTime;
+      updatedFields.endTime = updatedEvent.endTime;
+      hasChanges = true;
+    }
+    if (JSON.stringify(originalEvent.location) !== JSON.stringify(updatedEvent.location)) {
+      const oldLocation = `${originalEvent.location.address}, ${originalEvent.location.city}, ${originalEvent.location.state}`;
+      const newLocation = `${updatedEvent.location.address}, ${updatedEvent.location.city}, ${updatedEvent.location.state}`;
+      changes.push(`Location changed from "${oldLocation}" to "${newLocation}"`);
+      updatedFields.location = updatedEvent.location;
+      hasChanges = true;
+    }
+    if (originalEvent.capacity !== updatedEvent.capacity) {
+      changes.push(`Capacity changed from ${originalEvent.capacity} to ${updatedEvent.capacity}`);
+      updatedFields.capacity = updatedEvent.capacity;
+      hasChanges = true;
+    }
+    if (originalEvent.requirements !== updatedEvent.requirements) {
+      changes.push('Requirements were updated');
+      updatedFields.requirements = updatedEvent.requirements;
+      hasChanges = true;
+    }
+    if (originalEvent.whatToExpect !== updatedEvent.whatToExpect) {
+      changes.push('What to expect was updated');
+      updatedFields.whatToExpect = updatedEvent.whatToExpect;
+      hasChanges = true;
+    }
+    if (JSON.stringify(originalEvent.tags) !== JSON.stringify(updatedEvent.tags)) {
+      changes.push('Tags were updated');
+      updatedFields.tags = updatedEvent.tags;
+      hasChanges = true;
+    }
+
     // Send update emails to registered volunteers if there are changes
     if (hasChanges && event.registeredVolunteers.length > 0) {
-      
-      // Detect changes
-      const changes: string[] = [];
-      const updatedFields: Record<string, any> = {};
-      
-      // Check each field for changes
-      if (originalEvent.title !== updatedEvent.title) {
-        changes.push(`Title changed from "${originalEvent.title}" to "${updatedEvent.title}"`);
-        updatedFields.title = updatedEvent.title;
-      }
-      if (originalEvent.description !== updatedEvent.description) {
-        changes.push('Description was updated');
-        updatedFields.description = updatedEvent.description;
-      }
-      if (originalEvent.category !== updatedEvent.category) {
-        changes.push(`Category changed from "${originalEvent.category}" to "${updatedEvent.category}"`);
-        updatedFields.category = updatedEvent.category;
-      }
-      if (originalEvent.date.toISOString() !== updatedEvent.date.toISOString()) {
-        const oldDate = new Date(originalEvent.date).toLocaleDateString();
-        const newDate = new Date(updatedEvent.date).toLocaleDateString();
-        changes.push(`Date changed from ${oldDate} to ${newDate}`);
-        updatedFields.date = updatedEvent.date;
-      }
-      if (originalEvent.startTime !== updatedEvent.startTime || originalEvent.endTime !== updatedEvent.endTime) {
-        changes.push(`Time changed from ${originalEvent.startTime} - ${originalEvent.endTime} to ${updatedEvent.startTime} - ${updatedEvent.endTime}`);
-        updatedFields.startTime = updatedEvent.startTime;
-        updatedFields.endTime = updatedEvent.endTime;
-      }
-      if (JSON.stringify(originalEvent.location) !== JSON.stringify(updatedEvent.location)) {
-        const oldLocation = `${originalEvent.location.address}, ${originalEvent.location.city}, ${originalEvent.location.state}`;
-        const newLocation = `${updatedEvent.location.address}, ${updatedEvent.location.city}, ${updatedEvent.location.state}`;
-        changes.push(`Location changed from "${oldLocation}" to "${newLocation}"`);
-        updatedFields.location = updatedEvent.location;
-      }
-      if (originalEvent.capacity !== updatedEvent.capacity) {
-        changes.push(`Capacity changed from ${originalEvent.capacity} to ${updatedEvent.capacity}`);
-        updatedFields.capacity = updatedEvent.capacity;
-      }
-      if (originalEvent.requirements !== updatedEvent.requirements) {
-        changes.push('Requirements were updated');
-        updatedFields.requirements = updatedEvent.requirements;
-      }
-      if (originalEvent.whatToExpect !== updatedEvent.whatToExpect) {
-        changes.push('What to expect section was updated');
-        updatedFields.whatToExpect = updatedEvent.whatToExpect;
-      }
-      if (JSON.stringify(originalEvent.tags) !== JSON.stringify(updatedEvent.tags)) {
-        changes.push('Tags were updated');
-        updatedFields.tags = updatedEvent.tags;
-      }
-      
       // Send emails only if there are actual changes
       if (changes.length > 0) {
         try {
