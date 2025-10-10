@@ -50,6 +50,7 @@ import VolunteerAnalytics from './pages/admin/VolunteerAnalytics';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { DemoPage } from './pages/auth/DemoPage';
 import { APIAdminDashboard } from './pages/api-admin/APIAdminDashboard.tsx';
+import EmailRequestsPage from './pages/api-admin/EmailRequestsPage';
 import { SystemSettingsPage } from './pages/admin/SystemSettingsPage';
 import ActivityLogPage from './pages/admin/ActivityLogPage';
 import { AdminMessagesPage } from './pages/admin/AdminMessagesPage';
@@ -526,6 +527,14 @@ function App() {
             <APIAdminRoute>
               <AppLayout hideFooter>
                 <APIAdminDashboard />
+              </AppLayout>
+            </APIAdminRoute>
+          } />
+          
+          <Route path="/admin/email-requests" element={
+            <APIAdminRoute>
+              <AppLayout hideFooter>
+                <EmailRequestsPage />
               </AppLayout>
             </APIAdminRoute>
           } />

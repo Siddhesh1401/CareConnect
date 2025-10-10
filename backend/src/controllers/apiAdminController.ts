@@ -5,6 +5,7 @@ import AccessRequest from '../models/AccessRequest.js';
 import User from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 // Generate a secure API key
 const generateSecureKey = (): string => {
@@ -313,6 +314,120 @@ export const getAPIUsageAnalytics = async (req: AuthRequest, res: Response) => {
     res.status(error instanceof AppError ? error.statusCode : 500).json({
       success: false,
       message: error instanceof AppError ? error.message : 'Failed to fetch analytics'
+    });
+  }
+};
+
+// Send API key via email
+export const sendAPIKey = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user as any;
+
+    if (!user || user.role !== 'api_admin') {
+      throw new AppError('Unauthorized access', 403);
+    }
+
+    const { requestId, apiKey } = req.body;
+
+    if (!requestId || !apiKey) {
+      throw new AppError('Request ID and API key are required', 400);
+    }
+
+    // Find the access request
+    const accessRequest = await AccessRequest.findById(requestId);
+    if (!accessRequest) {
+      throw new AppError('Access request not found', 404);
+    }
+
+    // Find the API key to get its permissions
+    const apiKeyDoc = await APIKey.findOne({ key: apiKey });
+    if (!apiKeyDoc) {
+      throw new AppError('API key not found', 404);
+    }
+
+    // Create email transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+
+    // Email content
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: accessRequest.email,
+      subject: `Your CareConnect Government API Key - ${accessRequest.organization}`,
+      html: `
+        <h2>Government Data Access API Key</h2>
+        <p>Dear ${accessRequest.contactPerson},</p>
+        <p>Your request for government data access has been approved. Here are your API details:</p>
+        <ul>
+          <li><strong>Organization:</strong> ${accessRequest.organization}</li>
+          <li><strong>API Key:</strong> <code>${apiKey}</code></li>
+          <li><strong>Permissions:</strong> ${apiKeyDoc.permissions.join(', ')}</li>
+          <li><strong>Portal:</strong> <a href="http://localhost:8081">Government Portal</a></li>
+        </ul>
+        <p>Please keep your API key secure and do not share it.</p>
+        <p>Best regards,<br>CareConnect API Administration</p>
+      `
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    // Update request status
+    accessRequest.status = 'approved';
+    await accessRequest.save();
+
+    res.json({
+      success: true,
+      message: 'API key sent successfully'
+    });
+  } catch (error) {
+    console.error('Error sending API key:', error);
+    res.status(error instanceof AppError ? error.statusCode : 500).json({
+      success: false,
+      message: error instanceof AppError ? error.message : 'Failed to send API key'
+    });
+  }
+};
+
+// Trigger email monitoring
+export const triggerEmailMonitoring = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user as any;
+
+    if (!user || user.role !== 'api_admin') {
+      throw new AppError('Unauthorized access', 403);
+    }
+
+    // Import the email monitoring function
+    const { monitorEmails } = await import('../scripts/emailMonitor.js');
+
+    // Run email monitoring and capture results
+    try {
+      const results = await monitorEmails();
+      
+      res.json({
+        success: true,
+        message: 'Email monitoring completed successfully',
+        data: results
+      });
+    } catch (error) {
+      console.error('Email monitoring failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Email monitoring failed',
+        error: error.message
+      });
+    }
+  } catch (error) {
+    console.error('Error triggering email monitoring:', error);
+    res.status(error instanceof AppError ? error.statusCode : 500).json({
+      success: false,
+      message: error instanceof AppError ? error.message : 'Failed to trigger email monitoring'
     });
   }
 };

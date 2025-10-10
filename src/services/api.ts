@@ -1042,6 +1042,18 @@ export const apiAdminAPI = {
     const response = await api.get('/api-admin/analytics');
     return response.data;
   },
+
+  // Send API key via email
+  sendAPIKey: async (requestId: string, apiKey: string) => {
+    const response = await api.post('/api-admin/send-key', { requestId, apiKey });
+    return response.data;
+  },
+
+  // Trigger email monitoring
+  triggerEmailMonitoring: async () => {
+    const response = await api.post('/api-admin/email-monitoring');
+    return response.data;
+  },
 };
 
 // Export api instance both as named and default export

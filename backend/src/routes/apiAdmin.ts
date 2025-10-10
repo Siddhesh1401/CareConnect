@@ -4,7 +4,9 @@ import {
   generateAPIKey,
   getAPIKeys,
   revokeAPIKey,
-  getAPIUsageAnalytics
+  getAPIUsageAnalytics,
+  sendAPIKey,
+  triggerEmailMonitoring
 } from '../controllers/apiAdminController.js';
 import { authenticate } from '../middleware/auth.js';
 import { isAPIAdmin } from '../middleware/roleAuth.js';
@@ -25,5 +27,11 @@ router.delete('/keys/:keyId', revokeAPIKey);
 
 // Analytics routes
 router.get('/analytics', getAPIUsageAnalytics);
+
+// Send API key route
+router.post('/send-key', sendAPIKey);
+
+// Email monitoring route
+router.post('/email-monitoring', triggerEmailMonitoring);
 
 export default router;

@@ -214,10 +214,10 @@ export const approveAccessRequest = async (req: AuthRequest, res: Response): Pro
       return;
     }
 
-    if (accessRequest.status !== 'pending' && accessRequest.status !== 'under_review') {
+    if (accessRequest.status !== 'pending' && accessRequest.status !== 'under_review' && accessRequest.status !== 'email_submitted') {
       res.status(400).json({
         success: false,
-        message: 'Only pending or under review requests can be approved'
+        message: 'Only pending, under review, or email submitted requests can be approved'
       });
       return;
     }

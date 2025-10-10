@@ -18,7 +18,7 @@ export interface IAccessRequest extends Document {
     dataProcessingLocation: string;
     securityMeasures: string;
   };
-  status: 'pending' | 'approved' | 'rejected' | 'under_review';
+  status: 'pending' | 'approved' | 'rejected' | 'under_review' | 'email_submitted';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   reviewNotes?: string;
   reviewedBy?: Types.ObjectId;
@@ -123,7 +123,7 @@ const AccessRequestSchema = new Schema<IAccessRequest>({
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected', 'under_review'],
+    enum: ['pending', 'approved', 'rejected', 'under_review', 'email_submitted'],
     default: 'pending',
     required: true
   },

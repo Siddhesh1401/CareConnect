@@ -33,7 +33,7 @@ export interface AccessRequestData {
 
 export interface AccessRequest extends AccessRequestData {
   _id: string;
-  status: 'pending' | 'under_review' | 'approved' | 'rejected';
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'email_submitted';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   requestedAt: string;
   reviewedAt?: string;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Shield, Key, Users, BarChart3, Settings, User, LogOut, Database, Activity } from 'lucide-react';
+import { Menu, X, Shield, Key, Users, BarChart3, Settings, User, LogOut, Database, Activity, Mail } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 import { LogoutModal } from '../ui/LogoutModal';
@@ -15,16 +15,21 @@ export const APIAdminHeader: React.FC = () => {
   const { user, logout } = useAuth();
 
   const handleTabChange = (tab: string) => {
-    navigate(`/admin/api-dashboard?tab=${tab}`);
+    if (tab === 'email-requests') {
+      navigate('/admin/email-requests');
+    } else {
+      navigate(`/admin/api-dashboard?tab=${tab}`);
+    }
   };
 
   const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
 
   const navigation = [
-    { name: 'API Management', tab: 'overview', icon: Shield, current: currentTab === 'overview' },
-    { name: 'API Keys', tab: 'keys', icon: Key, current: currentTab === 'keys' },
-    { name: 'Access Requests', tab: 'requests', icon: Users, current: currentTab === 'requests' },
-    { name: 'Analytics', tab: 'analytics', icon: BarChart3, current: currentTab === 'analytics' },
+    { name: 'API Management', tab: 'overview', icon: Shield, current: currentTab === 'overview' && location.pathname === '/admin/api-dashboard' },
+    { name: 'API Keys', tab: 'keys', icon: Key, current: currentTab === 'keys' && location.pathname === '/admin/api-dashboard' },
+    { name: 'Access Requests', tab: 'requests', icon: Users, current: currentTab === 'requests' && location.pathname === '/admin/api-dashboard' },
+    { name: 'Email Requests', tab: 'email-requests', icon: Mail, current: location.pathname === '/admin/email-requests' },
+    { name: 'Analytics', tab: 'analytics', icon: BarChart3, current: currentTab === 'analytics' && location.pathname === '/admin/api-dashboard' },
   ];
 
   const handleLogout = () => {

@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 import { connectDB } from './config/database.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
@@ -22,6 +23,7 @@ import communityRoutes from './routes/communities.js';
 import reportRoutes from './routes/reports.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
+import './scripts/emailMonitor.js'; // Start email monitoring
 
 // Get current directory for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -161,7 +163,6 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.get('/api/health', async (req, res) => {
   try {
     // Check database connection
-    const mongoose = require('mongoose');
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     
     const healthStatus = {
@@ -197,8 +198,6 @@ app.get('/api/ping', (req, res) => {
 // Database health check endpoint
 app.get('/api/health/db', async (req, res) => {
   try {
-    const mongoose = require('mongoose');
-    
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({
         success: false,
@@ -208,7 +207,9 @@ app.get('/api/health/db', async (req, res) => {
     }
 
     // Try to perform a simple database operation
-    await mongoose.connection.db.admin().ping();
+    if (mongoose.connection.db) {
+      await mongoose.connection.db.admin().ping();
+    }
     
     res.status(200).json({
       success: true,
