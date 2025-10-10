@@ -139,21 +139,10 @@ export const EventManagement: React.FC = () => {
   const handleDeleteEvent = (eventId: string) => {
     const event = events.find(e => e._id === eventId);
     if (event) {
-      // FOR TESTING: Add fake volunteers to test email functionality
-      // Remove this when you want real volunteer checking
-      const testEvent = {
-        ...event,
-        registeredVolunteers: [
-          { userEmail: 'volunteer1@test.com', userName: 'John Doe' },
-          { userEmail: 'volunteer2@test.com', userName: 'Jane Smith' },
-          { userEmail: 'volunteer3@test.com', userName: 'Bob Johnson' }
-        ]
-      };
-      
-      const volunteerCount = testEvent.registeredVolunteers?.length || 0;
+      const volunteerCount = event.registeredVolunteers?.length || 0;
       if (volunteerCount > 0) {
-        // Open modal for events with volunteers
-        setEventToDelete(testEvent);
+        // Open modal for events with real registered volunteers
+        setEventToDelete(event);
         setIsModalOpen(true);
       } else {
         // For events without volunteers, use simple confirmation
