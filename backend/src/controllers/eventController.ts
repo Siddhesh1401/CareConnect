@@ -3,7 +3,7 @@ import Event, { IEvent } from '../models/Event.js';
 import User from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { getEventImageUrl } from '../middleware/upload.js';
-import { sendBulkEventCancellationEmails } from '../services/emailService.js';
+import { sendBulkEventCancellationEmails, sendBulkEventUpdateEmails } from '../services/emailService.js';
 import mongoose from 'mongoose';
 
 interface AuthRequest extends Request {
@@ -19,9 +19,6 @@ interface AuthRequest extends Request {
 // Create new event (NGO only)
 export const createEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    console.log('Create event request body:', req.body);
-    console.log('Create event files:', req.files);
-    
     let {
       title,
       description,
@@ -40,7 +37,6 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     if (typeof location === 'string') {
       try {
         location = JSON.parse(location);
-        console.log('Parsed location data:', location);
       } catch (e) {
         console.error('Error parsing location:', e);
         res.status(400).json({
@@ -121,10 +117,7 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     let imageUrls: string[] = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       // When using .array('images'), req.files is an array of files
-      console.log('Processing uploaded files:', req.files.length);
       imageUrls = req.files.map((file: any) => getEventImageUrl(file.filename));
-    } else {
-      console.log('No files uploaded');
     }
 
     // Create new event
@@ -148,19 +141,6 @@ export const createEvent = async (req: AuthRequest, res: Response): Promise<void
     });
 
     const savedEvent = await newEvent.save();
-
-    console.log('Event created successfully with location data:', {
-      eventId: savedEvent._id,
-      location: savedEvent.location,
-      fullLocation: {
-        address: savedEvent.location?.address,
-        area: savedEvent.location?.area,
-        city: savedEvent.location?.city,
-        state: savedEvent.location?.state,
-        pinCode: savedEvent.location?.pinCode,
-        landmark: savedEvent.location?.landmark
-      }
-    });
 
     res.status(201).json({
       success: true,
@@ -258,21 +238,6 @@ export const getAllEvents = async (req: Request, res: Response): Promise<void> =
       };
     });
 
-    if (eventsWithVirtuals.length > 0) {
-      console.log('First event in list with location data:', {
-        eventId: eventsWithVirtuals[0]._id,
-        location: eventsWithVirtuals[0].location,
-        fullLocation: {
-          address: eventsWithVirtuals[0].location?.address,
-          area: eventsWithVirtuals[0].location?.area,
-          city: eventsWithVirtuals[0].location?.city,
-          state: eventsWithVirtuals[0].location?.state,
-          pinCode: eventsWithVirtuals[0].location?.pinCode,
-          landmark: eventsWithVirtuals[0].location?.landmark
-        }
-      });
-    }
-
     res.status(200).json({
       success: true,
       message: 'Events retrieved successfully',
@@ -340,19 +305,6 @@ export const getEventById = async (req: Request, res: Response): Promise<void> =
       })()
     };
 
-    console.log('Event retrieved with location data:', {
-      eventId: event._id,
-      location: event.location,
-      fullLocation: {
-        address: event.location?.address,
-        area: event.location?.area,
-        city: event.location?.city,
-        state: event.location?.state,
-        pinCode: event.location?.pinCode,
-        landmark: event.location?.landmark
-      }
-    });
-
     res.status(200).json({
       success: true,
       message: 'Event retrieved successfully',
@@ -414,21 +366,6 @@ export const getNGOEvents = async (req: AuthRequest, res: Response): Promise<voi
         return 'open';
       })()
     }));
-
-    if (eventsWithVirtuals.length > 0) {
-      console.log('NGO events retrieved - first event location data:', {
-        eventId: eventsWithVirtuals[0]._id,
-        location: eventsWithVirtuals[0].location,
-        fullLocation: {
-          address: eventsWithVirtuals[0].location?.address,
-          area: eventsWithVirtuals[0].location?.area,
-          city: eventsWithVirtuals[0].location?.city,
-          state: eventsWithVirtuals[0].location?.state,
-          pinCode: eventsWithVirtuals[0].location?.pinCode,
-          landmark: eventsWithVirtuals[0].location?.landmark
-        }
-      });
-    }
 
     res.status(200).json({
       success: true,
@@ -673,10 +610,6 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
     const { eventId } = req.params;
     const { existingImages, ...updates } = req.body;
 
-    console.log('Update event request body:', req.body);
-    console.log('Update event updates:', updates);
-    console.log('Update event files:', req.files);
-
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       res.status(400).json({
         success: false,
@@ -710,16 +643,7 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
     const eventDate = new Date(event.date);
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-    
-    console.log('Date validation:');
-    console.log('Event date from DB:', event.date);
-    console.log('Parsed event date:', eventDate);
-    console.log('Today:', today);
-    console.log('Event day:', eventDay);
-    console.log('Is event in past?', eventDay < today);
-    
-    // Temporarily allow updating past events for testing
+    const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());    // Temporarily allow updating past events for testing
     /*
     if (eventDay < today) {
       res.status(400).json({
@@ -753,7 +677,6 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
     if (updates.location && typeof updates.location === 'string') {
       try {
         updates.location = JSON.parse(updates.location);
-        console.log('Parsed location:', updates.location);
       } catch (e) {
         console.error('Error parsing location:', e);
         res.status(400).json({
@@ -768,7 +691,6 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
     if (updates.tags && typeof updates.tags === 'string') {
       try {
         updates.tags = JSON.parse(updates.tags);
-        console.log('Parsed tags:', updates.tags);
       } catch (e) {
         console.error('Error parsing tags:', e);
         // Don't fail the update for tags parsing error, just set to empty array
@@ -778,10 +700,7 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
 
     // Validate location if provided
     if (updates.location) {
-      console.log('Location data received:', updates.location);
-      console.log('Location type:', typeof updates.location);
       if (!updates.location.address || !updates.location.city || !updates.location.state) {
-        console.log('Invalid location data:', updates.location);
         res.status(400).json({
           success: false,
           message: 'Location must include address, city, and state',
@@ -793,10 +712,8 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
 
     // Validate capacity if provided
     if (updates.capacity) {
-      console.log('Capacity data received:', updates.capacity, 'Type:', typeof updates.capacity);
       const capacity = parseInt(updates.capacity);
       if (isNaN(capacity) || capacity <= 0) {
-        console.log('Invalid capacity:', updates.capacity);
         res.status(400).json({
           success: false,
           message: 'Capacity must be a positive number',
@@ -805,6 +722,21 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
         return;
       }
     }
+
+    // Store the original event data BEFORE applying updates for change detection
+    const originalEvent = {
+      title: event.title,
+      description: event.description,
+      category: event.category,
+      date: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      location: event.location,
+      capacity: event.capacity,
+      requirements: event.requirements,
+      whatToExpect: event.whatToExpect,
+      tags: event.tags
+    };
 
     // Update event fields
     Object.keys(updates).forEach(key => {
@@ -822,6 +754,117 @@ export const updateEvent = async (req: AuthRequest, res: Response): Promise<void
     event.updatedAt = new Date();
     
     const updatedEvent = await event.save();
+
+    // Send update emails to registered volunteers if there are changes
+    if (hasChanges && event.registeredVolunteers.length > 0) {
+      
+      // Detect changes
+      const changes: string[] = [];
+      const updatedFields: Record<string, any> = {};
+      
+      // Check each field for changes
+      if (originalEvent.title !== updatedEvent.title) {
+        changes.push(`Title changed from "${originalEvent.title}" to "${updatedEvent.title}"`);
+        updatedFields.title = updatedEvent.title;
+      }
+      if (originalEvent.description !== updatedEvent.description) {
+        changes.push('Description was updated');
+        updatedFields.description = updatedEvent.description;
+      }
+      if (originalEvent.category !== updatedEvent.category) {
+        changes.push(`Category changed from "${originalEvent.category}" to "${updatedEvent.category}"`);
+        updatedFields.category = updatedEvent.category;
+      }
+      if (originalEvent.date.toISOString() !== updatedEvent.date.toISOString()) {
+        const oldDate = new Date(originalEvent.date).toLocaleDateString();
+        const newDate = new Date(updatedEvent.date).toLocaleDateString();
+        changes.push(`Date changed from ${oldDate} to ${newDate}`);
+        updatedFields.date = updatedEvent.date;
+      }
+      if (originalEvent.startTime !== updatedEvent.startTime || originalEvent.endTime !== updatedEvent.endTime) {
+        changes.push(`Time changed from ${originalEvent.startTime} - ${originalEvent.endTime} to ${updatedEvent.startTime} - ${updatedEvent.endTime}`);
+        updatedFields.startTime = updatedEvent.startTime;
+        updatedFields.endTime = updatedEvent.endTime;
+      }
+      if (JSON.stringify(originalEvent.location) !== JSON.stringify(updatedEvent.location)) {
+        const oldLocation = `${originalEvent.location.address}, ${originalEvent.location.city}, ${originalEvent.location.state}`;
+        const newLocation = `${updatedEvent.location.address}, ${updatedEvent.location.city}, ${updatedEvent.location.state}`;
+        changes.push(`Location changed from "${oldLocation}" to "${newLocation}"`);
+        updatedFields.location = updatedEvent.location;
+      }
+      if (originalEvent.capacity !== updatedEvent.capacity) {
+        changes.push(`Capacity changed from ${originalEvent.capacity} to ${updatedEvent.capacity}`);
+        updatedFields.capacity = updatedEvent.capacity;
+      }
+      if (originalEvent.requirements !== updatedEvent.requirements) {
+        changes.push('Requirements were updated');
+        updatedFields.requirements = updatedEvent.requirements;
+      }
+      if (originalEvent.whatToExpect !== updatedEvent.whatToExpect) {
+        changes.push('What to expect section was updated');
+        updatedFields.whatToExpect = updatedEvent.whatToExpect;
+      }
+      if (JSON.stringify(originalEvent.tags) !== JSON.stringify(updatedEvent.tags)) {
+        changes.push('Tags were updated');
+        updatedFields.tags = updatedEvent.tags;
+      }
+      
+      // Send emails only if there are actual changes
+      if (changes.length > 0) {
+        try {
+          // Get the NGO/organizer information
+          const organizer = await User.findById(req.user.id).select('name organizationName');
+          const organizationName = organizer?.organizationName || organizer?.name || 'CareConnect';
+
+          // Prepare volunteer data for email sending
+          const volunteers = event.registeredVolunteers.map(volunteer => ({
+            email: volunteer.userEmail,
+            name: volunteer.userName
+          }));
+
+          // Prepare event data for email
+          const eventData = {
+            eventTitle: updatedEvent.title,
+            eventDate: updatedEvent.date.toISOString(),
+            eventTime: `${updatedEvent.startTime} - ${updatedEvent.endTime}`,
+            eventLocation: `${updatedEvent.location.address}, ${updatedEvent.location.city}, ${updatedEvent.location.state}`,
+            organizationName: organizationName,
+            changes: changes,
+            updatedFields: updatedFields
+          };
+
+          // Send bulk emails
+          console.log(`📧 Sending event update emails to ${volunteers.length} volunteers`);
+          const emailResults = await sendBulkEventUpdateEmails(volunteers, eventData);
+          console.log(`📧 Update email notification results: ${emailResults.sent} sent, ${emailResults.failed} failed`);
+
+          res.status(200).json({
+            success: true,
+            message: 'Event updated successfully. Update emails sent to all registered volunteers.',
+            data: {
+              event: updatedEvent,
+              changes: changes,
+              emailNotifications: emailResults
+            }
+          });
+          return;
+
+        } catch (emailError) {
+          console.error('Failed to send update emails during event update:', emailError);
+          // Still return success but note the email failure
+          res.status(200).json({
+            success: true,
+            message: 'Event updated successfully, but failed to send some update emails.',
+            data: {
+              event: updatedEvent,
+              changes: changes,
+              emailError: 'Some emails may not have been delivered'
+            }
+          });
+          return;
+        }
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -846,10 +889,8 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
   try {
     const { eventId } = req.params;
     const { customMessage } = req.body; // Get custom cancellation message from request body
-    console.log('Delete event request:', { eventId, userId: req.user?.id, hasCustomMessage: !!customMessage });
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
-      console.log('Invalid event ID:', eventId);
       res.status(400).json({
         success: false,
         message: 'Invalid event ID'
@@ -858,7 +899,6 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
     }
 
     if (req.user?.role !== 'ngo_admin') {
-      console.log('Unauthorized delete attempt by:', req.user?.role);
       res.status(403).json({
         success: false,
         message: 'Only NGO administrators can delete events'
@@ -871,8 +911,6 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
       organizerId: req.user.id
     });
 
-    console.log('Found event:', event ? 'Yes' : 'No');
-
     if (!event) {
       res.status(404).json({
         success: false,
@@ -883,7 +921,6 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
 
     // Handle events with registered volunteers
     if (event.registeredVolunteers.length > 0) {
-      console.log('Event has volunteers, sending cancellation emails:', event.registeredVolunteers.length);
       
       try {
         // Get the NGO/organizer information
@@ -913,7 +950,6 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
 
         // Delete the event after sending emails
         await Event.findByIdAndDelete(eventId);
-        console.log('Event deleted successfully with email notifications sent');
 
         res.status(200).json({
           success: true,
@@ -945,7 +981,6 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
 
     // No registered volunteers - safe to delete without emails
     await Event.findByIdAndDelete(eventId);
-    console.log('Event deleted successfully (no volunteers to notify)');
 
     res.status(200).json({
       success: true,
@@ -966,7 +1001,6 @@ export const deleteEvent = async (req: AuthRequest, res: Response): Promise<void
 export const cancelEvent = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { eventId } = req.params;
-    console.log('Cancel event request:', { eventId, userId: req.user?.id });
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       res.status(400).json({
@@ -1018,8 +1052,6 @@ export const cancelEvent = async (req: AuthRequest, res: Response): Promise<void
     event.status = 'cancelled';
     event.updatedAt = new Date();
     await event.save();
-
-    console.log('Event cancelled successfully');
 
     res.status(200).json({
       success: true,

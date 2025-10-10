@@ -42,7 +42,7 @@ const limiter = rateLimit({
 // User-specific rate limiting
 const userLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // limit each user to 300 requests per windowMs (increased from 100)
+  max: 1000, // limit each user to 1000 requests per windowMs (temporarily increased for testing)
   message: 'Too many requests from this user, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,

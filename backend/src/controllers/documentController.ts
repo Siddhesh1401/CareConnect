@@ -13,14 +13,13 @@ const emailConfig = {
   },
   tls: {
     rejectUnauthorized: false
-  },
-  pool: true,
-  maxConnections: 1,
-  rateDelta: 20000,
-  rateLimit: 5
+  }
 };
 
-const transporter = nodemailer.createTransport(emailConfig);
+// Create fresh transporter for each email to avoid connection issues
+const createTransporter = () => {
+  return nodemailer.createTransport(emailConfig);
+};
 
 // Send NGO status update email
 const sendNGOApprovalEmail = async (
@@ -123,6 +122,7 @@ const sendNGOApprovalEmail = async (
     };
 
     console.log(`📧 Attempting to send NGO approval email to: ${email}`);
+    const transporter = createTransporter();
     const result = await transporter.sendMail(mailOptions);
     console.log(`✅ NGO approval email sent successfully to: ${email}`);
     console.log(`📧 Message ID: ${result.messageId}`);
@@ -261,6 +261,7 @@ const sendNGODocumentRejectionEmail = async (
     };
 
     console.log(`📧 Attempting to send document rejection email to: ${email}`);
+    const transporter = createTransporter();
     const result = await transporter.sendMail(mailOptions);
     console.log(`✅ Document rejection email sent successfully to: ${email}`);
     console.log(`📧 Message ID: ${result.messageId}`);

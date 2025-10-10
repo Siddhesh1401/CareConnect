@@ -9,7 +9,9 @@ export const connectDB = async (): Promise<void> => {
       maxPoolSize: 10, // Maintain up to 10 socket connections
       serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      family: 4 // Use IPv4, skip trying IPv6
+      family: 4, // Use IPv4, skip trying IPv6
+      // Disable auto-indexing in development to prevent duplicate index warnings
+      autoIndex: process.env.NODE_ENV !== 'development'
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);

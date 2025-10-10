@@ -19,15 +19,13 @@ const emailConfig = {
   },
   tls: {
     rejectUnauthorized: false
-  },
-  // Add these to improve deliverability
-  pool: true,
-  maxConnections: 1,
-  rateDelta: 20000,
-  rateLimit: 5
+  }
 };
 
-const transporter = nodemailer.createTransport(emailConfig);
+// Create fresh transporter for each email to avoid connection issues
+const createTransporter = () => {
+  return nodemailer.createTransport(emailConfig);
+};
 
 // Generate verification code locally
 const generateVerificationCode = (): string => {
@@ -141,6 +139,7 @@ const sendVerificationEmailService = async (email: string, name: string, verific
     };
 
     console.log(`📧 Attempting to send verification email to: ${email}`);
+    const transporter = createTransporter();
     const result = await transporter.sendMail(mailOptions);
     console.log(`✅ Verification email sent successfully to: ${email}`);
     console.log(`📧 Message ID: ${result.messageId}`);
@@ -1049,7 +1048,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
 
 // Send password reset email
 const sendPasswordResetEmail = async (email: string, resetCode: string) => {
-  const transporter = nodemailer.createTransport(emailConfig);
+  const transporter = createTransporter();
   
   const mailOptions = {
     from: {

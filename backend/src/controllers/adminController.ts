@@ -16,15 +16,13 @@ const emailConfig = {
   },
   tls: {
     rejectUnauthorized: false
-  },
-  // Add these to improve deliverability
-  pool: true,
-  maxConnections: 1,
-  rateDelta: 20000,
-  rateLimit: 5
+  }
 };
 
-const transporter = nodemailer.createTransport(emailConfig);
+// Create fresh transporter for each email to avoid connection issues
+const createTransporter = () => {
+  return nodemailer.createTransport(emailConfig);
+};
 
 // Send NGO status update email locally
 const sendNGOStatusUpdate = async (
@@ -157,6 +155,7 @@ const sendNGOStatusUpdate = async (
     };
 
     console.log(`📧 Attempting to send NGO status email to: ${email}`);
+    const transporter = createTransporter();
     const result = await transporter.sendMail(mailOptions);
     console.log(`✅ NGO status email sent successfully to: ${email}`);
     return true;
@@ -261,6 +260,7 @@ const sendResponseEmail = async (
       `
     };
 
+    const transporter = createTransporter();
     const result = await transporter.sendMail(mailOptions);
     console.log(`✅ Response email sent successfully to: ${userEmail}`);
     return true;

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, Users, FileText, Tag, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, FileText, Tag, AlertCircle, Mail, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { TimePicker } from '../../components/ui/TimePicker';
 import MapsButton from '../../components/ui/MapsButton';
 import { EnhancedLocationInput } from '../../components/ui/EnhancedLocationInput';
+import { Modal } from '../../components/ui/Modal';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -20,6 +21,12 @@ export const EditEvent: React.FC = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [isLocationValid, setIsLocationValid] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState<{
+    sent: number;
+    failed: number;
+    total: number;
+  } | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -175,22 +182,24 @@ export const EditEvent: React.FC = () => {
 
       // Prepare FormData for file upload
       const formDataToSend = new FormData();
-      
-      console.log('Form data being sent:', {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        date: formData.date,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        location: formData.location, // Show full location object
-        capacity: formData.capacity,
-        requirements: formData.requirements,
-        whatToExpect: formData.whatToExpect,
-        tags: formData.tags,
-        existingImages: existingImages,
-        selectedImagesCount: selectedImages.length
-      });
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Form data being sent:', {
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          date: formData.date,
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          location: formData.location, // Show full location object
+          capacity: formData.capacity,
+          requirements: formData.requirements,
+          whatToExpect: formData.whatToExpect,
+          tags: formData.tags,
+          existingImages: existingImages,
+          selectedImagesCount: selectedImages.length
+        });
+      }
       
       // Add form fields
       formDataToSend.append('title', formData.title);
@@ -219,8 +228,17 @@ export const EditEvent: React.FC = () => {
       });
 
       if (response.data.success) {
-        alert('Event updated successfully!');
-        navigate('/ngo/events');
+        // Store email notification results
+        if (response.data.data?.emailNotifications) {
+          setEmailNotifications({
+            sent: response.data.data.emailNotifications.sent || 0,
+            failed: response.data.data.emailNotifications.failed || 0,
+            total: (response.data.data.emailNotifications.sent || 0) + (response.data.data.emailNotifications.failed || 0)
+          });
+        }
+        
+        // Show email notification modal instead of alert
+        setShowEmailModal(true);
       }
 
     } catch (error: any) {
@@ -546,6 +564,83 @@ export const EditEvent: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {/* Email Notification Modal */}
+      <Modal
+        isOpen={showEmailModal}
+        onClose={() => {
+          setShowEmailModal(false);
+          navigate('/ngo/events');
+        }}
+        title="Event Updated Successfully"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg border border-green-200">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+            <div>
+              <h4 className="font-medium text-green-800">Event Updated</h4>
+              <p className="text-sm text-green-700">Your event has been successfully updated.</p>
+            </div>
+          </div>
+
+          {emailNotifications && (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Mail className="w-5 h-5 text-blue-600" />
+                <h4 className="font-medium text-gray-900">Email Notifications Sent</h4>
+              </div>
+              
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{emailNotifications.total}</div>
+                    <div className="text-sm text-blue-700">Total Recipients</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{emailNotifications.sent}</div>
+                    <div className="text-sm text-green-700">Emails Sent</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-red-600">{emailNotifications.failed}</div>
+                    <div className="text-sm text-red-700">Failed</div>
+                  </div>
+                </div>
+                
+                {emailNotifications.sent > 0 && (
+                  <div className="mt-3 flex items-center space-x-2 text-green-700">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="text-sm">
+                      {emailNotifications.sent} volunteer{emailNotifications.sent !== 1 ? 's' : ''} notified successfully
+                    </span>
+                  </div>
+                )}
+                
+                {emailNotifications.failed > 0 && (
+                  <div className="mt-2 flex items-center space-x-2 text-red-700">
+                    <XCircle className="w-4 h-4" />
+                    <span className="text-sm">
+                      {emailNotifications.failed} email{emailNotifications.failed !== 1 ? 's' : ''} failed to send
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4">
+            <Button
+              onClick={() => {
+                setShowEmailModal(false);
+                navigate('/ngo/events');
+              }}
+              className="bg-primary-600 hover:bg-primary-700"
+            >
+              Continue
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
