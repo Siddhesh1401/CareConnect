@@ -37,6 +37,7 @@ import { CreateCampaign } from './pages/ngo/CreateCampaign';
 import { EditCampaign } from './pages/ngo/EditCampaign';
 import CampaignAnalytics from './pages/ngo/CampaignAnalytics';
 import { VolunteerManagement } from './pages/ngo/VolunteerManagement';
+import { NGOVolunteerAnalytics } from './pages/ngo/NGOVolunteerAnalytics';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { StoriesPage } from './pages/stories/StoriesPage';
@@ -57,8 +58,8 @@ import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { AdminReportsPage } from './pages/admin/AdminReportsPage';
 import { CampaignsPage } from './pages/campaigns/CampaignsPage';
 import { CampaignDetailsPage } from './pages/campaigns/CampaignDetailsPage';
-import { NGOVolunteerAnalytics } from './pages/ngo/NGOVolunteerAnalytics';
 import GovernmentAccessPage from './pages/GovernmentAccessPage';
+import { APIAdminHeader } from './components/layout/APIAdminHeader';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -125,9 +126,9 @@ const APIAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
 const DynamicHeader: React.FC = () => {
   const { user } = useAuth();
-  
+
   if (!user) return <Header />;
-  
+
   switch (user.role) {
     case 'volunteer':
       return <VolunteerHeader />;
@@ -135,6 +136,8 @@ const DynamicHeader: React.FC = () => {
       return <NGOHeader />;
     case 'admin':
       return <AdminHeader />;
+    case 'api_admin':
+      return <APIAdminHeader />;
     default:
       return <Header />;
   }

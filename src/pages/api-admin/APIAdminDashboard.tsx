@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Shield, Key, Users, BarChart3, Settings, Plus, Eye, Trash2, CheckCircle, XCircle, Clock, Download, Activity, AlertCircle, FileText, Building2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -30,6 +31,7 @@ interface DashboardData {
 }
 
 const APIAdminDashboard: React.FC = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'overview' | 'keys' | 'requests' | 'analytics'>('overview');
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,6 +70,15 @@ const APIAdminDashboard: React.FC = () => {
 
     fetchDashboardData();
   }, []);
+
+  // Handle URL search parameter for active tab
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['overview', 'keys', 'requests', 'analytics'].includes(tabParam)) {
+      setActiveTab(tabParam as 'overview' | 'keys' | 'requests' | 'analytics');
+    }
+  }, [location.search]);
 
   // Memoize stats calculation
   const stats = useMemo(() => {
@@ -193,6 +204,10 @@ const APIAdminDashboard: React.FC = () => {
 
   const setActiveTabCallback = useCallback((tab: 'overview' | 'keys' | 'requests' | 'analytics') => {
     setActiveTab(tab);
+    // Update URL with tab parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tab);
+    window.history.replaceState({}, '', url.toString());
   }, []);
 
   return (
@@ -227,94 +242,60 @@ const APIAdminDashboard: React.FC = () => {
 
         {/* Main Content */}
         {!loading && !error && (
-          <div>
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                    <Shield className="mr-3 text-blue-600" size={32} />
-                    API Management
-                  </h1>
-                  <p className="text-gray-600 mt-2">
-                    Secure government data access and API key management
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-              <div className="flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                <Activity className="mr-2" size={14} />
-                System Active
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="mb-8">
-          <nav className="flex space-x-8 border-b border-gray-200">
-            {[
-              { id: 'overview', label: 'Overview', icon: BarChart3 },
-              { id: 'keys', label: 'API Keys', icon: Key },
-              { id: 'requests', label: 'Access Requests', icon: Users },
-              { id: 'analytics', label: 'Analytics', icon: Settings }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTabCallback(tab.id as 'overview' | 'keys' | 'requests' | 'analytics')}
-                className={`flex items-center px-1 py-4 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <tab.icon className="mr-2" size={16} />
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
+          <div className="space-y-8">
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <div>
+          <div className="space-y-8">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center">
-                  <Key className="text-blue-600" size={24} />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Active API Keys</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.activeKeys}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-700 mb-1">Active API Keys</p>
+                    <p className="text-3xl font-bold text-blue-900">{stats.activeKeys}</p>
+                    <p className="text-xs text-blue-600 mt-1">Currently active</p>
+                  </div>
+                  <div className="bg-blue-500 p-3 rounded-lg">
+                    <Key className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </Card>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center">
-                  <Clock className="text-yellow-600" size={24} />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Pending Requests</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.pendingRequests}</p>
+              <Card className="p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-lg transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-yellow-700 mb-1">Pending Requests</p>
+                    <p className="text-3xl font-bold text-yellow-900">{stats.pendingRequests}</p>
+                    <p className="text-xs text-yellow-600 mt-1">Awaiting review</p>
+                  </div>
+                  <div className="bg-yellow-500 p-3 rounded-lg">
+                    <Clock className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </Card>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center">
-                  <BarChart3 className="text-purple-600" size={24} />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total API Calls</p>
-                    <p className="text-2xl font-bold text-gray-900">{(stats.totalRequests || 0).toLocaleString()}</p>
+              <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-700 mb-1">Total API Calls</p>
+                    <p className="text-3xl font-bold text-green-900">{stats.totalRequests}</p>
+                    <p className="text-xs text-green-600 mt-1">This month</p>
+                  </div>
+                  <div className="bg-green-500 p-3 rounded-lg">
+                    <Activity className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </Card>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center">
-                  <CheckCircle className="text-green-600" size={24} />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Approved Requests</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.approvedRequests}</p>
+              <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-700 mb-1">Approved Requests</p>
+                    <p className="text-3xl font-bold text-purple-900">{stats.approvedRequests}</p>
+                    <p className="text-xs text-purple-600 mt-1">Total approved</p>
+                  </div>
+                  <div className="bg-purple-500 p-3 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </Card>
@@ -322,56 +303,76 @@ const APIAdminDashboard: React.FC = () => {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <Card className="p-6 bg-white border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Settings className="mr-2 h-5 w-5 text-blue-600" />
+                  Quick Actions
+                </h3>
                 <div className="space-y-3">
                   <Button
                     onClick={generateNewKey}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 transform hover:scale-105"
+                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                   >
-                    <Plus className="mr-2" size={16} />
+                    <Plus className="mr-2 h-4 w-4" />
                     Generate New API Key
                   </Button>
                   <Button
                     onClick={() => setActiveTabCallback('requests')}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white transition-all duration-200 transform hover:scale-105"
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                   >
-                    <Users className="mr-2" size={16} />
+                    <Users className="mr-2 h-4 w-4" />
                     Review Access Requests ({stats.pendingRequests})
                   </Button>
                   <Button
                     onClick={() => setActiveTabCallback('analytics')}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-all duration-200 transform hover:scale-105"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                   >
-                    <BarChart3 className="mr-2" size={16} />
+                    <BarChart3 className="mr-2 h-4 w-4" />
                     View Usage Analytics
                   </Button>
                 </div>
               </Card>
 
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                <div className="space-y-3">
+              <Card className="p-6 bg-white border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Activity className="mr-2 h-5 w-5 text-green-600" />
+                  Recent Activity
+                </h3>
+                <div className="space-y-4">
                   {dashboardData?.recentKeys.slice(0, 3).map((key) => (
-                    <div key={key.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{key.name}</p>
-                        <p className="text-sm text-gray-600">Organization: {key.organization}</p>
-                        <p className="text-sm text-gray-600">Last used: {key.lastUsed ? new Date(key.lastUsed).toLocaleDateString() : 'Never'}</p>
+                    <div key={key.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-blue-100 p-2 rounded-lg">
+                          <Key className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{key.name}</p>
+                          <p className="text-sm text-gray-600">{key.organization}</p>
+                          <p className="text-xs text-gray-500">
+                            Last used: {key.lastUsed ? new Date(key.lastUsed).toLocaleDateString() : 'Never'}
+                          </p>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">{key.usageCount} calls</p>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <p className="text-lg font-bold text-gray-900">{key.usageCount}</p>
+                        <p className="text-xs text-gray-600">API calls</p>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          key.status === 'active' ? 'bg-green-100 text-green-800' :
+                          key.status === 'revoked' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
                           {key.status}
                         </span>
                       </div>
                     </div>
                   ))}
                   {(!dashboardData?.recentKeys || dashboardData.recentKeys.length === 0) && (
-                    <div className="text-gray-500 text-center py-8">
-                      <Shield size={48} className="mx-auto mb-4 text-gray-300" />
-                      <p>No recent activity</p>
-                      <p className="text-sm">API key usage will appear here</p>
+                    <div className="text-center py-8">
+                      <div className="bg-gray-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                        <Shield className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">No recent activity</p>
+                      <p className="text-sm text-gray-400 mt-1">API key usage will appear here</p>
                     </div>
                   )}
                 </div>
@@ -717,6 +718,17 @@ const APIAdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Floating Action Button for Quick API Key Generation */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => setShowKeyModal(true)}
+          className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110"
+          title="Generate New API Key"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 };
