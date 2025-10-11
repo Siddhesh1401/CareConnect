@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Shield, Eye, CheckCircle, XCircle, Clock, Mail, FileText, AlertCircle, Send, RefreshCw } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Mail, Send, RefreshCw } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { accessRequestAPI, AccessRequest } from '../../services/accessRequestAPI';

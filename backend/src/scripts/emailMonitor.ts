@@ -136,8 +136,8 @@ function parseEmailBody(body: string): EmailData | null {
   // Ensure authorized officials have required fields and filter out incomplete ones
   if (data.authorizedOfficials) {
     data.authorizedOfficials = data.authorizedOfficials
-      .filter(official => official.name && official.email) // Only keep officials with name and email
-      .map(official => ({
+      .filter((official: any) => official.name && official.email) // Only keep officials with name and email
+      .map((official: any) => ({
         name: official.name,
         title: official.title || 'Contact',
         email: official.email,
@@ -281,7 +281,7 @@ async function monitorEmails() {
         }
         results.emailsProcessed++;
       } catch (error) {
-        const errorMsg = `Failed to process message: ${error.message}`;
+        const errorMsg = `Failed to process message: ${error instanceof Error ? error.message : 'Unknown error'}`;
         console.error(errorMsg);
         results.errors.push(errorMsg);
       }
@@ -293,7 +293,7 @@ async function monitorEmails() {
     return results;
   } catch (error) {
     console.error('Email monitoring error:', error);
-    results.errors.push(`Email monitoring failed: ${error.message}`);
+    results.errors.push(`Email monitoring failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return results;
   }
 }

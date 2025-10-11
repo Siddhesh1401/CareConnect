@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Shield, Key, Users, BarChart3, Settings, Plus, Eye, Trash2, CheckCircle, XCircle, Clock, Download, Activity, AlertCircle, FileText, Building2 } from 'lucide-react';
+import { Shield, Key, Users, BarChart3, Settings, Plus, Eye, Trash2, CheckCircle, XCircle, Clock, Download, Activity, AlertCircle, FileText } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { apiAdminAPI } from '../../services/api';
-import { accessRequestAPI, AccessRequest as APIAccessRequest, AccessRequestStats } from '../../services/accessRequestAPI';
+import { accessRequestAPI, AccessRequest as APIAccessRequest } from '../../services/accessRequestAPI';
 
 interface APIKey {
   id: string;
@@ -117,7 +117,7 @@ const APIAdminDashboard: React.FC = () => {
         console.error('API key not found in response:', result);
         alert('API key was generated but not returned properly. Please try again.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error generating API key:', err);
       console.error('Error details:', err.response?.data);
       alert(`Failed to generate API key: ${err.response?.data?.message || err.message}`);
@@ -243,6 +243,50 @@ const APIAdminDashboard: React.FC = () => {
         {/* Main Content */}
         {!loading && !error && (
           <div className="space-y-8">
+            {/* Page Header with Developer Navigation */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <Shield className="mr-3 h-8 w-8 text-blue-600" />
+                    API Administration Dashboard
+                  </h1>
+                  <p className="text-gray-600 mt-1">Manage API keys, monitor usage, and oversee government access requests</p>
+                </div>
+                
+                {/* Developer Navigation */}
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    href="http://localhost:5000/api/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg transition-colors duration-200"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    API Docs
+                  </a>
+                  <a
+                    href="http://localhost:5000/status"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg transition-colors duration-200"
+                  >
+                    <Activity className="mr-2 h-4 w-4" />
+                    Status Page
+                  </a>
+                  <a
+                    href="http://localhost:5173/admin/api-dashboard?tab=overview"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg transition-colors duration-200"
+                  >
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    API Analytics
+                  </a>
+                </div>
+              </div>
+            </div>
+
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
@@ -589,7 +633,12 @@ const APIAdminDashboard: React.FC = () => {
       {showKeyModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            {console.log('Modal render - newApiKey:', newApiKey, 'showKeyModal:', showKeyModal)}
+            {/* Debug logging - remove in production */}
+            {newApiKey && showKeyModal && (
+              <div style={{ display: 'none' }}>
+                {/* Modal render - newApiKey: {newApiKey}, showKeyModal: {showKeyModal} */}
+              </div>
+            )}
             {!newApiKey ? (
               <>
                 <h3 className="text-lg font-semibold mb-4">Generate New API Key</h3>
@@ -679,7 +728,7 @@ const APIAdminDashboard: React.FC = () => {
                         value={newApiKey}
                         readOnly
                         className="w-full p-3 border-2 border-red-300 rounded-md bg-yellow-50 font-mono text-sm font-bold"
-                        onClick={(e) => e.target.select()}
+                        onClick={(e) => (e.target as HTMLInputElement).select()}
                       />
                       <Button
                         onClick={() => {

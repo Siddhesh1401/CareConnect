@@ -38,6 +38,7 @@ export const AdminAnalyticsPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [isLoading, setIsLoading] = useState(false);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [apiAnalyticsData, setApiAnalyticsData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch analytics data from API
@@ -72,13 +73,56 @@ export const AdminAnalyticsPage: React.FC = () => {
     }
   };
 
+  // Fetch API analytics data
+  const fetchApiAnalyticsData = async () => {
+    try {
+      const token = localStorage.getItem('careconnect_token');
+      if (!token) return;
+
+      // Fetch API metrics
+      const metricsResponse = await axios.get(`http://localhost:5000/api/v1/monitoring/metrics`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      // Fetch cache stats
+      const cacheResponse = await axios.get(`http://localhost:5000/api/v1/cache/stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      // Fetch recent logs (last 24 hours)
+      const logsResponse = await axios.get(`http://localhost:5000/api/v1/monitoring/logs`, {
+        params: { limit: 100 },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (metricsResponse.data.success && cacheResponse.data.success && logsResponse.data.success) {
+        setApiAnalyticsData({
+          metrics: metricsResponse.data.data,
+          cache: cacheResponse.data.data,
+          logs: logsResponse.data.data
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching API analytics:', err);
+      // Don't set error state for API analytics - it's supplementary
+    }
+  };
+
   // Load data on component mount and when timeRange changes
   useEffect(() => {
     fetchAnalyticsData();
+    fetchApiAnalyticsData();
   }, [timeRange]);
 
   const handleRefresh = () => {
     fetchAnalyticsData();
+    fetchApiAnalyticsData();
   };
 
   const handleExport = () => {
@@ -152,7 +196,10 @@ export const AdminAnalyticsPage: React.FC = () => {
                 </div>
                 <span>Analytics Dashboard</span>
               </h1>
-              <p className="text-gray-600">Comprehensive insights into platform performance and user engagement</p>
+              <p className="text-gray-600">Comprehensive insights into your platform's performance and API usage</p>
+              {apiAnalyticsData && (
+                <p className="text-sm text-blue-600 mt-1">🔗 API monitoring active - View detailed API analytics below</p>
+              )}
             </div>
 
             <div className="flex items-center space-x-3">
@@ -505,6 +552,193 @@ export const AdminAnalyticsPage: React.FC = () => {
             </div>
           </Card>
         </div>
+
+        {/* API Analytics Section */}
+        {apiAnalyticsData && (
+          <div className="mt-12">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Activity className="w-6 h-6 text-blue-600" />
+                </div>
+                <span>API Analytics</span>
+              </h2>
+              <p className="text-gray-600">Monitor your API performance and usage patterns</p>
+            </div>
+
+            {/* API Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card className="p-6 bg-white border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Total Requests</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {apiAnalyticsData.metrics?.totalRequests || 0}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      All-time API calls
+                    </p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <BarChart3 className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-white border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Avg Response Time</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {apiAnalyticsData.metrics?.averageResponseTime ? `${Math.round(apiAnalyticsData.metrics.averageResponseTime)}ms` : 'N/A'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Average API response
+                    </p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-white border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Cache Hit Rate</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {apiAnalyticsData.metrics?.cacheHitRate ? `${Math.round(apiAnalyticsData.metrics.cacheHitRate)}%` : '0%'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Cached responses
+                    </p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <RefreshCw className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-white border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Error Rate</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {apiAnalyticsData.metrics?.errorRate ? `${apiAnalyticsData.metrics.errorRate.toFixed(1)}%` : '0%'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Failed requests
+                    </p>
+                  </div>
+                  <div className="p-3 bg-red-100 rounded-lg">
+                    <Activity className="w-6 h-6 text-red-600" />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* API Performance Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <Card className="p-6 bg-white border border-blue-100">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900">Top API Endpoints</h3>
+                <div className="space-y-3">
+                  {(apiAnalyticsData.metrics?.topEndpoints || []).slice(0, 5).map((endpoint: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <span className="text-sm font-medium text-gray-900">{endpoint.endpoint}</span>
+                        <div className="text-xs text-gray-500">
+                          {endpoint.count} requests • {Math.round(endpoint.averageTime)}ms avg
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-blue-600">
+                        {endpoint.count}
+                      </div>
+                    </div>
+                  ))}
+                  {(!apiAnalyticsData.metrics?.topEndpoints || apiAnalyticsData.metrics.topEndpoints.length === 0) && (
+                    <p className="text-gray-500 text-sm">No endpoint data available yet</p>
+                  )}
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-white border border-blue-100">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900">HTTP Status Codes</h3>
+                <div className="space-y-3">
+                  {apiAnalyticsData.metrics?.statusCodes && Object.entries(apiAnalyticsData.metrics.statusCodes)
+                    .sort(([,a]: any, [,b]: any) => b - a)
+                    .slice(0, 5)
+                    .map(([code, count]: [string, any]) => (
+                      <div key={code} className="flex justify-between items-center">
+                        <span className={`text-sm font-medium ${code.startsWith('2') ? 'text-green-600' : code.startsWith('4') ? 'text-red-600' : 'text-yellow-600'}`}>
+                          {code}
+                        </span>
+                        <span className="text-sm text-gray-600">{count} requests</span>
+                      </div>
+                    ))}
+                  {(!apiAnalyticsData.metrics?.statusCodes || Object.keys(apiAnalyticsData.metrics.statusCodes).length === 0) && (
+                    <p className="text-gray-500 text-sm">No status code data available yet</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Cache Statistics */}
+            <Card className="p-6 bg-white border border-blue-100 mb-8">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Cache Performance</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">{apiAnalyticsData.cache?.size || 0}</p>
+                  <p className="text-sm text-gray-600">Cached Items</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {apiAnalyticsData.cache?.keys?.length ? apiAnalyticsData.cache.keys.length : 0}
+                  </p>
+                  <p className="text-sm text-gray-600">Cache Keys</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-600">
+                    {apiAnalyticsData.cache?.size ? Math.round((apiAnalyticsData.cache.size / 100) * 100) : 0}%
+                  </p>
+                  <p className="text-sm text-gray-600">Cache Efficiency</p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Recent API Logs */}
+            <Card className="p-6 bg-white border border-blue-100">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Recent API Activity</h3>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {(apiAnalyticsData.logs || []).slice(0, 10).map((log: any, index: number) => (
+                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          log.statusCode >= 200 && log.statusCode < 300 ? 'bg-green-100 text-green-800' :
+                          log.statusCode >= 400 ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {log.method} {log.statusCode}
+                        </span>
+                        <span className="text-sm text-gray-600 truncate max-w-xs">
+                          {log.url.split('?')[0]}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(log.timestamp).toLocaleString()} • {log.responseTime ? `${log.responseTime}ms` : 'N/A'}
+                        {log.apiKey && ` • ${log.apiKey.substring(0, 8)}...`}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {(!apiAnalyticsData.logs || apiAnalyticsData.logs.length === 0) && (
+                  <p className="text-gray-500 text-sm">No recent API activity</p>
+                )}
+              </div>
+            </Card>
+          </div>
+        )}
+
       </div>
     </div>
   );

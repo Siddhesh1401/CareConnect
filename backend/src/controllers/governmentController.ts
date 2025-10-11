@@ -4,8 +4,66 @@ import User from '../models/User.js';
 import Campaign from '../models/Campaign.js';
 import Event from '../models/Event.js';
 import Community from '../models/Community.js';
-import { AppError } from '../utils/AppError.js';
+import { createInternalServerError, createResourceNotFoundError } from '../utils/problemDetails.js';
+import { parseQueryParams, executePaginatedQuery, COMMON_FILTERS } from '../utils/queryUtils.js';
 
+/**
+ * @swagger
+ * /government/test:
+ *   get:
+ *     summary: Test API key connection and permissions
+ *     description: Validates the provided API key and returns information about the key's permissions and usage
+ *     tags: [Government API]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: API key is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "API key is valid and active"
+ *                 keyInfo:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "Government Health Department"
+ *                     organization:
+ *                       type: string
+ *                       example: "Government Agency"
+ *                     permissions:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       example: ["read:volunteers", "read:reports"]
+ *                     lastUsed:
+ *                       type: string
+ *                       format: date-time
+ *                     usageCount:
+ *                       type: integer
+ *                       example: 5
+ *                     expiresAt:
+ *                       type: string
+ *                       format: date-time
+ *                 apiVersion:
+ *                   type: string
+ *                   example: "v1"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         $ref: '#/components/schemas/Error'
+ *       429:
+ *         $ref: '#/components/schemas/Error'
+ */
 // Test API key connection
 export const testConnection = async (req: APIKeyRequest, res: Response) => {
   try {
@@ -21,175 +79,466 @@ export const testConnection = async (req: APIKeyRequest, res: Response) => {
         lastUsed: apiKey.lastUsed,
         usageCount: apiKey.usageCount,
         expiresAt: apiKey.expiresAt
-      }
+      },
+      apiVersion: 'v1',
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('Error in test connection:', error);
-    throw new AppError('Failed to test connection', 500);
+    throw createInternalServerError('Failed to test connection');
   }
 };
 
 // Get volunteers data (requires read:volunteers permission)
+/**
+ * @swagger
+ * /government/volunteers:
+ *   get:
+ *     summary: Get paginated list of volunteers
+ *     description: Retrieves a paginated list of active volunteers with advanced filtering, sorting, and search capabilities
+ *     tags: [Government API, Volunteers]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [name, createdAt, updatedAt, -name, -createdAt, -updatedAt]
+ *           default: createdAt
+ *         description: Sort field (prefix with - for descending)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for name, email, or skills
+ *       - in: query
+ *         name: skills
+ *         schema:
+ *           type: string
+ *         description: Filter by skills (comma-separated)
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *         description: Filter by location
+ *       - in: query
+ *         name: availability
+ *         schema:
+ *           type: string
+ *         description: Filter by availability
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/PaginatedResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Volunteer'
+ *       401:
+ *         $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         $ref: '#/components/schemas/Error'
+ */
 export const getVolunteers = async (req: APIKeyRequest, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100); // Max 100 per page
-    const skip = (page - 1) * limit;
+    // Parse query parameters with advanced features
+    const queryOptions = parseQueryParams(req);
 
-    // Look for users with role 'volunteer' (not 'user')
-    const volunteers = await User.find({ 
+    // Base query for volunteers
+    const baseQuery = {
       role: 'volunteer',
       isActive: true
-    })
-    .select('name email location skills totalVolunteerHours createdAt')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+    };
 
-    const total = await User.countDocuments({ 
-      role: 'volunteer',
-      isActive: true
-    });
+    // Execute paginated query with all features
+    const result = await executePaginatedQuery(
+      User,
+      queryOptions,
+      baseQuery,
+      [] // No population needed for volunteers
+    );
 
-    console.log(`✅ Found ${volunteers.length} volunteers with role 'volunteer'`);
+    console.log(`✅ Found ${result.data.length} volunteers with advanced query features`);
 
     res.status(200).json({
       success: true,
-      data: volunteers,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit),
-        limit
-      }
+      ...result
     });
   } catch (error) {
     console.error('Error fetching volunteers:', error);
-    throw new AppError('Failed to fetch volunteers data', 500);
+    throw createInternalServerError('Failed to fetch volunteers');
   }
 };
 
 // Get NGOs/Communities data (requires read:ngos permission)
+/**
+ * @swagger
+ * /government/ngos:
+ *   get:
+ *     summary: Get paginated list of NGOs/Communities
+ *     description: Retrieves a paginated list of active NGOs and communities with advanced filtering, sorting, and search capabilities
+ *     tags: [Government API, NGOs]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [name, createdAt, updatedAt, -name, -createdAt, -updatedAt]
+ *           default: createdAt
+ *         description: Sort field (prefix with - for descending)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for name, description, or location
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *         description: Filter by location
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive]
+ *         description: Filter by status
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/PaginatedResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/NGO'
+ *       401:
+ *         $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         $ref: '#/components/schemas/Error'
+ */
 export const getNGOs = async (req: APIKeyRequest, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
-    const skip = (page - 1) * limit;
+    // Parse query parameters with advanced features
+    const queryOptions = parseQueryParams(req);
 
-    // Debug: Check total communities first
-    const totalAllCommunities = await Community.countDocuments();
-    const totalActiveCommunities = await Community.countDocuments({ isActive: true });
-    
-    console.log(`🔍 Debug - Total communities: ${totalAllCommunities}, Active communities: ${totalActiveCommunities}`);
+    // Base query for communities (NGOs)
+    const baseQuery = {
+      isActive: true // Only active communities
+    };
 
-    const communities = await Community.find({
-      // Temporarily remove isActive filter
-    })
-    .select('name description location category members totalEvents createdAt isActive')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+    // Execute paginated query with all features
+    const result = await executePaginatedQuery(
+      Community,
+      queryOptions,
+      baseQuery,
+      [] // No population needed
+    );
 
-    const total = await Community.countDocuments({
-      // Temporarily remove isActive filter
-    });
-
-    console.log(`🔍 Debug - Found ${communities.length} communities`);
-    communities.forEach(c => {
-      console.log(`- ${c.name} | isActive: ${c.isActive}`);
-    });
+    console.log(`✅ Found ${result.data.length} communities with advanced query features`);
 
     res.status(200).json({
       success: true,
-      data: communities,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit),
-        limit
-      }
+      ...result
     });
   } catch (error) {
     console.error('Error fetching communities:', error);
-    throw new AppError('Failed to fetch communities data', 500);
+    throw createInternalServerError('Failed to fetch communities');
   }
 };
 
 // Get campaigns data (requires read:campaigns permission)
+/**
+ * @swagger
+ * /government/campaigns:
+ *   get:
+ *     summary: Get paginated list of active campaigns
+ *     description: Retrieves a paginated list of active fundraising campaigns with advanced filtering, sorting, and search capabilities
+ *     tags: [Government API, Campaigns]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [title, goal, raised, createdAt, -title, -goal, -raised, -createdAt]
+ *           default: createdAt
+ *         description: Sort field (prefix with - for descending)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for title or description
+ *       - in: query
+ *         name: ngoId
+ *         schema:
+ *           type: string
+ *         description: Filter by NGO ID
+ *       - in: query
+ *         name: minGoal
+ *         schema:
+ *           type: number
+ *         description: Filter campaigns with goal amount greater than or equal to this value
+ *       - in: query
+ *         name: maxGoal
+ *         schema:
+ *           type: number
+ *         description: Filter campaigns with goal amount less than or equal to this value
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/PaginatedResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Campaign'
+ *       401:
+ *         $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         $ref: '#/components/schemas/Error'
+ */
 export const getCampaigns = async (req: APIKeyRequest, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
-    const skip = (page - 1) * limit;
+    // Parse query parameters with advanced features
+    const queryOptions = parseQueryParams(req);
 
-    const campaigns = await Campaign.find({ 
+    // Base query for active campaigns
+    const baseQuery = {
       status: 'active',
-      isActive: true 
-    })
-    .select('title description goal raised startDate endDate createdBy location category')
-    .populate('createdBy', 'name organization')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+      isActive: true
+    };
 
-    const total = await Campaign.countDocuments({ 
-      status: 'active',
-      isActive: true 
-    });
+    // Execute paginated query with population
+    const result = await executePaginatedQuery(
+      Campaign,
+      queryOptions,
+      baseQuery,
+      [
+        { path: 'createdBy', select: 'name organization' }
+      ]
+    );
+
+    console.log(`✅ Found ${result.data.length} campaigns with advanced query features`);
 
     res.status(200).json({
       success: true,
-      data: campaigns,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit),
-        limit
-      }
+      ...result
     });
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    throw new AppError('Failed to fetch campaigns data', 500);
+    throw createInternalServerError('Failed to fetch campaigns');
   }
 };
 
 // Get events data (requires read:events permission)
+/**
+ * @swagger
+ * /government/events:
+ *   get:
+ *     summary: Get paginated list of upcoming events
+ *     description: Retrieves a paginated list of upcoming events with advanced filtering, sorting, and search capabilities
+ *     tags: [Government API, Events]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [title, date, capacity, createdAt, -title, -date, -capacity, -createdAt]
+ *           default: date
+ *         description: Sort field (prefix with - for descending)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for title or description
+ *       - in: query
+ *         name: ngoId
+ *         schema:
+ *           type: string
+ *         description: Filter by NGO ID
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *         description: Filter by location
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Filter events starting from this date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Filter events ending before this date
+ *       - in: query
+ *         name: minCapacity
+ *         schema:
+ *           type: integer
+ *         description: Filter events with minimum capacity
+ *       - in: query
+ *         name: maxCapacity
+ *         schema:
+ *           type: integer
+ *         description: Filter events with maximum capacity
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/PaginatedResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Event'
+ *       401:
+ *         $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         $ref: '#/components/schemas/Error'
+ */
 export const getEvents = async (req: APIKeyRequest, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
-    const skip = (page - 1) * limit;
+    // Parse query parameters with advanced features
+    const queryOptions = parseQueryParams(req);
 
-    const events = await Event.find({ 
+    // Base query for upcoming events
+    const baseQuery = {
       status: 'upcoming',
       isActive: true,
       date: { $gte: new Date() }
-    })
-    .select('title description date location maxParticipants currentParticipants createdBy category')
-    .populate('createdBy', 'name organization')
-    .sort({ date: 1 })
-    .skip(skip)
-    .limit(limit);
+    };
 
-    const total = await Event.countDocuments({ 
-      status: 'upcoming',
-      isActive: true,
-      date: { $gte: new Date() }
-    });
+    // Execute paginated query with population
+    const result = await executePaginatedQuery(
+      Event,
+      queryOptions,
+      baseQuery,
+      [
+        { path: 'createdBy', select: 'name organization' }
+      ]
+    );
+
+    console.log(`✅ Found ${result.data.length} events with advanced query features`);
 
     res.status(200).json({
       success: true,
-      data: events,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit),
-        limit
-      }
+      ...result
     });
   } catch (error) {
     console.error('Error fetching events:', error);
-    throw new AppError('Failed to fetch events data', 500);
+    throw createInternalServerError('Failed to fetch events');
   }
 };
 
@@ -229,6 +578,6 @@ export const getDashboardStats = async (req: APIKeyRequest, res: Response) => {
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    throw new AppError('Failed to fetch dashboard statistics', 500);
+    throw new Error('Failed to fetch dashboard statistics');
   }
 };

@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { APIKey } from '../models/APIKey.js';
-import { AppError } from '../utils/AppError.js';
+import {
+  createMissingAPIKeyError,
+  createInvalidAPIKeyError,
+  createExpiredAPIKeyError,
+  createInsufficientPermissionsError,
+  createInternalServerError
+} from '../utils/problemDetails.js';
 
 export interface APIKeyRequest extends Request {
   apiKey?: any;
@@ -12,7 +18,7 @@ export const validateAPIKey = async (req: APIKeyRequest, res: Response, next: Ne
     const apiKey = req.headers['x-api-key'] as string;
     
     if (!apiKey) {
-      return next(new AppError('API key is required', 401));
+      return next(createMissingAPIKeyError());
     }
 
     // Find the API key in the database
@@ -22,12 +28,12 @@ export const validateAPIKey = async (req: APIKeyRequest, res: Response, next: Ne
     }).populate('createdBy', 'name email organization');
 
     if (!foundKey) {
-      return next(new AppError('Invalid or inactive API key', 401));
+      return next(createInvalidAPIKeyError());
     }
 
     // Check if the key has expired
     if (foundKey.expiresAt && foundKey.expiresAt < new Date()) {
-      return next(new AppError('API key has expired', 401));
+      return next(createExpiredAPIKeyError());
     }
 
     // Update last used timestamp and increment usage count
@@ -40,7 +46,7 @@ export const validateAPIKey = async (req: APIKeyRequest, res: Response, next: Ne
     next();
   } catch (error) {
     console.error('Error validating API key:', error);
-    return next(new AppError('Failed to validate API key', 500));
+    return next(createInternalServerError('Failed to validate API key'));
   }
 };
 
@@ -48,11 +54,11 @@ export const validateAPIKey = async (req: APIKeyRequest, res: Response, next: Ne
 export const requirePermission = (permission: string) => {
   return (req: APIKeyRequest, res: Response, next: NextFunction) => {
     if (!req.apiKey) {
-      return next(new AppError('API key validation required', 401));
+      return next(createMissingAPIKeyError());
     }
 
     if (!req.apiKey.permissions.includes(permission)) {
-      return next(new AppError(`Insufficient permissions. Required: ${permission}`, 403));
+      return next(createInsufficientPermissionsError(permission));
     }
 
     next();

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5000/api/v1',
   timeout: 15000, // Increased timeout
   headers: {
     'Content-Type': 'application/json',
@@ -39,8 +39,9 @@ const processQueue = async () => {
   }
 };
 
-// Add request to queue
-const queueRequest = (requestFn: () => Promise<any>): Promise<any> => {
+// Add request to queue (commented out - not used)
+/*
+export const queueRequest = (requestFn: () => Promise<any>): Promise<any> => {
   return new Promise((resolve, reject) => {
     const wrappedRequest = async () => {
       try {
@@ -55,6 +56,7 @@ const queueRequest = (requestFn: () => Promise<any>): Promise<any> => {
     processQueue();
   });
 };
+*/
 
 // Helper function to create request key for deduplication
 const createRequestKey = (config: any) => {
@@ -103,7 +105,7 @@ export const getFullImageUrl = (imagePath: string | undefined | null): string =>
 };
 
 // Helper function to get profile picture URL - returns default avatar if no profile picture  
-export const getProfilePictureUrl = (profilePicture: string | undefined | null, userName?: string | undefined | null, size?: number): string => {
+export const getProfilePictureUrl = (profilePicture: string | undefined | null, _userName?: string | undefined | null, size?: number): string => {
   if (profilePicture) {
     // If it's already a full URL, return as is
     if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {

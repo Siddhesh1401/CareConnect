@@ -318,8 +318,11 @@ export const approveDocument = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    ngo.documents[documentType as keyof typeof ngo.documents].status = 'approved';
-    ngo.documents[documentType as keyof typeof ngo.documents].rejectionReason = undefined;
+    const document = ngo.documents[documentType as keyof typeof ngo.documents];
+    if (document) {
+      document.status = 'approved';
+      document.rejectionReason = undefined;
+    }
 
     // Check if all documents are approved
     const allDocumentsApproved = 
@@ -355,7 +358,7 @@ export const approveDocument = async (req: Request, res: Response): Promise<void
       success: true,
       message: `Document ${documentType} approved successfully`,
       data: {
-        documentStatus: ngo.documents[documentType as keyof typeof ngo.documents].status,
+        documentStatus: ngo.documents[documentType as keyof typeof ngo.documents]?.status || 'unknown',
         overallStatus: ngo.verificationStatus,
         allDocumentsApproved
       }
@@ -424,8 +427,11 @@ export const rejectDocument = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    ngo.documents[documentType as keyof typeof ngo.documents].status = 'rejected';
-    ngo.documents[documentType as keyof typeof ngo.documents].rejectionReason = rejectionReason.trim();
+    const document = ngo.documents[documentType as keyof typeof ngo.documents];
+    if (document) {
+      document.status = 'rejected';
+      document.rejectionReason = rejectionReason.trim();
+    }
 
     // Keep status as pending - NGO can resubmit rejected documents
     // Only set to rejected if admin explicitly rejects the entire application
@@ -444,7 +450,7 @@ export const rejectDocument = async (req: Request, res: Response): Promise<void>
 
     // Send document rejection email to NGO
     try {
-      await sendNGODocumentRejectionEmail(ngo.email, ngo.organizationName, documentType, rejectionReason.trim());
+      await sendNGODocumentRejectionEmail(ngo.email, ngo.organizationName, documentType, rejectionReason as string);
       console.log(`📧 Document rejection email sent to ${ngo.email} for ${documentType}`);
     } catch (emailError) {
       console.error('❌ Failed to send document rejection email:', emailError);
@@ -457,7 +463,7 @@ export const rejectDocument = async (req: Request, res: Response): Promise<void>
       success: true,
       message: `Document ${documentType} rejected successfully`,
       data: {
-        documentStatus: ngo.documents[documentType as keyof typeof ngo.documents].status,
+        documentStatus: ngo.documents[documentType as keyof typeof ngo.documents]?.status || 'unknown',
         overallStatus: ngo.verificationStatus,
         rejectionReason: rejectionReason
       }

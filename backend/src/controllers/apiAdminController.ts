@@ -415,8 +415,8 @@ export const triggerEmailMonitoring = async (req: AuthRequest, res: Response) =>
         message: 'Email monitoring completed successfully',
         data: results
       });
-    } catch (error) {
-      console.error('Email monitoring failed:', error);
+    } catch (error: any) {
+      console.error('Error in email monitoring:', error);
       res.status(500).json({
         success: false,
         message: 'Email monitoring failed',

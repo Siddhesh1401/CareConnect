@@ -16,13 +16,10 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { getProfilePictureUrl } from '../../services/api';
-import axios from 'axios';
+import { getProfilePictureUrl, api } from '../../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import ReactCalendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-
-const API_BASE_URL = 'http://localhost:5000/api';
 
 interface NGODashboardData {
   stats: {
@@ -63,7 +60,7 @@ export const NGODashboard: React.FC = () => {
   useEffect(() => {
     console.log('NGO Dashboard - User object:', user);
     console.log('NGO Dashboard - User ID:', user?.id);
-    console.log('NGO Dashboard - User _id:', user?._id);
+    // console.log('NGO Dashboard - User _id:', user?._id);
     console.log('NGO Dashboard - Auth loading:', authLoading);
   }, [user, authLoading]);
 
@@ -80,18 +77,8 @@ export const NGODashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('careconnect_token');
 
-        if (!token) {
-          setError('Authentication required');
-          return;
-        }
-
-        const response = await axios.get(`${API_BASE_URL}/dashboard/ngo`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/dashboard/ngo');
 
         if (response.data.success) {
           const data = response.data.data;
@@ -281,8 +268,8 @@ export const NGODashboard: React.FC = () => {
                 <span>Edit Profile</span>
               </Button>
             </Link>
-            {user && (user.id || user._id) && (
-              <Link to={`/ngos/${user.id || user._id}`}>
+            {user && user.id && (
+              <Link to={`/ngos/${user.id}`}>
                 <Button variant="outline" className="flex items-center space-x-2">
                   <Eye className="w-4 h-4" />
                   <span>View Public Profile</span>
