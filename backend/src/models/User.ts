@@ -44,6 +44,8 @@ export interface IUser extends Document {
   foundedYear?: number;
   website?: string;
   description?: string;
+  averageRating?: number;
+  totalReviews?: number;
   documents?: {
     registrationCertificate?: {
       filename?: string;
@@ -69,79 +71,6 @@ export interface IUser extends Document {
     reason: string;
     rejectedAt: Date;
   }>;
-
-  // Enhanced NGO Profile Fields
-  mission?: string;
-  goals?: string[];
-  targetAudience?: string[];
-  socialMediaLinks?: {
-    facebook?: string;
-    twitter?: string;
-    instagram?: string;
-    linkedin?: string;
-    youtube?: string;
-  };
-  contactDetails?: {
-    primaryEmail?: string;
-    secondaryEmail?: string;
-    primaryPhone?: string;
-    secondaryPhone?: string;
-    whatsapp?: string;
-    address?: {
-      street?: string;
-      city?: string;
-      state?: string;
-      country?: string;
-      zipCode?: string;
-    };
-  };
-  organizationAchievements?: {
-    title: string;
-    description: string;
-    date: Date;
-    category?: 'award' | 'milestone' | 'recognition' | 'impact';
-  }[];
-  donationInfo?: {
-    acceptsDonations: boolean;
-    donationMethods?: string[];
-    bankDetails?: {
-      accountName?: string;
-      accountNumber?: string;
-      bankName?: string;
-      ifscCode?: string;
-      upiId?: string;
-    };
-    taxBenefits?: string;
-  };
-  teamInfo?: {
-    totalMembers?: number;
-    coreTeamMembers?: {
-      name: string;
-      position: string;
-      bio?: string;
-      photo?: string;
-    }[];
-    volunteers?: {
-      activeCount?: number;
-      totalCount?: number;
-    };
-  };
-  gallery?: {
-    photos: string[];
-    videos?: string[];
-  };
-  impactStats?: {
-    peopleHelped?: number;
-    projectsCompleted?: number;
-    yearsActive?: number;
-    partnershipsFormed?: number;
-  };
-  workingAreas?: string[];
-  profileCompletionPercentage?: number;
-
-  // Methods
-  calculateProfileCompletion(): number;
-  getNestedValue(path: string): any;
 
   // Email verification
   isEmailVerified: boolean;
@@ -281,6 +210,17 @@ const userSchema = new Schema<IUser>({
     type: String,
     maxlength: [1000, 'Description cannot exceed 1000 characters']
   },
+  averageRating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  totalReviews: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   documents: {
     registrationCertificate: {
       filename: String,
@@ -337,201 +277,6 @@ const userSchema = new Schema<IUser>({
       default: Date.now
     }
   }],
-
-  // Enhanced NGO Profile Schema Fields
-  mission: {
-    type: String,
-    maxlength: [2000, 'Mission cannot exceed 2000 characters'],
-    trim: true
-  },
-  goals: [{
-    type: String,
-    trim: true,
-    maxlength: [500, 'Each goal cannot exceed 500 characters']
-  }],
-  targetAudience: [{
-    type: String,
-    trim: true
-  }],
-  socialMediaLinks: {
-    facebook: {
-      type: String,
-      trim: true,
-      match: [/^https?:\/\/(www\.)?facebook\.com\/.*/, 'Please enter a valid Facebook URL']
-    },
-    twitter: {
-      type: String,
-      trim: true,
-      match: [/^https?:\/\/(www\.)?twitter\.com\/.*/, 'Please enter a valid Twitter URL']
-    },
-    instagram: {
-      type: String,
-      trim: true,
-      match: [/^https?:\/\/(www\.)?instagram\.com\/.*/, 'Please enter a valid Instagram URL']
-    },
-    linkedin: {
-      type: String,
-      trim: true,
-      match: [/^https?:\/\/(www\.)?linkedin\.com\/.*/, 'Please enter a valid LinkedIn URL']
-    },
-    youtube: {
-      type: String,
-      trim: true,
-      match: [/^https?:\/\/(www\.)?youtube\.com\/.*/, 'Please enter a valid YouTube URL']
-    }
-  },
-  contactDetails: {
-    primaryEmail: {
-      type: String,
-      trim: true,
-      lowercase: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-    },
-    secondaryEmail: {
-      type: String,
-      trim: true,
-      lowercase: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-    },
-    primaryPhone: {
-      type: String,
-      trim: true
-    },
-    secondaryPhone: {
-      type: String,
-      trim: true
-    },
-    whatsapp: {
-      type: String,
-      trim: true
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      country: String,
-      zipCode: String
-    }
-  },
-  organizationAchievements: [{
-    title: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    description: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    date: {
-      type: Date,
-      required: true
-    },
-    category: {
-      type: String,
-      enum: ['award', 'milestone', 'recognition', 'impact'],
-      default: 'milestone'
-    }
-  }],
-  donationInfo: {
-    acceptsDonations: {
-      type: Boolean,
-      default: false
-    },
-    donationMethods: [{
-      type: String,
-      enum: ['bank_transfer', 'upi', 'cash', 'cheque', 'online', 'crypto']
-    }],
-    bankDetails: {
-      accountName: String,
-      accountNumber: String,
-      bankName: String,
-      ifscCode: String,
-      upiId: String
-    },
-    taxBenefits: {
-      type: String,
-      trim: true
-    }
-  },
-  teamInfo: {
-    totalMembers: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    coreTeamMembers: [{
-      name: {
-        type: String,
-        required: true,
-        trim: true
-      },
-      position: {
-        type: String,
-        required: true,
-        trim: true
-      },
-      bio: {
-        type: String,
-        trim: true,
-        maxlength: [500, 'Bio cannot exceed 500 characters']
-      },
-      photo: String
-    }],
-    volunteers: {
-      activeCount: {
-        type: Number,
-        min: 0,
-        default: 0
-      },
-      totalCount: {
-        type: Number,
-        min: 0,
-        default: 0
-      }
-    }
-  },
-  gallery: {
-    photos: [{
-      type: String
-    }],
-    videos: [{
-      type: String
-    }]
-  },
-  impactStats: {
-    peopleHelped: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    projectsCompleted: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    yearsActive: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    partnershipsFormed: {
-      type: Number,
-      min: 0,
-      default: 0
-    }
-  },
-  workingAreas: [{
-    type: String,
-    trim: true
-  }],
-  profileCompletionPercentage: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: 0
-  },
 
   // Email verification
   isEmailVerified: {
@@ -627,76 +372,5 @@ userSchema.methods.isAdmin = function(): boolean {
 userSchema.methods.isVolunteer = function(): boolean {
   return this.role === 'volunteer';
 };
-
-// Instance method to calculate NGO profile completion percentage
-userSchema.methods.calculateProfileCompletion = function(): number {
-  if (this.role !== 'ngo_admin') {
-    return 100; // Non-NGO users are considered complete
-  }
-
-  const requiredFields = {
-    // Basic required fields (weight: 60%)
-    basic: [
-      'organizationName',
-      'organizationType', 
-      'description',
-      'website'
-    ],
-    // Enhanced profile fields (weight: 40%)
-    enhanced: [
-      'mission',
-      'goals',
-      'targetAudience',
-      'contactDetails.primaryEmail',
-      'contactDetails.primaryPhone',
-      'contactDetails.address.city',
-      'workingAreas',
-      'impactStats.peopleHelped'
-    ]
-  };
-
-  let completedBasic = 0;
-  let completedEnhanced = 0;
-
-  // Check basic fields
-  requiredFields.basic.forEach(field => {
-    if (this[field] && this[field].toString().trim().length > 0) {
-      completedBasic++;
-    }
-  });
-
-  // Check enhanced fields (with nested field support)
-  requiredFields.enhanced.forEach(fieldPath => {
-    const value = this.getNestedValue(fieldPath);
-    if (value !== null && value !== undefined) {
-      if (Array.isArray(value) && value.length > 0) {
-        completedEnhanced++;
-      } else if (typeof value === 'string' && value.trim().length > 0) {
-        completedEnhanced++;
-      } else if (typeof value === 'number' && value > 0) {
-        completedEnhanced++;
-      }
-    }
-  });
-
-  // Calculate weighted percentage
-  const basicPercentage = (completedBasic / requiredFields.basic.length) * 60;
-  const enhancedPercentage = (completedEnhanced / requiredFields.enhanced.length) * 40;
-  
-  return Math.round(basicPercentage + enhancedPercentage);
-};
-
-// Helper method to get nested object values
-userSchema.methods.getNestedValue = function(path: string): any {
-  return path.split('.').reduce((obj, key) => obj?.[key], this);
-};
-
-// Pre-save hook to update profile completion percentage for NGOs
-userSchema.pre('save', function(next) {
-  if (this.role === 'ngo_admin') {
-    this.profileCompletionPercentage = this.calculateProfileCompletion();
-  }
-  next();
-});
 
 export default mongoose.model<IUser>('User', userSchema);

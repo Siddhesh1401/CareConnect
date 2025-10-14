@@ -21,7 +21,12 @@ import campaignRoutes from './routes/campaigns.js';
 import storyRoutes from './routes/stories.js';
 import communityRoutes from './routes/communities.js';
 import reportRoutes from './routes/reports.js';
-import ngoProfileRoutes from './routes/ngoProfile.js';
+import ratingRoutes from './routes/ratings.js';
+
+console.log('=== RATING ROUTES IMPORTED ===');
+console.log('Rating routes object:', ratingRoutes);
+console.log('Type:', typeof ratingRoutes);
+
 import { authenticate } from './middleware/auth.js';
 import { notFound } from './middleware/notFound.js';
 import { apiVersioning, enforceMinimumVersion } from './middleware/apiVersioning.js';
@@ -32,7 +37,7 @@ import { getStatusPage, createIncident, updateIncident, getIncidents, statusPage
 import { errorHandler } from './middleware/errorHandler.js';
 import { getNGODashboard } from './controllers/dashboardController.js';
 import { swaggerUi, specs } from './swagger.js';
-import './scripts/emailMonitor.js'; // Start email monitoring
+import './scripts/emailMonitor.js'; // Start email monitoring (disabled in dev mode)
 
 // Get current directory for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -246,11 +251,14 @@ app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.get('/api/v1/ngo', authenticate, getNGODashboard);
 app.use('/api/v1/ngos', ngoRoutes);
-app.use('/api/v1/ngo-profile', ngoProfileRoutes);
 app.use('/api/v1/campaigns', campaignRoutes);
 app.use('/api/v1/stories', storyRoutes);
 app.use('/api/v1/communities', communityRoutes);
 app.use('/api/v1/reports', reportRoutes);
+
+console.log('=== REGISTERING RATING ROUTES ===');
+app.use('/api/v1/ratings', ratingRoutes);
+console.log('=== RATING ROUTES REGISTERED ===');
 
 // Legacy routes (redirect to v1) - for backward compatibility during transition
 app.use('/api/auth', (req, res) => res.redirect(301, `/api/v1${req.path}`));
