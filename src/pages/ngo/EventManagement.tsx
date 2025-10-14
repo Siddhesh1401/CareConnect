@@ -22,7 +22,7 @@ import MapsButton from '../../components/ui/MapsButton';
 import { getFullImageUrl } from '../../services/api';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5001/api/v1';
 
 interface Event {
   _id: string;

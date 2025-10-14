@@ -18,6 +18,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import ReportForm from '../../components/ReportForm';
+import { RatingModal } from '../../components/ui/RatingModal';
 import api, { getFullImageUrl } from '../../services/api';
 
 interface NGO {
@@ -29,6 +30,7 @@ interface NGO {
   location: string;
   verified: boolean;
   rating: number;
+  totalReviews?: number;
   totalVolunteers: number;
   totalEvents: number;
   totalDonations: number;
@@ -47,6 +49,10 @@ export const NGOsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalNGOs, setTotalNGOs] = useState(0);
+
+  // Rating modal states
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [selectedNGOForRating, setSelectedNGOForRating] = useState<NGO | null>(null);
 
   // Report modal states
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -300,10 +306,23 @@ export const NGOsPage: React.FC = () => {
                       <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
                         {ngo.name}
                       </h3>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-blue-400 fill-current" />
-                        <span className="text-sm font-medium text-gray-700">{ngo.rating.toFixed(1)}</span>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedNGOForRating(ngo);
+                          setRatingModalOpen(true);
+                        }}
+                        className="flex items-center space-x-1 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+                        title="Rate this NGO"
+                      >
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <span className="text-sm font-medium text-gray-700">
+                          {ngo.rating > 0 ? ngo.rating.toFixed(1) : 'Rate'}
+                        </span>
+                        {ngo.totalReviews && ngo.totalReviews > 0 && (
+                          <span className="text-xs text-gray-500">({ngo.totalReviews})</span>
+                        )}
+                      </button>
                     </div>
                     <div className="flex items-center space-x-1 text-sm text-gray-500 mb-2">
                       <MapPin className="w-4 h-4" />
@@ -471,6 +490,23 @@ export const NGOsPage: React.FC = () => {
           type="ngo"
           targetId={selectedNGOForReport.id}
           targetName={selectedNGOForReport.name}
+        />
+      )}
+
+      {/* Rating Modal */}
+      {selectedNGOForRating && (
+        <RatingModal
+          isOpen={ratingModalOpen}
+          onClose={() => {
+            setRatingModalOpen(false);
+            setSelectedNGOForRating(null);
+          }}
+          ngoId={selectedNGOForRating.id}
+          ngoName={selectedNGOForRating.name}
+          onSubmitSuccess={() => {
+            // Refresh the NGO list to get updated ratings
+            fetchNGOs(currentPage);
+          }}
         />
       )}
     </div>

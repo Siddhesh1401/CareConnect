@@ -231,6 +231,12 @@ async function processMessage(message: any, connection: any) {
 }
 
 async function monitorEmails() {
+  // Skip email monitoring in development mode or if credentials are not set
+  if (process.env.NODE_ENV === 'development' || !process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD || process.env.EMAIL_USER === 'your-email@gmail.com') {
+    console.log('📧 Email monitoring disabled in development mode or missing credentials');
+    return;
+  }
+  
   console.log('Starting email monitoring...');
 
   const results = {

@@ -72,7 +72,7 @@ export const getNGOs = async (req: Request, res: Response) => {
     let ngos;
     try {
       ngos = await User.find(query)
-        .select('_id name email organizationName organizationType description location foundedYear website isNGOVerified verificationStatus profilePicture joinedDate')
+        .select('_id name email organizationName organizationType description location foundedYear website isNGOVerified verificationStatus profilePicture joinedDate averageRating totalReviews')
         .sort(sort)
         .skip(skip)
         .limit(Number(limit));
@@ -100,7 +100,8 @@ export const getNGOs = async (req: Request, res: Response) => {
         category: ngo.organizationType?.toLowerCase() || 'community',
         location: ngo.location?.city ? `${ngo.location.city}, ${ngo.location.state || ''}`.trim() : 'Location not specified',
         verified: ngo.isNGOVerified || ngo.verificationStatus === 'approved',
-        rating: 4.5, // Placeholder since we don't have this from simple query
+        rating: ngo.averageRating || 0,
+        totalReviews: ngo.totalReviews || 0,
         totalVolunteers: 0, // Placeholder since we don't have this from simple query
         totalEvents: 0, // Placeholder since we don't have this from simple query
         totalDonations: 0, // Placeholder since we don't have this from simple query
@@ -213,7 +214,8 @@ export const getNGODetails = async (req: Request, res: Response) => {
           category: ngo.organizationType || 'Community Development',
           location: location,
           verified: ngo.isNGOVerified || false,
-          rating: 4.5, // Placeholder - you might want to implement a rating system
+          rating: (ngo as any).averageRating || 0,
+          totalReviews: (ngo as any).totalReviews || 0,
           totalVolunteers: volunteerCount,
           totalEvents: ngoEvents.length,
           totalDonations: totalDonations,
