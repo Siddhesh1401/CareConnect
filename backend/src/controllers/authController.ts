@@ -1047,88 +1047,108 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
 };
 
 // Send password reset email
-const sendPasswordResetEmail = async (email: string, resetCode: string) => {
-  const transporter = createTransporter();
-  
-  const mailOptions = {
-    from: {
-      name: 'CareConnect',
-      address: emailConfig.auth.user
-    },
-    to: email,
-    subject: 'Password Reset Code - CareConnect',
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Password Reset Code - CareConnect</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .code-box { background: #fff; border: 2px solid #667eea; padding: 20px; text-align: center; border-radius: 10px; margin: 20px 0; }
-          .code { font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 8px; font-family: 'Courier New', monospace; }
-          .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 14px; }
-          .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>🔐 Password Reset Code</h1>
-          <p>CareConnect - Connecting Hearts, Changing Lives</p>
-        </div>
-        
-        <div class="content">
-          <h2>Reset Your Password</h2>
-          <p>Hello,</p>
-          <p>We received a request to reset your password for your CareConnect account. Use the verification code below to reset your password:</p>
-          
-          <div class="code-box">
-            <p style="margin: 0; font-size: 16px; color: #666;">Your Reset Code</p>
-            <div class="code">${resetCode}</div>
-            <p style="margin: 0; font-size: 14px; color: #666; margin-top: 10px;">Enter this code on the reset password page</p>
-          </div>
-          
-          <div class="warning">
-            <strong>⚠️ Important Security Information:</strong>
-            <ul>
-              <li>This code will expire in <strong>15 minutes</strong> for your security</li>
-              <li>If you didn't request this reset, please ignore this email</li>
-              <li>Never share this code with anyone</li>
-              <li>If you're concerned about your account security, contact our support team</li>
-            </ul>
-          </div>
-          
-          <p><strong>How to use this code:</strong></p>
-          <ol>
-            <li>Go back to the password reset page</li>
-            <li>Enter this 6-digit code</li>
-            <li>Set your new password</li>
-            <li>Log in with your new credentials</li>
-          </ol>
-          
-          <p>Best regards,<br>The CareConnect Team</p>
-        </div>
-        
-        <div class="footer">
-          <p>This email was sent from CareConnect. If you have any questions, please contact our support team.</p>
-          <p>© 2025 CareConnect. All rights reserved.</p>
-        </div>
-      </body>
-      </html>
-    `,
-    headers: {
-      'X-Priority': '1',
-      'X-MSMail-Priority': 'High',
-      'Importance': 'high',
-      'X-Mailer': 'CareConnect-System',
-      'Reply-To': emailConfig.auth.user
+const sendPasswordResetEmail = async (email: string, resetCode: string): Promise<boolean> => {
+  console.log('🔴 [ENTER] sendPasswordResetEmail called with:', email, resetCode);
+  try {
+    // Development mode - just log the email instead of sending
+    if (process.env.EMAIL_DEV_MODE === 'true') {
+      console.log('📧 [DEV MODE] Password Reset Email:');
+      console.log(`   To: ${email}`);
+      console.log(`   Reset Code: ${resetCode}`);
+      console.log(`   Subject: Password Reset Code - CareConnect`);
+      console.log(`   Expires in 15 minutes`);
+      return true;
     }
-  };
 
-  await transporter.sendMail(mailOptions);
+    console.log('🟢 [PROD MODE] Attempting to send real email...');
+    const transporter = createTransporter();
+    
+    const mailOptions = {
+      from: `"CareConnect Support" <${emailConfig.auth.user}>`,
+      to: email,
+      subject: 'Password Reset Code - CareConnect',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset Code - CareConnect</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+            .code-box { background: #fff; border: 2px solid #667eea; padding: 20px; text-align: center; border-radius: 10px; margin: 20px 0; }
+            .code { font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 14px; }
+            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>🔐 Password Reset Code</h1>
+            <p>CareConnect - Connecting Hearts, Changing Lives</p>
+          </div>
+          
+          <div class="content">
+            <h2>Reset Your Password</h2>
+            <p>Hello,</p>
+            <p>We received a request to reset your password for your CareConnect account. Use the verification code below to reset your password:</p>
+            
+            <div class="code-box">
+              <p style="margin: 0; font-size: 16px; color: #666;">Your Reset Code</p>
+              <div class="code">${resetCode}</div>
+              <p style="margin: 0; font-size: 14px; color: #666; margin-top: 10px;">Enter this code on the reset password page</p>
+            </div>
+            
+            <div class="warning">
+              <strong>⚠️ Important Security Information:</strong>
+              <ul>
+                <li>This code will expire in <strong>15 minutes</strong> for your security</li>
+                <li>If you didn't request this reset, please ignore this email</li>
+                <li>Never share this code with anyone</li>
+                <li>If you're concerned about your account security, contact our support team</li>
+              </ul>
+            </div>
+            
+            <p><strong>How to use this code:</strong></p>
+            <ol>
+              <li>Go back to the password reset page</li>
+              <li>Enter this 6-digit code</li>
+              <li>Set your new password</li>
+              <li>Log in with your new credentials</li>
+            </ol>
+            
+            <p>Best regards,<br>The CareConnect Team</p>
+          </div>
+          
+          <div class="footer">
+            <p>This email was sent from CareConnect. If you have any questions, please contact our support team.</p>
+            <p>© 2025 CareConnect. All rights reserved.</p>
+          </div>
+        </body>
+        </html>
+      `,
+      headers: {
+        'X-Priority': '1',
+        'X-MSMail-Priority': 'High',
+        'Importance': 'high',
+        'X-Mailer': 'CareConnect-System',
+        'Reply-To': emailConfig.auth.user
+      }
+    };
+
+    console.log(`📧 Attempting to send password reset email to: ${email}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Password reset email sent successfully to: ${email}`);
+    console.log(`📧 Message ID: ${result.messageId}`);
+    console.log('🟢 [EXIT] sendPasswordResetEmail returning TRUE');
+    return true;
+  } catch (error) {
+    console.error(`❌ Failed to send password reset email to ${email}:`, error);
+    console.log('🔴 [EXIT] sendPasswordResetEmail returning FALSE due to error');
+    return false;
+  }
 };
 
 // Forgot password controller
@@ -1166,11 +1186,9 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     await user.save();
 
     // Send email with reset code
-    try {
-      await sendPasswordResetEmail(user.email, resetCode);
-      console.log(`📧 Password reset code sent to ${user.email}`);
-    } catch (emailError) {
-      console.error('❌ Failed to send password reset email:', emailError);
+    const emailSent = await sendPasswordResetEmail(user.email, resetCode);
+    if (!emailSent) {
+      console.error('❌ Failed to send password reset email');
       // Clear the reset code since email failed
       user.passwordResetCode = undefined;
       user.passwordResetExpires = undefined;
@@ -1182,6 +1200,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       });
       return;
     }
+    console.log(`📧 Password reset code sent to ${user.email}`);
 
     res.status(200).json({
       success: true,

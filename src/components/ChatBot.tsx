@@ -373,7 +373,7 @@ export const ChatBot: React.FC = () => {
           }
 
           // Send as anonymous user
-          response = await fetch('http://localhost:5000/api/messages/send-public', {
+          response = await fetch('http://localhost:5000/api/v1/messages/send-public', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

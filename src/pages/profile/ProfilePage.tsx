@@ -56,7 +56,7 @@ export const ProfilePage: React.FC = () => {
         formDataToSend.append('avatar', selectedAvatar);
 
         // Direct API call with FormData
-        const response = await fetch('http://localhost:5000/api/auth/profile', {
+        const response = await fetch('http://localhost:5000/api/v1/auth/profile', {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('careconnect_token')}`

@@ -36,7 +36,7 @@ export const ResetPasswordPage: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch(`/api/auth/reset-password/${token}`, {
+      const response = await fetch(`/api/v1/auth/reset-password/${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
