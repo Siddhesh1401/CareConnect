@@ -1,15 +1,30 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface UsageLog {
+  timestamp: Date;
+  endpoint: string;
+  method: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
 export interface IAPIKey extends Document {
   name: string;
   key: string;
   organization: string;
-  status: 'active' | 'revoked' | 'expired';
+  status: 'active' | 'revoked' | 'expired' | 'paused';
   permissions: string[];
   usageCount: number;
   lastUsed?: Date;
   expiresAt?: Date;
   createdBy: mongoose.Types.ObjectId; // Reference to User who created it
+  revokedAt?: Date;
+  revokedBy?: mongoose.Types.ObjectId;
+  pausedAt?: Date;
+  pausedBy?: mongoose.Types.ObjectId;
+  notes?: string;
+  tags?: string[];
+  usageLogs: UsageLog[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +48,7 @@ const APIKeySchema = new Schema<IAPIKey>({
   },
   status: {
     type: String,
-    enum: ['active', 'revoked', 'expired'],
+    enum: ['active', 'revoked', 'expired', 'paused'],
     default: 'active'
   },
   permissions: [{
@@ -69,7 +84,37 @@ const APIKeySchema = new Schema<IAPIKey>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  }
+  },
+  revokedAt: {
+    type: Date
+  },
+  revokedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  pausedAt: {
+    type: Date
+  },
+  pausedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  notes: {
+    type: String
+  },
+  tags: [{
+    type: String
+  }],
+  usageLogs: [{
+    timestamp: {
+      type: Date,
+      default: Date.now
+    },
+    endpoint: String,
+    method: String,
+    ipAddress: String,
+    userAgent: String
+  }]
 }, {
   timestamps: true
 });
