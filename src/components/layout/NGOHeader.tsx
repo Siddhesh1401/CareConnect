@@ -79,7 +79,7 @@ export const NGOHeader: React.FC = () => {
           </nav>
 
           {/* Desktop Actions & Profile */}
-          <div className="hidden md:flex items-center space-x-6 ml-8">
+          <div className="hidden md:flex items-center space-x-4 flex-shrink-0">
             {/* Contact Support */}
             <HeaderContactSupport userType="ngo_admin" />
             
@@ -141,15 +141,15 @@ export const NGOHeader: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-primary-50 transition-colors"
+                className="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-primary-50 transition-colors min-w-0"
               >
                 <img
                   src={getProfilePictureUrl(user?.profilePicture, user?.name, 32)}
                   alt={user?.name}
-                  className="w-8 h-8 rounded-lg object-cover border-2 border-primary-200"
+                  className="w-8 h-8 rounded-lg object-cover border-2 border-primary-200 flex-shrink-0"
                 />
-                <div className="text-left">
-                  <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                <div className="text-left min-w-0 flex-1">
+                  <div className="text-sm font-medium text-gray-900 truncate">{user?.name}</div>
                   <div className="text-xs text-primary-600 font-medium">NGO Admin</div>
                 </div>
               </button>
