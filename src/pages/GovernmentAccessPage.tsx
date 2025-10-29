@@ -8,6 +8,7 @@ const GovernmentAccessPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'form' | 'email'>('form');
 
   const handleEmailCompose = () => {
+    const govEmail = import.meta.env.VITE_GOVERNMENT_EMAIL || 'gov.access@careconnect.org';
     const subject = encodeURIComponent('Government Data Access Request');
     const body = encodeURIComponent(`Organization: [Enter your organization name]
 Contact Person: [Your name]
@@ -24,7 +25,7 @@ Government Level: [federal/state/local]
 Department: [Department name]
 Authorized Officials: [Name1, Email1; Name2, Email2]`);
     // Open Gmail compose in browser
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=bug75297@gmail.com&su=${subject}&body=${body}`, '_blank');
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(govEmail)}&su=${subject}&body=${body}`, '_blank');
   };
 
   return (
@@ -78,7 +79,7 @@ Authorized Officials: [Name1, Email1; Name2, Email2]`);
               {/* Email Address */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-900 mb-2">Send to:</h3>
-                <p className="text-blue-800 font-mono text-lg">bug75297@gmail.com</p>
+                <p className="text-blue-800 font-mono text-lg">{import.meta.env.VITE_GOVERNMENT_EMAIL || 'gov.access@careconnect.org'}</p>
               </div>
 
               {/* Template */}

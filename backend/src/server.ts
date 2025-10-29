@@ -40,6 +40,34 @@ const __dirname = path.dirname(__filename);
 // Load environment variables
 dotenv.config();
 
+// ============================================================================
+// ENVIRONMENT VARIABLE VALIDATION - Ensure critical configs are set
+// ============================================================================
+const requiredEnvVars = [
+  'MONGODB_URI',
+  'JWT_SECRET',
+  'EMAIL_USER',
+  'EMAIL_PASSWORD',
+];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ FATAL ERROR: Missing required environment variables:');
+  missingEnvVars.forEach(envVar => {
+    console.error(`   - ${envVar}`);
+  });
+  console.error('\n📋 Please ensure the following are set in your .env file:');
+  console.error('   - MONGODB_URI');
+  console.error('   - JWT_SECRET');
+  console.error('   - EMAIL_USER');
+  console.error('   - EMAIL_PASSWORD');
+  console.error('\n💡 Tip: Copy .env.example to .env and fill in your values\n');
+  process.exit(1);
+}
+
+console.log('✅ Environment variables validated successfully');
+
 // Rate limiting - IP-based fallback (for non-API routes)
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes

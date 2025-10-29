@@ -33,18 +33,54 @@ interface EmailData {
 }
 
 function parseEmailBody(body: string): EmailData | null {
-  const lines = body.split('\n').map(line => line.trim()).filter(line => line);
+  const rawLines = body.split('\n').map(line => line.trim());
+  
+  // First pass: identify lines that are valid field definitions
+  const fieldLines: string[] = [];
+  for (const line of rawLines) {
+    if (!line) continue; // Skip empty lines
+    
+    // Skip MIME boundary markers and other non-content lines
+    if (line.startsWith('--') || line.startsWith('Content-') || line.includes('charset=')) {
+      continue;
+    }
+    
+    if (line.includes(':')) {
+      const [key] = line.split(':');
+      const cleanKey = key.toLowerCase().replace(/[^a-z]/g, '');
+      
+      // Only treat as field if key is a recognized field name
+      const recognizedFields = ['organization', 'contactperson', 'email', 'phone', 'purpose', 'datatypes', 
+                                'justification', 'estimatedrequests', 'duration', 'apiintegration', 
+                                'dataprocessing', 'securitymeasures', 'governmentlevel', 'department', 
+                                'authorizedofficials'];
+      
+      if (recognizedFields.some(f => cleanKey.includes(f))) {
+        fieldLines.push(line);
+      }
+    } else if (fieldLines.length > 0) {
+      // This line doesn't have a key, append to previous line (for multi-line fields)
+      fieldLines[fieldLines.length - 1] += ' ' + line;
+    }
+  }
+  
   const data: any = {};
 
   console.log('Parsing email lines:');
-  for (const line of lines) {
-    console.log('Line:', JSON.stringify(line));
+  for (const line of fieldLines) {
+    console.log('Line:', JSON.stringify(line.substring(0, 100)));
     const [key, ...valueParts] = line.split(':');
     const value = valueParts.join(':').trim();
     if (!key || !value) continue;
 
     const cleanKey = key.toLowerCase().replace(/[^a-z]/g, '');
-    console.log('Key:', cleanKey, 'Value:', value);
+    console.log('Key:', cleanKey);
+    
+    // Skip if we already have this field with good data (avoid duplicates from multi-part emails)
+    if (data[cleanKey] && Object.keys(data).length > 3) {
+      console.log('  Skipping duplicate field:', cleanKey);
+      continue;
+    }
 
     switch (cleanKey) {
       case 'email':
@@ -53,17 +89,25 @@ function parseEmailBody(body: string): EmailData | null {
           data.email = value;
         }
         break;
-      case 'contactperson':
-        data.contactPerson = value;
+      case 'organization':
+        if (!data.organization) {
+          data.organization = value;
+        }
         break;
-      case 'email':
-        data.email = value;
+      case 'contactperson':
+        if (!data.contactPerson) {
+          data.contactPerson = value;
+        }
         break;
       case 'phone':
-        data.phone = value;
+        if (!data.phone) {
+          data.phone = value;
+        }
         break;
       case 'purpose':
-        data.purpose = value;
+        if (!data.purpose) {
+          data.purpose = value;
+        }
         break;
       case 'datatypes':
         // Map email data types to schema enum values
@@ -82,9 +126,12 @@ function parseEmailBody(body: string): EmailData | null {
         });
         break;
       case 'justification':
-        data.justification = value;
+        if (!data.justification) {
+          data.justification = value;
+        }
         break;
       case 'estimatedrequestspermonth':
+      case 'estimatedrequestsmonth':
         data.estimatedUsage = { requestsPerMonth: parseInt(value) || 1000, duration: '1 year' };
         break;
       case 'duration':
@@ -103,21 +150,37 @@ function parseEmailBody(body: string): EmailData | null {
         data.governmentLevel = value as any;
         break;
       case 'department':
-        data.department = value;
+        if (!data.department) {
+          data.department = value;
+        }
         break;
       case 'authorizedofficials':
         // Parse multiple officials: Name, Title, Email; Name, Title, Email
+        // Handle cases where officials may be formatted as "Name, Email; Name, Email" or "Name, Title, Email"
         data.authorizedOfficials = value.split(';').map((official: string) => {
-          const parts = official.split(',').map(s => s.trim());
-          if (parts.length >= 3) {
-            return { name: parts[0], title: parts[1], email: parts[2] };
-          } else if (parts.length >= 2) {
-            // Fallback: assume Name, Email format
-            return { name: parts[0], title: 'Contact', email: parts[1] };
-          } else {
-            return { name: parts[0] || 'Unknown', title: 'Contact', email: '' };
+          const trimmed = official.trim();
+          if (!trimmed) return null;
+          
+          // Check if this contains an email address (has @)
+          const emailMatch = trimmed.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+          const email = emailMatch ? emailMatch[0] : '';
+          
+          // Remove email from the string to get name and title
+          let withoutEmail = trimmed.replace(email, '').replace(/[,;@]+/g, ',').trim();
+          // Clean up extra commas
+          withoutEmail = withoutEmail.replace(/,+/g, ',').replace(/^,|,$/, '').trim();
+          
+          const parts = withoutEmail.split(',').map(s => s.trim()).filter(s => s);
+          
+          if (parts.length >= 2) {
+            return { name: parts[0], title: parts[1], email: email };
+          } else if (parts.length >= 1 && email) {
+            return { name: parts[0], title: 'Contact', email: email };
+          } else if (parts.length >= 1) {
+            return { name: parts[0], title: 'Contact', email: '' };
           }
-        });
+          return null;
+        }).filter((official: any) => official !== null);
         break;
     }
   }
@@ -145,10 +208,21 @@ function parseEmailBody(body: string): EmailData | null {
       }));
   }
 
-  // Must have at least one authorized official with email
-  if (!data.authorizedOfficials || data.authorizedOfficials.length === 0) {
-    console.log('No valid authorized officials found');
+  // Must have at least organization, email, and purpose
+  if (!data.organization || !data.email || !data.purpose) {
+    console.log('Missing required fields:', { organization: data.organization, email: data.email, purpose: data.purpose });
     return null;
+  }
+
+  // If no authorized officials, create default one from contact person
+  if (!data.authorizedOfficials || data.authorizedOfficials.length === 0) {
+    console.log('No authorized officials found, using contact person as default');
+    data.authorizedOfficials = [{
+      name: data.contactPerson || 'Contact Person',
+      title: 'Contact',
+      email: data.email || 'contact@unknown.com',
+      phone: data.phone || ''
+    }];
   }
 
   // Validate required fields (email is now from sender, so don't check it in parsed data)
@@ -160,35 +234,104 @@ function parseEmailBody(body: string): EmailData | null {
 }
 
 async function processMessage(message: any, connection: any) {
+  // Get sender from message headers (more reliable)
+  let senderEmail: string = '';
+  
+  const headerPart = message.parts.find((part: any) => part.which === 'HEADER');
+  if (headerPart) {
+    const headerText = typeof headerPart.body === 'string' ? headerPart.body : '';
+    // Extract From header
+    const fromMatch = headerText.match(/From:\s*([^\n]*)/i);
+    if (fromMatch) {
+      const fromHeader = fromMatch[1];
+      // Try to extract email from "Name <email@domain.com>" format
+      const emailMatch = fromHeader.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+      if (emailMatch) {
+        senderEmail = emailMatch[0];
+      }
+    }
+  }
+  
+  console.log('Sender email from headers:', senderEmail);
+
   const all = message.parts.find((part: any) => part.which === 'TEXT');
   if (!all) {
     console.log('No TEXT part found, skipping');
     return;
   }
 
+  // Parse the entire message to get text and html separately
   const parsed = await simpleParser(all.body);
-  console.log('Parsed email body:', parsed.text?.substring(0, 200) + '...');
   
-  // Use the sender's email address as the contact email (more reliable than parsing from body)
-  const senderEmail = parsed.from?.value?.[0]?.address;
-  if (!senderEmail) {
-    console.log('No sender email found, skipping');
-    return;
+  // Prefer plain text over HTML - simpleParser handles this conversion automatically
+  let emailBody = parsed.text || '';
+  
+  // If HTML is present but no text, it means the email is HTML-only
+  // In this case, we should get plain text from the parsed.text property
+  // but if that's empty, we need to extract from HTML manually
+  if (!emailBody && parsed.html) {
+    console.log('No plain text found, extracting from HTML...');
+    emailBody = parsed.html
+      .replace(/<[^>]*>/g, ' ') // Remove HTML tags
+      .replace(/&nbsp;/g, ' ') // HTML entities
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/=3D/g, '=') // Decode quoted-printable
+      .replace(/=C2=A0/g, ' ') // Non-breaking space
+      .replace(/=[0-9A-Fa-f]{2}/g, (match) => {
+        try {
+          return String.fromCharCode(parseInt(match.slice(1), 16));
+        } catch (e) {
+          return match;
+        }
+      })
+      .replace(/\s+/g, ' ') // Collapse whitespace
+      .trim();
   }
   
-  const emailData = parseEmailBody(parsed.text || '');
+  console.log('Parsed email body:', emailBody.substring(0, 200) + '...');
+  
+  if (!senderEmail) {
+    console.log('⚠️ No sender email found from headers, trying to extract from parsed message');
+    // Fallback: Try multiple formats to get sender email from parsed message
+    if (typeof parsed.from === 'string') {
+      senderEmail = parsed.from;
+    } else if (parsed.from?.value?.[0]?.address) {
+      senderEmail = parsed.from.value[0].address;
+    } else if (parsed.from?.text) {
+      const match = parsed.from.text.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+      senderEmail = match ? match[0] : '';
+    }
+  }
+  
+  console.log('Final sender email:', senderEmail);
+  
+  const emailData = parseEmailBody(emailBody);
   if (!emailData) {
     console.log('Failed to parse email data');
     return;
   }
 
-  // Override the email with the sender's email (more reliable)
-  emailData.email = senderEmail;
+  // Override the email with the sender's email (more reliable), but fallback to body email if not found
+  if (senderEmail) {
+    emailData.email = senderEmail;
+  } else {
+    console.log('⚠️ No sender email extracted, using email from body:', emailData.email);
+  }
 
   console.log('Checking for placeholder values...');
   console.log('Sender Email:', senderEmail);
+  console.log('Contact Email:', emailData.email);
   console.log('Organization:', emailData.organization);
   console.log('Contact:', emailData.contactPerson);
+
+  // Require at least a valid email from either sender or body
+  if (!emailData.email) {
+    console.log('❌ No email found - skipping this request');
+    return;
+  }
 
   // Skip emails with placeholder values
   if (emailData.organization?.includes('[Enter') ||
@@ -197,9 +340,10 @@ async function processMessage(message: any, connection: any) {
     return;
   }
 
-  // Check if this request already exists (use sender email for duplicate check)
+  // Check if this request already exists (use sender email or body email for duplicate check)
+  const contactEmail = senderEmail || emailData.email;
   const existingRequest = await AccessRequest.findOne({
-    email: senderEmail,
+    email: contactEmail,
     organization: emailData.organization,
     status: 'email_submitted'
   });
@@ -249,7 +393,8 @@ async function monitorEmails() {
       port: 993,
       tls: true,
       tlsOptions: { rejectUnauthorized: false }, // For development - allows self-signed certs
-      authTimeout: 3000
+      authTimeout: 10000, // Increased from 3000ms to 10000ms for slower connections
+      connectionTimeout: 10000 // Added connection timeout
     }
   };
 

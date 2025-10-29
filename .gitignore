@@ -20,6 +20,7 @@ build
 *.local
 
 # Environment variables (IMPORTANT: Never commit these!)
+# These contain sensitive credentials and must NEVER be uploaded to version control
 .env
 .env.local
 .env.development.local
