@@ -93,8 +93,8 @@ export const NGOProfilePage: React.FC = () => {
       const ngoResponse = await api.get(`/ngos/${id}`);
       console.log('NGO API Response:', ngoResponse);
 
-      if (ngoResponse.data.success) {
-        setNgo(ngoResponse.data.data.ngo);
+      if (ngoResponse.success) {
+        setNgo(ngoResponse.data.ngo);
       } else {
         setError('NGO not found');
       }

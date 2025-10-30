@@ -438,11 +438,15 @@ export const eventAPI = {
     location?: string;
     date?: string;
     search?: string;
+    page?: number;
+    limit?: number;
   }) => {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
       });
     }
     const response = await api.get(`/events?${params.toString()}`);

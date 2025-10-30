@@ -80,7 +80,7 @@ const limiter = rateLimit({
 // User-specific rate limiting
 const userLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each user to 1000 requests per windowMs (temporarily increased for testing)
+  max: parseInt(process.env.USER_RATE_LIMIT_MAX_REQUESTS || '5000'), // limit each user to 5000 requests per windowMs in development
   message: 'Too many requests from this user, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -280,19 +280,20 @@ app.use('/api/v1/communities', communityRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
 // Legacy routes (redirect to v1) - for backward compatibility during transition
-app.use('/api/auth', (req, res) => res.redirect(301, `/api/v1/auth${req.path}`));
-app.use('/api/admin', (req, res) => res.redirect(301, `/api/v1/admin${req.path}`));
-app.use('/api/api-admin', (req, res) => res.redirect(301, `/api/v1/api-admin${req.path}`));
-app.use('/api/access-requests', (req, res) => res.redirect(301, `/api/v1/access-requests${req.path}`));
-app.use('/api/government', (req, res) => res.redirect(301, `/api/v1/government${req.path}`));
-app.use('/api/messages', (req, res) => res.redirect(301, `/api/v1/messages${req.path}`));
-app.use('/api/events', (req, res) => res.redirect(301, `/api/v1/events${req.path}`));
-app.use('/api/dashboard', (req, res) => res.redirect(301, `/api/v1/dashboard${req.path}`));
-app.use('/api/ngos', (req, res) => res.redirect(301, `/api/v1/ngos${req.path}`));
-app.use('/api/campaigns', (req, res) => res.redirect(301, `/api/v1/campaigns${req.path}`));
-app.use('/api/stories', (req, res) => res.redirect(301, `/api/v1/stories${req.path}`));
-app.use('/api/communities', (req, res) => res.redirect(301, `/api/v1/communities${req.path}`));
-app.use('/api/reports', (req, res) => res.redirect(301, `/api/v1/reports${req.path}`));
+// Using 307 (Temporary Redirect) to preserve HTTP method, body, and query parameters
+app.use('/api/auth', (req, res) => res.redirect(307, `/api/v1/auth${req.path}`));
+app.use('/api/admin', (req, res) => res.redirect(307, `/api/v1/admin${req.path}`));
+app.use('/api/api-admin', (req, res) => res.redirect(307, `/api/v1/api-admin${req.path}`));
+app.use('/api/access-requests', (req, res) => res.redirect(307, `/api/v1/access-requests${req.path}`));
+app.use('/api/government', (req, res) => res.redirect(307, `/api/v1/government${req.path}`));
+app.use('/api/messages', (req, res) => res.redirect(307, `/api/v1/messages${req.path}`));
+app.use('/api/events', (req, res) => res.redirect(307, `/api/v1/events${req.path}`));
+app.use('/api/dashboard', (req, res) => res.redirect(307, `/api/v1/dashboard${req.path}`));
+app.use('/api/ngos', (req, res) => res.redirect(307, `/api/v1/ngos${req.path}`));
+app.use('/api/campaigns', (req, res) => res.redirect(307, `/api/v1/campaigns${req.path}`));
+app.use('/api/stories', (req, res) => res.redirect(307, `/api/v1/stories${req.path}`));
+app.use('/api/communities', (req, res) => res.redirect(307, `/api/v1/communities${req.path}`));
+app.use('/api/reports', (req, res) => res.redirect(307, `/api/v1/reports${req.path}`));
 
 // Serve uploaded files with CORS headers
 app.use('/uploads', (req, res, next) => {
@@ -566,9 +567,9 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
 }));
 
 // Legacy health endpoints (redirect to v1)
-app.get('/api/health', (req, res) => res.redirect(301, '/api/v1/health'));
-app.get('/api/ping', (req, res) => res.redirect(301, '/api/v1/ping'));
-app.get('/api/health/db', (req, res) => res.redirect(301, '/api/v1/health/db'));
+app.get('/api/health', (req, res) => res.redirect(307, '/api/v1/health'));
+app.get('/api/ping', (req, res) => res.redirect(307, '/api/v1/ping'));
+app.get('/api/health/db', (req, res) => res.redirect(307, '/api/v1/health/db'));
 
 // Error handling middleware
 app.use(errorLogger); // Log errors before handling them

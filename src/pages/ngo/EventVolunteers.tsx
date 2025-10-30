@@ -70,9 +70,15 @@ export const EventVolunteers: React.FC = () => {
         }
       });
 
-      if (response.data.success) {
+      console.log('EventVolunteers - API Response:', response);
+
+      if (response.data?.success) {
+        console.log('Event data:', response.data.data.event);
+        console.log('Volunteers data:', response.data.data.volunteers);
         setEvent(response.data.data.event);
         setVolunteers(response.data.data.volunteers);
+      } else {
+        console.error('Failed to fetch volunteers - success is false');
       }
     } catch (error: any) {
       console.error('Error fetching volunteers:', error);

@@ -67,8 +67,8 @@ export const NGOProfileEditPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.get('/auth/profile');
-      if (response.data.success) {
-        const user = response.data.data.user;
+      if (response.success) {
+        const user = response.data.user;
         setProfile(user);
         setFormData({
           organizationName: user.organizationName || '',
@@ -145,9 +145,9 @@ export const NGOProfileEditPage: React.FC = () => {
         }
       });
 
-      if (response.data.success) {
+      if (response.success) {
         setSuccess(true);
-        setProfile(prev => prev ? { ...prev, ...response.data.data.user } : null);
+        setProfile(prev => prev ? { ...prev, ...response.data.user } : null);
         
         // Notify other pages that NGO profile has been updated
         localStorage.setItem('ngo_profile_updated', Date.now().toString());

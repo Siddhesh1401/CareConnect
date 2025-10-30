@@ -2,7 +2,7 @@
 const fetch = require('node-fetch');
 
 async function testLogin() {
-  const url = 'http://localhost:5000/api/auth/login';
+  const url = 'http://localhost:5000/api/v1/auth/login';
   const credentials = {
     email: 'siddeshbangar14@gmail.com', // NGO with rejected documents
     password: 'password123' // Assuming this is the password

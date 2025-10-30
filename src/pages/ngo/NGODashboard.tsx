@@ -79,9 +79,9 @@ export const NGODashboard: React.FC = () => {
         setLoading(true);
 
         const response = await api.get('/dashboard/ngo');
+        const data = response.data?.data || null;
 
-        if (response.data.success) {
-          const data = response.data.data;
+        if (response.data?.success && data) {
           // Deduplicate arrays to prevent duplicate keys
           if (data.recentVolunteers) {
             const uniqueVolunteers = data.recentVolunteers.filter((volunteer: any, index: number, arr: any[]) => 
@@ -138,6 +138,22 @@ export const NGODashboard: React.FC = () => {
           // Prepare calendar events
           const eventDates = data.recentEvents.map((event: any) => new Date(event.date));
           setCalendarEvents(eventDates);
+        } else {
+          // Ensure we always set a safe default to avoid UI crashes
+          const emptyData: NGODashboardData = {
+            stats: {
+              totalVolunteers: 0,
+              activeEvents: 0,
+              totalEvents: 0,
+              upcomingEvents: 0,
+              totalDonations: '₹0L',
+              impactScore: '0.0'
+            },
+            recentEvents: [],
+            recentVolunteers: [],
+            campaigns: []
+          };
+          setDashboardData(emptyData);
         }
       } catch (error: any) {
         console.error('Error fetching NGO dashboard data:', error);
@@ -153,33 +169,35 @@ export const NGODashboard: React.FC = () => {
   const stats = [
     {
       label: 'Total Volunteers',
-      value: dashboardData?.stats.totalVolunteers.toString() || '0',
+      value: ((dashboardData && dashboardData.stats && dashboardData.stats.totalVolunteers) || 0).toString(),
       icon: Users,
       color: 'text-primary-600 bg-primary-50',
       change: '+12%'
     },
     {
       label: 'Active Events',
-      value: dashboardData?.stats.activeEvents.toString() || '0',
+      value: ((dashboardData && dashboardData.stats && dashboardData.stats.activeEvents) || 0).toString(),
       icon: Calendar,
       color: 'text-primary-600 bg-primary-50',
       change: '+3'
     },
     {
       label: 'Total Donations',
-      value: dashboardData?.stats.totalDonations || '₹0L',
+      value: (dashboardData && dashboardData.stats && dashboardData.stats.totalDonations) || '₹0L',
       icon: Heart,
       color: 'text-primary-600 bg-primary-50',
       change: '+18%'
     },
     {
       label: 'Impact Score',
-      value: dashboardData?.stats.impactScore || '0.0',
+      value: (dashboardData && dashboardData.stats && dashboardData.stats.impactScore) || '0.0',
       icon: Star,
       color: 'text-primary-600 bg-primary-50',
       change: '+0.2'
     }
-  ];  const recentEvents = dashboardData?.recentEvents || [];
+  ];
+
+  const recentEvents = dashboardData?.recentEvents || [];
   const recentVolunteers = dashboardData?.recentVolunteers || [];
   const campaigns = dashboardData?.campaigns || [];
 

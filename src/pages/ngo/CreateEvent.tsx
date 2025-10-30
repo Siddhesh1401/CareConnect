@@ -6,9 +6,7 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { TimePicker } from '../../components/ui/TimePicker';
 import { EnhancedLocationInput } from '../../components/ui/EnhancedLocationInput';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { eventAPI } from '../../services/api';
 
 export const CreateEvent: React.FC = () => {
   const navigate = useNavigate();
@@ -114,12 +112,6 @@ export const CreateEvent: React.FC = () => {
         return;
       }
 
-      const token = localStorage.getItem('careconnect_token');
-      if (!token) {
-        navigate('/auth/login');
-        return;
-      }
-
       // Prepare FormData for file upload
       const formDataToSend = new FormData();
       
@@ -149,14 +141,9 @@ export const CreateEvent: React.FC = () => {
         imageCount: selectedImages.length
       });
 
-      const response = await axios.post(`${API_BASE_URL}/events/create`, formDataToSend, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const response = await eventAPI.createEvent(formDataToSend);
 
-      if (response.data.success) {
+      if (response.success) {
         alert('🎉 Event created successfully! It is now live and visible to volunteers.');
         navigate('/ngo/events');
       }

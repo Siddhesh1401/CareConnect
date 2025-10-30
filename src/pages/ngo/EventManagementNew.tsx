@@ -80,8 +80,8 @@ export const EventManagement: React.FC = () => {
         }
       });
 
-      if (response.data.success) {
-        setEvents(response.data.data.events);
+      if (response.success) {
+        setEvents(response.data.events);
       }
     } catch (error: any) {
       console.error('Error fetching events:', error);

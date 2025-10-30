@@ -104,9 +104,9 @@ export const EventsPage: React.FC = () => {
         limit: pagination.limit
       });
       
-      if (response.data.success) {
-        setEvents(response.data.data.events);
-        setPagination(response.data.data.pagination);
+      if (response.success) {
+        setEvents(response.data.events);
+        setPagination(response.data.pagination);
       }
     } catch (error) {
       console.error('Error fetching events:', error);

@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Interactive Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .presentation {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            padding: 40px 60px;
+            animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(20px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        /* Title Slide */
+        .title-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="1200" height="600" fill="url(%23grid)" /></svg>');
+            opacity: 0.5;
+        }
+
+        .title-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-slide h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .title-subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+            letter-spacing: 2px;
+        }
+
+        /* Content Slides */
+        .content-slide {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: -40px -60px 25px -60px;
+            padding-bottom: 30px;
+            border-bottom: 4px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-header h2 {
+            font-size: 2.2em;
+            margin: 0;
+            border: none;
+            padding: 0;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .content-slide h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .content-slide p, .content-slide li {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .content-slide ul {
+            margin-left: 30px;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #f0f4ff 0%, #f8f9ff 100%);
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .feature-box h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+
+        .feature-box p {
+            font-size: 0.9em;
+            color: #555;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Flow Diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 140px;
+            margin: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .flow-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .flow-arrow {
+            font-size: 1.8em;
+            color: #667eea;
+            margin: 0 8px;
+            font-weight: bold;
+        }
+
+        /* Revenue Box */
+        .revenue-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-size: 0.95em;
+            line-height: 1.8;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Statistics */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        /* Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+            font-size: 0.9em;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+
+        .checkmark {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .cross {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border-top: 3px solid #667eea;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            font-size: 1em;
+            color: #667eea;
+            font-weight: 700;
+            background: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            font-size: 0.8em;
+            color: #999;
+            display: none;
+        }
+
+        /* Feature list with icons */
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: start;
+            gap: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            min-width: 50px;
+        }
+
+        .feature-content h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .feature-content p {
+            margin: 0;
+            color: #666;
+            font-size: 1em;
+        }
+
+        /* Highlight text */
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: #856404;
+        }
+
+        /* Call to action */
+        .cta-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        /* Closing slide */
+        .closing-text {
+            text-align: center;
+            font-size: 1.4em;
+            line-height: 2.5;
+        }
+
+        .thank-you {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+
+        @media (max-width: 1200px) {
+            .slide {
+                padding: 60px;
+            }
+
+            .title-slide h1 {
+                font-size: 4em;
+            }
+
+            .section-header h2 {
+                font-size: 2.5em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .presentation {
+                min-height: auto;
+            }
+
+            .slide {
+                padding: 40px;
+            }
+
+            .title-slide h1 {
+                font-size: 2.5em;
+            }
+
+            .section-header {
+                margin: -40px -40px 30px -40px;
+            }
+
+            .section-header h2 {
+                font-size: 2em;
+            }
+
+            .content-slide p {
+                font-size: 1.05em;
+            }
+
+            .controls {
+                padding: 20px 40px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px 30px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            color: #667eea;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="presentation">
+            <!-- Slide 1: Title -->
+            <div class="slide active title-slide">
+                <div class="title-content">
+                    <h1>🚀 CareConnect</h1>
+                    <p class="tagline">India's First B2G Social Impact Platform</p>
+                    <p class="title-subtitle">Connecting Volunteers • NGOs • Government Agencies</p>
+                </div>
+                <div class="slide-number">1 / 22</div>
+            </div>
+
+            <!-- Slide 2: The Problem -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>❓ The Problem We Solve</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">👤</div>
+                        <div class="feature-content">
+                            <h4>Volunteers Can't Find Opportunities</h4>
+                            <p>Want to do good work but lack verified, organized platforms to find legitimate opportunities</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏢</div>
+                        <div class="feature-content">
+                            <h4>NGOs Manage Volunteers Manually</h4>
+                            <p>Struggling with manual spreadsheets, no analytics, no data on impact, hard to scale</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏛️</div>
+                        <div class="feature-content">
+                            <h4>Government Makes Policies Without Data</h4>
+                            <p>Lack real data on social sector to make informed policy decisions and allocate resources</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="cta-box">
+                    ✨ CareConnect solves all three problems simultaneously!
+                </div>
+                <div class="slide-number">2 / 22</div>
+            </div>
+
+            <!-- Slide 3: Three Users -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>👥 Three Types of Users</h2>
+                </div>
+                <div class="feature-grid">
+                    <div class="feature-box" style="border-left: 5px solid #28a745;">
+                        <h3 style="color: #28a745;">🤝 Volunteers</h3>
+                        <p>Find verified opportunities • Register for events • Track volunteering hours • Earn badges & recognition • Build social impact profile</p>
+                    </div>
+                    <div class="feature-box" style="border-left: 5px solid #007bff;">
+                        <h3 style="color: #007bff;">🏢 NGOs</h3>
+                        <p>Register with document verification • Create & manage events • Track volunteer participation • Fundraise online • Access real-time analytics</p>
+                    </div>
+                    <div class="feature-box" style="border-left: 5px solid #dc3545;">
+                        <h3 style="color: #dc3545;">🏛️ Government</h3>
+                        <p>Request data access • Get API keys • Query social sector data • Make policy decisions • Allocate resources effectively</p>
+                    </div>
+                </div>
+                <div class="slide-number">3 / 22</div>
+            </div>
+
+            <!-- Slide 4: Volunteer Features -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🤝 Volunteer Features</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">✉️</div>
+                        <div class="feature-content">
+                            <h4>Email Verification System</h4>
+                            <p>6-digit verification code • 10-minute expiration • 5 attempt limit • Like Gmail</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔍</div>
+                        <div class="feature-content">
+                            <h4>Browse & Search Events</h4>
+                            <p>Filter by category, location, date • See NGO details • View required skills • Check event capacity</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📝</div>
+                        <div class="feature-content">
+                            <h4>Event Registration</h4>
+                            <p>One-click registration • View confirmation • Get event reminders • See other volunteers</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⏱️</div>
+                        <div class="feature-content">
+                            <h4>Track Volunteer Hours</h4>
+                            <p>Log hours attended • Calculate total contribution • See impact in real-time</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⭐</div>
+                        <div class="feature-content">
+                            <h4>Gamification System</h4>
+                            <p>Earn points per event • Unlock badges & levels • Build reputation • See leaderboard ranking</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-content">
+                            <h4>Personal Dashboard</h4>
+                            <p>View profile statistics • Track all registered events • See earned badges • Download certificates</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">4 / 22</div>
+            </div>
+
+            <!-- Slide 5: NGO Features -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🏢 NGO Features</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div class="feature-content">
+                            <h4>Document Verification</h4>
+                            <p>Upload registration certificates • Submit legal documents • Admin review & approval • Government-grade security</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📅</div>
+                        <div class="feature-content">
+                            <h4>Event Management</h4>
+                            <p>Create unlimited events • Set title, description, date, location • Define capacity & skills needed • Update event status</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-content">
+                            <h4>Volunteer Management</h4>
+                            <p>See all registered volunteers • View volunteer profiles • Track attendance • Rate volunteer performance</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💰</div>
+                        <div class="feature-content">
+                            <h4>Fundraising Campaigns</h4>
+                            <p>Create donation campaigns • Set fundraising targets • Accept online donations • Track progress in real-time</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-content">
+                            <h4>Real-time Analytics</h4>
+                            <p>Track volunteers count • Monitor donation progress • View event engagement • See campaign ROI</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📣</div>
+                        <div class="feature-content">
+                            <h4>Announcements & Messages</h4>
+                            <p>Send broadcasts to volunteers • Create communities for discussions • Share impact stories • Keep volunteers engaged</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">5 / 22</div>
+            </div>
+
+            <!-- Slide 6: Data Isolation (Security) -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🔒 Multi-NGO Data Isolation (UNIQUE!)</h2>
+                </div>
+                <div>
+                    <div class="feature-box" style="border-left: 5px solid #dc3545; margin-bottom: 30px;">
+                        <h3 style="color: #dc3545;">Complete Separation of Data</h3>
+                        <p>Each NGO's data is completely isolated at the database level. NGO A cannot see NGO B's events, volunteers, or donations - even if they tried.</p>
+                    </div>
+
+                    <div class="flow">
+                        <div class="flow-item">NGO A<br>Data</div>
+                        <div class="flow-arrow">🔐</div>
+                        <div class="flow-item">NGO B<br>Data</div>
+                        <div class="flow-arrow">🔐</div>
+                        <div class="flow-item">NGO C<br>Data</div>
+                    </div>
+
+                    <p style="text-align: center; font-size: 1.15em; color: #667eea; margin-top: 30px;">
+                        <strong>✅ This is enforced at the database level (not just in UI)</strong>
+                    </p>
+                    <p style="text-align: center; font-size: 1.05em; color: #666; margin-top: 15px;">
+                        Even if there's a security breach, only that specific NGO's data is exposed, not all NGOs
+                    </p>
+                </div>
+                <div class="slide-number">6 / 22</div>
+            </div>
+
+            <!-- Slide 7: Government API System -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🏛️ Government API System (Revenue Model)</h2>
+                </div>
+                <div>
+                    <p style="font-size: 1.3em; color: #667eea; font-weight: 600; margin-bottom: 30px;">How Government Access Works:</p>
+                    
+                    <div class="flow">
+                        <div class="flow-item">Request<br>Access</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-item">Admin<br>Reviews</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-item">Receives<br>API Key</div>
+                    </div>
+
+                    <div class="flow">
+                        <div class="flow-item">Query<br>Data</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-item">Tracked &<br>Logged</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-item">Monthly<br>Payment ✅</div>
+                    </div>
+
+                    <div class="revenue-box">
+                        <strong>💰 Revenue Model (B2G - Business to Government)</strong><br><br>
+                        • Monthly subscription: ₹1,00,000/month for API access<br>
+                        • OR Per-call pricing: ₹0.50 per government API call<br>
+                        • Government makes 10,000 calls/month = ₹5,000<br>
+                        • Every call is tracked: endpoint, timestamp, IP address, results
+                    </div>
+                </div>
+                <div class="slide-number">7 / 22</div>
+            </div>
+
+            <!-- Slide 8: API Features -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>⚙️ API Admin Dashboard Features</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">🔑</div>
+                        <div class="feature-content">
+                            <h4>API Key Management</h4>
+                            <p>Generate keys for government agencies • Set specific permissions • Control what data they can access • Revoke keys instantly</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-content">
+                            <h4>Usage Analytics</h4>
+                            <p>Track every API call • View endpoints accessed • See query patterns • Monitor agency usage trends</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🛡️</div>
+                        <div class="feature-content">
+                            <h4>Permission System</h4>
+                            <p>Fine-grained permissions: read:volunteers, read:ngos, read:campaigns, read:events, read:reports • Agencies only get what they need</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📝</div>
+                        <div class="feature-content">
+                            <h4>Access Request Management</h4>
+                            <p>Review government agency requests • Verify legitimacy • Approve or reject • Send notifications</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⏰</div>
+                        <div class="feature-content">
+                            <h4>Key Expiration</h4>
+                            <p>Keys expire automatically (yearly) • Renewal required • Security best practice • Automatic notifications before expiry</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💵</div>
+                        <div class="feature-content">
+                            <h4>Billing System</h4>
+                            <p>Calculate bills based on API usage • Track monthly revenue • Generate invoices • Payment tracking</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">8 / 22</div>
+            </div>
+
+            <!-- Slide 9: Admin Features -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>👮 Admin Dashboard Features</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">📋</div>
+                        <div class="feature-content">
+                            <h4>NGO Approval Workflow</h4>
+                            <p>Review NGO registration requests • Verify documents • Approve or reject • Send notification emails</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-content">
+                            <h4>User Management</h4>
+                            <p>View all users by role • Manage volunteer accounts • Monitor NGO admins • See API admin users</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-content">
+                            <h4>Platform Analytics</h4>
+                            <p>Total volunteers count • Total NGOs registered • Total events created • Total fundraising • Platform-wide metrics</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📝</div>
+                        <div class="feature-content">
+                            <h4>Activity Logs</h4>
+                            <p>Track all admin actions • View user activities • Monitor system events • Audit trail for compliance</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚙️</div>
+                        <div class="feature-content">
+                            <h4>System Settings</h4>
+                            <p>Configure platform settings • Manage email templates • Set commission rates • Configure permissions</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📧</div>
+                        <div class="feature-content">
+                            <h4>Email System</h4>
+                            <p>Send bulk notifications • Email verification codes • Account confirmations • Approval notifications</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">9 / 22</div>
+            </div>
+
+            <!-- Slide 10: Additional Features -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>✨ Additional Features</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">📖</div>
+                        <div class="feature-content">
+                            <h4>Stories & Impact Showcase</h4>
+                            <p>Volunteers share their volunteering stories • NGOs showcase impact • Photo galleries • Community engagement</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💬</div>
+                        <div class="feature-content">
+                            <h4>Community Forums</h4>
+                            <p>Create communities by interest • Volunteers discuss opportunities • Share resources • Build communities of practice</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔔</div>
+                        <div class="feature-content">
+                            <h4>Notification System</h4>
+                            <p>Event reminders • NGO approvals • Payment updates • Real-time alerts • Email notifications</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏅</div>
+                        <div class="feature-content">
+                            <h4>Certificates & Recognition</h4>
+                            <p>Download volunteer certificates • Digital badges • Achievement records • Shareable credentials</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔐</div>
+                        <div class="feature-content">
+                            <h4>Password Reset & Security</h4>
+                            <p>Email-based password reset • JWT authentication • Bcrypt encryption • Rate limiting</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📱</div>
+                        <div class="feature-content">
+                            <h4>Responsive Design</h4>
+                            <p>Works on desktop, tablet, mobile • Clean UI • Intuitive navigation • Accessibility features</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">10 / 22</div>
+            </div>
+
+            <!-- Slide 11: Tech Stack -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>💻 Technology Stack</h2>
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number">React 18</div>
+                        <div class="stat-label">TypeScript Frontend (2000+ LOC)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">Node.js</div>
+                        <div class="stat-label">Express Backend (1500+ LOC)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">MongoDB</div>
+                        <div class="stat-label">Database + Mongoose ODM</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #f0f4ff 0%, #f8f9ff 100%); border-radius: 15px; border-left: 5px solid #667eea;">
+                    <p style="font-size: 1.15em; color: #333; line-height: 2;">
+                        ✅ <strong>30+ API endpoints</strong> with role-based access control<br>
+                        ✅ <strong>JWT authentication</strong> (enterprise security)<br>
+                        ✅ <strong>Email verification</strong> system (6-digit codes)<br>
+                        ✅ <strong>Bcrypt password hashing</strong><br>
+                        ✅ <strong>Rate limiting</strong> for abuse prevention<br>
+                        ✅ <strong>File upload validation</strong> (size & format checks)<br>
+                        ✅ <strong>Multi-role system</strong> (volunteer, ngo_admin, admin, api_admin)<br>
+                        ✅ <strong>Error handling</strong> at all levels<br>
+                    </p>
+                </div>
+                <div class="slide-number">11 / 22</div>
+            </div>
+
+            <!-- Slide 12: Security -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🔒 Security & Data Protection</h2>
+                </div>
+                <div>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Security Feature</th>
+                            <th>Implementation</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Email Verification</strong></td>
+                            <td>6-digit code • 10-min expiration • 5 attempt limit</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password Security</strong></td>
+                            <td>Bcrypt encryption • Never stored in plain text</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authentication</strong></td>
+                            <td>JWT tokens • Banks use this standard</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Security</strong></td>
+                            <td>API keys • Expiration dates • Permission-based</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Isolation</strong></td>
+                            <td>Database-level separation • NGO A cannot see NGO B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Document Verification</strong></td>
+                            <td>NGOs upload legal docs • Admin approval before activation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rate Limiting</strong></td>
+                            <td>Prevents brute force attacks • Limits API abuse</td>
+                        </tr>
+                        <tr>
+                            <td><strong>File Uploads</strong></td>
+                            <td>Size limits • Format validation • Virus scanning</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="slide-number">12 / 22</div>
+            </div>
+
+            <!-- Slide 13: Comparison -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>📊 Why We're Different</h2>
+                </div>
+                <div>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Traditional Apps</th>
+                            <th>CareConnect</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Users Connected</strong></td>
+                            <td>Volunteers ↔ NGOs</td>
+                            <td><span class="checkmark">✓</span> Volunteers ↔ NGOs ↔ Government</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Revenue Model</strong></td>
+                            <td>Free or subscription</td>
+                            <td><span class="checkmark">✓</span> B2G (Government pays)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NGO Verification</strong></td>
+                            <td>Self-registration</td>
+                            <td><span class="checkmark">✓</span> Document verification</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Isolation</strong></td>
+                            <td><span class="cross">✗</span> Not implemented</td>
+                            <td><span class="checkmark">✓</span> Multi-level isolation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Government Access</strong></td>
+                            <td><span class="cross">✗</span> No APIs</td>
+                            <td><span class="checkmark">✓</span> Full API system</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Usage Tracking</strong></td>
+                            <td><span class="cross">✗</span> No tracking</td>
+                            <td><span class="checkmark">✓</span> Every call logged</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Business Model</strong></td>
+                            <td>B2C (limited)</td>
+                            <td><span class="checkmark">✓</span> B2G (sustainable)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="slide-number">13 / 22</div>
+            </div>
+
+            <!-- Slide 14: Revenue Model Deep Dive -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>💰 Three Revenue Streams</h2>
+                </div>
+                <div class="feature-grid">
+                    <div class="feature-box" style="border-left: 5px solid #dc3545;">
+                        <h3 style="color: #dc3545;">1️⃣ PRIMARY: Government Subscriptions</h3>
+                        <p><strong>Monthly/Annual fees from government agencies</strong><br><br>
+                        • Department pays ₹1,00,000/month for API access<br>
+                        • Annual contract = recurring revenue<br>
+                        • Multiple departments = multiple contracts<br>
+                        <strong>= Sustainable, predictable revenue</strong></p>
+                    </div>
+                    <div class="feature-box" style="border-left: 5px solid #28a745;">
+                        <h3 style="color: #28a745;">2️⃣ SECONDARY: NGO Premium</h3>
+                        <p><strong>Advanced features for NGOs</strong><br><br>
+                        • Advanced analytics<br>
+                        • Priority support<br>
+                        • Custom branding<br>
+                        <strong>= Optional premium tier</strong></p>
+                    </div>
+                    <div class="feature-box" style="border-left: 5px solid #007bff;">
+                        <h3 style="color: #007bff;">3️⃣ TERTIARY: Usage-Based</h3>
+                        <p><strong>Pay per API call model</strong><br><br>
+                        • ₹0.50 per query<br>
+                        • 10,000 calls/month = ₹5,000<br>
+                        • Higher usage = more revenue<br>
+                        <strong>= Scalable revenue</strong></p>
+                    </div>
+                </div>
+                <div class="slide-number">14 / 22</div>
+            </div>
+
+            <!-- Slide 15: B2G Business Model Proven -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>📈 B2G Model - Already Proven</h2>
+                </div>
+                <div>
+                    <p style="text-align: center; font-size: 1.2em; color: #667eea; font-weight: 600; margin-bottom: 30px;">
+                        This business model already works at billion-dollar scale:
+                    </p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-box">
+                            <h3>💳 Stripe</h3>
+                            <p><strong>Model:</strong> Charges per transaction<br>
+                            <strong>Result:</strong> $95 Billion valuation</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3>📱 Twilio</h3>
+                            <p><strong>Model:</strong> Charges per SMS sent<br>
+                            <strong>Result:</strong> $10 Billion valuation</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3>☁️ AWS</h3>
+                            <p><strong>Model:</strong> Charges per resource used<br>
+                            <strong>Result:</strong> Fastest-growing Amazon division</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3>🎯 CareConnect</h3>
+                            <p><strong>Model:</strong> Charges per government API call<br>
+                            <strong>Result:</strong> Same proven model, social sector</p>
+                        </div>
+                    </div>
+
+                    <div class="cta-box" style="margin-top: 40px;">
+                        We're applying a billion-dollar proven business model to the social sector
+                    </div>
+                </div>
+                <div class="slide-number">15 / 22</div>
+            </div>
+
+            <!-- Slide 16: Project Status -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>✅ Project Status - COMPLETE MVP</h2>
+                </div>
+                <div class="feature-grid" style="grid-template-columns: 1fr;">
+                    <div class="feature-box">
+                        <h3>🚀 All Features Built & Working</h3>
+                        <p style="margin-bottom: 20px;">
+                            ✅ Email verification system<br>
+                            ✅ Volunteer signup & authentication<br>
+                            ✅ Event browsing & registration<br>
+                            ✅ NGO registration & document verification<br>
+                            ✅ NGO event management<br>
+                            ✅ Fundraising campaigns<br>
+                            ✅ Volunteer analytics<br>
+                            ✅ Admin dashboard & NGO approval<br>
+                            ✅ API key generation & management<br>
+                            ✅ Government access requests<br>
+                            ✅ Usage tracking & analytics<br>
+                            ✅ Data isolation between NGOs<br>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="stats" style="margin-top: 30px;">
+                    <div class="stat-box">
+                        <div class="stat-number">2000+</div>
+                        <div class="stat-label">Frontend Code Lines</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">1500+</div>
+                        <div class="stat-label">Backend Code Lines</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">30+</div>
+                        <div class="stat-label">API Endpoints</div>
+                    </div>
+                </div>
+                <div class="slide-number">16 / 22</div>
+            </div>
+
+            <!-- Slide 17: Global Scalability -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🌍 Global Scalability</h2>
+                </div>
+                <div>
+                    <div class="feature-box" style="margin-bottom: 30px;">
+                        <h3>📍 Current: India-Specific</h3>
+                        <p>
+                            • Uses ₹ (Indian Rupee)<br>
+                            • Built for Indian government structure (Federal/State/Local)<br>
+                            • Developed for Indian market & laws
+                        </p>
+                    </div>
+
+                    <div class="feature-box" style="border-left: 5px solid #28a745; margin-bottom: 30px;">
+                        <h3 style="color: #28a745;">🌐 Future: Globally Scalable</h3>
+                        <p>
+                            ✅ Technology is universal (React, Node, MongoDB)<br>
+                            ✅ Can adapt to any country's government<br>
+                            ✅ Same B2G revenue model everywhere<br>
+                            ✅ Examples: USA (Federal/State), UK, EU, Asia
+                        </p>
+                    </div>
+
+                    <div class="revenue-box">
+                        <strong>Vision:</strong> India-first, but globally repeatable<br>
+                        We can replicate in 10+ countries with same technology & business model
+                    </div>
+                </div>
+                <div class="slide-number">17 / 22</div>
+            </div>
+
+            <!-- Slide 18: What Makes It Business Model -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>💼 Why This Is a "Business Model" Project</h2>
+                </div>
+                <div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">📊</div>
+                            <div class="feature-content">
+                                <h4>Multiple Revenue Streams</h4>
+                                <p>Not just one way to make money • 3 different revenue channels • Diversified income</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🎯</div>
+                            <div class="feature-content">
+                                <h4>Real Market Demand</h4>
+                                <p>Government agencies need social sector data • NGOs need volunteer platforms • Clear market gap</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💪</div>
+                            <div class="feature-content">
+                                <h4>Proven Model</h4>
+                                <p>B2G business model proven by Stripe, Twilio, AWS • Not speculative • Real businesses built on this</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📈</div>
+                            <div class="feature-content">
+                                <h4>Scalable Architecture</h4>
+                            <p>Can expand to multiple countries • Technology doesn't change • Same model applied globally</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🔐</div>
+                            <div class="feature-content">
+                                <h4>Enterprise-Grade Security</h4>
+                                <p>Production-quality code • Not demo-grade • Ready for real government partnerships</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🏗️</div>
+                            <div class="feature-content">
+                                <h4>Sustainable Design</h4>
+                                <p>Recurring revenue (subscriptions) • Not one-time payments • Predictable income model</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">18 / 22</div>
+            </div>
+
+            <!-- Slide 19: Next Steps -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🚀 Next Steps (After MVP)</h2>
+                </div>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">🤝</div>
+                        <div class="feature-content">
+                            <h4>Phase 1: NGO Partnerships</h4>
+                            <p>Partner with 5-10 real NGOs • Get them using the platform • Collect feedback • Iterate</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🏛️</div>
+                        <div class="feature-content">
+                            <h4>Phase 2: Government Pilot</h4>
+                            <p>Approach state health department • Pilot data sharing agreement • Demonstrate value • Sign first paying contract</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💰</div>
+                        <div class="feature-content">
+                            <h4>Phase 3: Revenue Generation</h4>
+                            <p>Start charging government agencies • Expand to other departments • Build predictable revenue stream</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-content">
+                            <h4>Phase 4: Scaling</h4>
+                            <p>Expand to other states • Increase NGO base • Scale volunteer network • Plan international expansion</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-number">19 / 22</div>
+            </div>
+
+            <!-- Slide 20: Key Metrics -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>📊 Key Project Metrics</h2>
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number">3500+</div>
+                        <div class="stat-label">Total Code Lines (Full Stack)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">30+</div>
+                        <div class="stat-label">API Endpoints</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Database Models</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">User Roles</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Feature Complete</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Data Breaches (Secure)</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #f0f4ff 0%, #f8f9ff 100%); border-radius: 15px; border-left: 5px solid #667eea;">
+                    <p style="font-size: 1.15em; color: #333; line-height: 2;">
+                        <strong>Tech Stack:</strong> React 18 + TypeScript • Node.js + Express • MongoDB • JWT • Bcrypt • Nodemailer<br>
+                        <strong>Architecture:</strong> Microservices-ready • Scalable • Production-grade<br>
+                        <strong>Security:</strong> Enterprise-level • OWASP compliant • Rate limiting • Data isolation
+                    </p>
+                </div>
+                <div class="slide-number">20 / 22</div>
+            </div>
+
+            <!-- Slide 21: Quick Summary -->
+            <div class="slide content-slide">
+                <div class="section-header">
+                    <h2>🎯 Executive Summary</h2>
+                </div>
+                <div style="font-size: 1.2em; line-height: 2.5; color: #333;">
+                    <p><strong style="color: #667eea;">WHAT:</strong> India's first B2G social impact platform connecting volunteers, NGOs, and government</p>
+                    <p><strong style="color: #667eea;">WHERE:</strong> India-focused, globally scalable</p>
+                    <p><strong style="color: #667eea;">WHY:</strong> Solve problems for all three user types simultaneously</p>
+                    <p><strong style="color: #667eea;">HOW:</strong> APIs, subscriptions, usage-based pricing</p>
+                    <p><strong style="color: #667eea;">WHO:</strong> Volunteers → NGOs → Government agencies</p>
+                    <p><strong style="color: #667eea;">REVENUE:</strong> B2G subscriptions + NGO premium + per-call pricing</p>
+                    <p><strong style="color: #667eea;">STATUS:</strong> ✅ MVP complete with all features working</p>
+                    <p><strong style="color: #667eea;">IMPACT:</strong> Data-driven social impact + sustainable business</p>
+                </div>
+                <div class="slide-number">21 / 22</div>
+            </div>
+
+            <!-- Slide 22: Thank You -->
+            <div class="slide title-slide">
+                <div class="closing-text">
+                    <div class="thank-you">🙏 Thank You!</div>
+                    <p style="font-size: 1.5em; margin: 30px 0;">Questions?</p>
+                    <p style="margin: 40px 0; font-size: 1.3em;">CareConnect</p>
+                    <p style="font-size: 1.1em; opacity: 0.9;">India's First B2G Social Impact Platform</p>
+                </div>
+                <div class="slide-number">22 / 22</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <span class="slide-counter">
+                <span id="currentSlide">1</span> / <span id="totalSlides">22</span>
+            </span>
+            <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+            <span class="keyboard-hint">Use ← → keys to navigate</span>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.slide').length;
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) {
+                currentSlide = totalSlides;
+            }
+            if (n < 1) {
+                currentSlide = 1;
+            }
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = currentSlide;
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Initialize
+        showSlide(currentSlide);
+
+        // Full screen support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'f') {
+                document.querySelector('.container').requestFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>

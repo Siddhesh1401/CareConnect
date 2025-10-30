@@ -90,9 +90,9 @@ export const NGOsPage: React.FC = () => {
       });
 
       const response = await api.get(`/ngos?${params}`);
-      console.log('NGOs API response:', response.data);
+      console.log('NGOs API response:', response);
       
-      if (response.data.success) {
+      if (response.data?.success) {
         console.log('NGOs data:', response.data.data.ngos);
         if (response.data.data.ngos.length > 0) {
           console.log('First NGO:', response.data.data.ngos[0]);

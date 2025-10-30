@@ -68,8 +68,8 @@ export const EventAnalytics: React.FC = () => {
         }
       });
 
-      if (response.data.success) {
-        setAnalytics(response.data.data.analytics);
+      if (response.success) {
+        setAnalytics(response.data.analytics);
       }
     } catch (error: any) {
       console.error('Error fetching analytics:', error);

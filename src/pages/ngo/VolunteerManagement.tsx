@@ -82,11 +82,15 @@ export const VolunteerManagement: React.FC = () => {
       setError(null);
       const response = await eventAPI.getNGOVolunteers();
       
-      if (response.success) {
+      console.log('Volunteer Management - API Response:', response);
+      
+      if (response && response.success) {
+        console.log('Volunteers received:', response.data.volunteers);
         setVolunteers(response.data.volunteers);
         setStats(response.data.stats);
       } else {
-        setError(response.message || 'Failed to fetch volunteers');
+        console.error('Failed to fetch volunteers - Success is false or undefined');
+        setError(response?.message || 'Failed to fetch volunteers');
       }
     } catch (err) {
       console.error('Error fetching volunteers:', err);

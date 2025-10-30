@@ -40,6 +40,8 @@ interface DashboardData {
     ngo: string;
     date: string;
     location: string;
+    isUserRegistered?: boolean;
+    registrationStatus?: string;
   }>;
   achievements: Array<{
     id: string;
@@ -63,11 +65,44 @@ export const VolunteerDashboard: React.FC = () => {
       try {
         setLoading(true);
 
-        const response = await api.get('/volunteer');
+        // Fetch volunteer's dashboard stats and registered events
+        const dashboardResponse = await api.get('/volunteer');
+        const dashboardStats = dashboardResponse.data?.data || {
+          stats: {
+            totalHours: 0,
+            eventsJoined: 0,
+            completedEvents: 0,
+            upcomingEvents: 0,
+            totalPoints: 0
+          },
+          recentEvents: []
+        };
 
-        if (response.data.success) {
-          setDashboardData(response.data.data);
-        }
+        // Fetch all available events for discovery (with a small delay to avoid rate limiting)
+        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
+        const eventsResponse = await api.get('/events', {
+          params: { limit: 6 } // Get 6 events for discovery
+        });
+        const availableEvents = eventsResponse.data?.data?.events ? 
+          eventsResponse.data.data.events.map((event: any) => ({
+            _id: event._id,
+            title: event.title,
+            ngo: event.organizationName,
+            date: event.date,
+            location: Array.isArray(event.location) 
+              ? event.location.join(', ') 
+              : `${event.location?.address || ''}, ${event.location?.city || ''}, ${event.location?.state || ''}`.replace(/^, |, $/, ''),
+            isUserRegistered: event.isUserRegistered || false,
+            registrationStatus: event.registrationStatus || 'open'
+          })) : [];
+
+        // Combine the data
+        const combinedData: DashboardData = {
+          ...dashboardStats,
+          upcomingEvents: availableEvents // Show available events for discovery
+        };
+
+        setDashboardData(combinedData);
       } catch (error: any) {
         console.error('Error fetching dashboard data:', error);
         setError(error.response?.data?.message || 'Failed to load dashboard data');
@@ -82,25 +117,25 @@ export const VolunteerDashboard: React.FC = () => {
   const stats = [
     {
       label: 'Total Hours',
-      value: dashboardData?.stats.totalHours.toString() || '0',
+      value: (dashboardData?.stats?.totalHours || 0).toString(),
       icon: Clock,
       color: 'text-primary-600 bg-primary-50'
     },
     {
       label: 'Events Joined',
-      value: dashboardData?.stats.eventsJoined.toString() || '0',
+      value: (dashboardData?.stats?.eventsJoined || 0).toString(),
       icon: Calendar,
       color: 'text-primary-600 bg-primary-50'
     },
     {
       label: 'Completed',
-      value: dashboardData?.stats.completedEvents.toString() || '0',
+      value: (dashboardData?.stats?.completedEvents || 0).toString(),
       icon: Award,
       color: 'text-primary-600 bg-primary-50'
     },
     {
       label: 'Upcoming',
-      value: dashboardData?.stats.upcomingEvents.toString() || '0',
+      value: (dashboardData?.stats?.upcomingEvents || 0).toString(),
       icon: Star,
       color: 'text-primary-600 bg-primary-50'
     }
@@ -329,11 +364,22 @@ export const VolunteerDashboard: React.FC = () => {
                         <span>{event.location}</span>
                       </div>
                     </div>
-                    <Link to={`/events/${event._id}`}>
-                      <Button size="sm" className="w-full bg-primary-600 hover:bg-primary-700">
-                        Register Now
-                      </Button>
-                    </Link>
+                    {event.isUserRegistered ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-green-600 text-sm font-medium">Already Registered</span>
+                        <Link to={`/events/${event._id}`}>
+                          <Button variant="outline" size="sm" className="border-green-200 hover:border-green-300 hover:bg-green-50">
+                            View Details
+                          </Button>
+                        </Link>
+                      </div>
+                    ) : (
+                      <Link to={`/events/${event._id}`}>
+                        <Button size="sm" className="w-full bg-primary-600 hover:bg-primary-700">
+                          Register Now
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 ))}
               </div>

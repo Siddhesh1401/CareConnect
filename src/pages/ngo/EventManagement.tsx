@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { 
   Plus, 
   Edit, 
@@ -19,10 +20,10 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { EventCancellationModal } from '../../components/ui/EventCancellationModal';
 import MapsButton from '../../components/ui/MapsButton';
-import { getFullImageUrl } from '../../services/api';
-import axios from 'axios';
+import { getFullImageUrl, eventAPI } from '../../services/api';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// API base URL for direct axios calls (for special cases)
+const API_BASE_URL = 'http://localhost:5000/api/v1';
 
 interface Event {
   _id: string;
@@ -71,26 +72,21 @@ export const EventManagement: React.FC = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('careconnect_token');
-      
-      if (!token) {
-        navigate('/auth/login');
-        return;
-      }
 
-      const params = new URLSearchParams();
+      const params: any = {};
       if (statusFilter !== 'all') {
-        params.append('status', statusFilter);
+        params.status = statusFilter;
       }
 
-      const response = await axios.get(`${API_BASE_URL}/events/ngo/my-events?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await eventAPI.getNGOEvents();
 
-      if (response.data.success) {
-        setEvents(response.data.data.events);
+      if (response.success) {
+        // Filter events based on status if needed
+        let filteredEvents = response.data.events;
+        if (statusFilter !== 'all') {
+          filteredEvents = filteredEvents.filter((event: Event) => event.status === statusFilter);
+        }
+        setEvents(filteredEvents);
       }
     } catch (error: any) {
       console.error('Error fetching events:', error);
@@ -106,18 +102,10 @@ export const EventManagement: React.FC = () => {
   // Fetch event statistics
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('careconnect_token');
-      
-      if (!token) return;
+      const response = await eventAPI.getEventStats();
 
-      const response = await axios.get(`${API_BASE_URL}/events/ngo/stats`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.data.success) {
-        setStats(response.data.data.stats);
+      if (response.success) {
+        setStats(response.data.stats);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -155,20 +143,9 @@ export const EventManagement: React.FC = () => {
 
   const deleteEventWithoutVolunteers = async (eventId: string) => {
     try {
-      const token = localStorage.getItem('careconnect_token');
-      
-      if (!token) {
-        navigate('/auth/login');
-        return;
-      }
+      const response = await eventAPI.deleteEvent(eventId);
 
-      const response = await axios.delete(`${API_BASE_URL}/events/${eventId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.data.success) {
+      if (response.success) {
         alert('Event deleted successfully');
         fetchEvents(); // Refresh the list
         fetchStats(); // Refresh stats
@@ -205,9 +182,9 @@ export const EventManagement: React.FC = () => {
         }
       });
 
-      if (response.data.success) {
-        const emailResults = response.data.data?.emailNotifications;
-        const volunteersCount = response.data.data?.deletedVolunteers || 0;
+      if (response.success) {
+        const emailResults = response.data?.emailNotifications;
+        const volunteersCount = response.data?.deletedVolunteers || 0;
         
         if (emailResults) {
           alert(`Event deleted successfully! 
@@ -234,21 +211,10 @@ The email content has been logged to the development terminal.`);
 
   const handleCancelEvent = async (eventId: string) => {
     try {
-      const token = localStorage.getItem('careconnect_token');
-      
-      if (!token) {
-        navigate('/auth/login');
-        return;
-      }
+      const response = await eventAPI.cancelEvent(eventId);
 
-      const response = await axios.patch(`${API_BASE_URL}/events/${eventId}/cancel`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.data.success) {
-        const volunteersCount = response.data.data.registeredVolunteers;
+      if (response.success) {
+        const volunteersCount = response.data.registeredVolunteers;
         alert(`Event cancelled successfully. ${volunteersCount} registered volunteers will be notified.`);
         fetchEvents(); // Refresh the list
         fetchStats(); // Refresh stats

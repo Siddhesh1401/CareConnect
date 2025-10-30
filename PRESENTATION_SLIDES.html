@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect - Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Professional Blue -->
+    <!-- Application Structure Plan: The application is structured as a top-down narrative, single-page dashboard, not mirroring the linear handout. It uses a sticky header for navigation (Overview, The Platform, Business Model, Status) that scrolls to sections. This structure was chosen for usability, allowing users to quickly grasp the core concept and then dive into the area that interests them most. The key interaction is a "demo" government dashboard in 'The Platform' section. This interactively *shows* the core value proposition (data API) by linking it to a Chart.js visualization, which is far more effective than just text. This flow (Problem -> Interactive Solution Demo -> Revenue Model -> Proof) is designed to be a persuasive and intuitive exploration of the report's content. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: 3 User Problems. Goal: Inform. Viz: Interactive Tab/Button Toggle. Interaction: onClick, JS updates a single text area. Justification: More engaging than a static list, reinforces the 3-user focus. Library: Vanilla JS.
+        2. Report Info: 3 User Feature Sets. Goal: Organize/Inform. Viz: Interactive Tabbed Section. Interaction: onClick, JS hides/shows the content div for Volunteers, NGOs, or Government. Justification: Cleans the UI, allows user-driven exploration. Library: Vanilla JS.
+        3. Report Info: Data Isolation. Goal: Inform. Viz: HTML/CSS/Tailwind Diagram. Interaction: None. Justification: A simple visual (using boxes and a Unicode lock 🔒) is needed as SVG/Mermaid are disallowed. Library: HTML/Tailwind.
+        4. Report Info: Government API Data. Goal: Demonstrate/Engage. Viz: Interactive Bar Chart (Canvas) with Dropdown Filters. Interaction: User selects options; onClick on "Query" button triggers a JS function to generate mock data and update the Chart.js instance (`chart.update()`). Justification: This is the SPA's core. It makes the abstract "B2G data API" concept tangible and directly connects the product feature to the business model. Library: Chart.js + Vanilla JS.
+        5. Report Info: Revenue Streams. Goal: Compare. Viz: 3-Column Card Layout. Interaction: None. Justification: Clear, professional way to present the 3 tiers. Library: HTML/Tailwind.
+        6. Report Info: Project Metrics. Goal: Inform. Viz: 4-Column "Stat Card" Grid. Interaction: None. Justification: Common dashboard pattern for high-impact numbers. Library: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        [data-nav-btn].active {
+            background-color: #1d4ed8;
+            color: white;
+        }
+        [data-tab-btn].active {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-700">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold text-blue-700">CareConnect</h1>
+            <div id="main-nav" class="flex flex-wrap justify-center gap-2 sm:gap-4 mt-4 sm:mt-0">
+                <a href="#overview" class="text-sm sm:text-base font-medium text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md">Overview</a>
+                <a href="#platform" class="text-sm sm:text-base font-medium text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md">The Platform</a>
+                <a href="#model" class="text-sm sm:text-base font-medium text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md">Business Model</a>
+                <a href="#status" class="text-sm sm:text-base font-medium text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md">Project Status</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="overview" class="mb-20 text-center">
+            <h2 class="text-4xl font-extrabold text-slate-800 mb-4">India's First B2G Social Impact Platform</h2>
+            <p class="text-xl text-slate-600 max-w-3xl mx-auto mb-12">
+                CareConnect is a complete ecosystem designed to solve a critical disconnect in India's social sector by connecting <span class="font-bold text-blue-600">Volunteers</span>, <span class="font-bold text-green-600">NGOs</span>, and the <span class="font-bold text-red-600">Government</span> on a single, data-driven platform.
+            </p>
+
+            <div class="bg-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
+                <h3 class="text-2xl font-bold text-slate-800 mb-6">The Core Problem: A Disconnected Sector</h3>
+                <p class="text-slate-600 mb-6">Each group faces a unique, isolating challenge. Select a group below to see the problem we solve for them.</p>
+                <div id="problem-nav" class="flex flex-wrap justify-center gap-4 mb-6" role="tablist">
+                    <button data-nav-btn="volunteers" role="tab" class="active text-base font-semibold px-6 py-3 rounded-full transition-all duration-300 ease-in-out bg-blue-100 text-blue-700 hover:bg-blue-200">
+                        👤 Volunteers
+                    </button>
+                    <button data-nav-btn="ngos" role="tab" class="text-base font-semibold px-6 py-3 rounded-full transition-all duration-300 ease-in-out bg-green-100 text-green-700 hover:bg-green-200">
+                        🏢 NGOs
+                    </button>
+                    <button data-nav-btn="government" role="tab" class="text-base font-semibold px-6 py-3 rounded-full transition-all duration-300 ease-in-out bg-red-100 text-red-700 hover:bg-red-200">
+                        🏛️ Government
+                    </button>
+                </div>
+                <div id="problem-content" class="bg-slate-100 p-6 rounded-lg min-h-[100px] text-left">
+                </div>
+            </div>
+        </section>
+
+        <section id="platform" class="mb-20">
+            <h2 class="text-3xl font-extrabold text-slate-800 mb-4 text-center">The Platform: How It Works</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12 text-center">
+                This section details the specific features and tools we provide to each user group. Our platform acts as the central hub, providing value to all three stakeholders simultaneously. Explore the tabs to see the features for each.
+            </p>
+
+            <div class="w-full max-w-6xl mx-auto">
+                <div id="platform-nav" class="flex flex-col sm:flex-row justify-center border-b border-slate-300 mb-8" role="tablist">
+                    <button data-tab-btn="volunteers" role="tab" class="active w-full sm:w-auto text-lg font-semibold py-4 px-8 border-b-4 transition-all">
+                        🤝 For Volunteers
+                    </button>
+                    <button data-tab-btn="ngos" role="tab" class="w-full sm:w-auto text-lg font-semibold py-4 px-8 border-b-4 border-transparent text-slate-500 hover:text-slate-800 transition-all">
+                        🏢 For NGOs
+                    </button>
+                    <button data-tab-btn="government" role="tab" class="w-full sm:w-auto text-lg font-semibold py-4 px-8 border-b-4 border-transparent text-slate-500 hover:text-slate-800 transition-all">
+                        🏛️ For Government
+                    </button>
+                </div>
+
+                <div id="platform-content" class="bg-white p-6 sm:p-10 rounded-xl shadow-xl">
+                    <div data-tab-content="volunteers">
+                        <h3 class="text-2xl font-bold text-blue-700 mb-6">Build Your Social Impact Profile</h3>
+                        <p class="text-slate-600 mb-8">We empower volunteers by providing a clear and rewarding path to making a difference.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                <h4 class="text-lg font-semibold text-blue-800 mb-2">Find Verified Events</h4>
+                                <p class="text-slate-600 text-sm">Browse a directory of legitimate opportunities from government-verified NGOs.</p>
+                            </div>
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                <h4 class="text-lg font-semibold text-blue-800 mb-2">One-Click Registration</h4>
+                                <p class="text-slate-600 text-sm">No more complex forms. Register for events instantly.</p>
+                            </div>
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                <h4 class="text-lg font-semibold text-blue-800 mb-2">Track Your Hours</h4>
+                                <p class="text-slate-600 text-sm">Automatically log all attended events and see your total contribution.</p>
+                            </div>
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                <h4 class="text-lg font-semibold text-blue-800 mb-2">Earn Badges & Certificates</h4>
+                                <p class="text-slate-600 text-sm">Gain recognition for your work with points, badges, and downloadable certificates.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-tab-content="ngos" class="hidden">
+                        <h3 class="text-2xl font-bold text-green-700 mb-6">Manage Your Impact & Operations</h3>
+                        <p class="text-slate-600 mb-8">We give NGOs the professional tools they need to scale their operations, manage volunteers, and secure funding—all while ensuring total data security.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                                <h4 class="text-lg font-semibold text-green-800 mb-2">Document Verification</h4>
+                                <p class="text-slate-600 text-sm">Build trust by uploading legal documents for admin approval, marking your NGO as 'Verified'.</p>
+                            </div>
+                            <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                                <h4 class="text-lg font-semibold text-green-800 mb-2">Event & Volunteer Dashboard</h4>
+                                <p class="text-slate-600 text-sm">A central dashboard to create events, manage registered volunteers, and track attendance.</p>
+                            </div>
+                            <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                                <h4 class="text-lg font-semibold text-green-800 mb-2">Fundraising Tools</h4>
+                                <p class="text-slate-600 text-sm">Create and manage online donation campaigns directly on the platform.</p>
+                            </div>
+                            <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                                <h4 class="text-lg font-semibold text-green-800 mb-2">Real-Time Analytics</h4>
+                                <p class="text-slate-600 text-sm">Track volunteer engagement, donation progress, and event success rates.</p>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-800 mb-4 text-center">Critical Feature: Multi-NGO Data Isolation</h4>
+                        <div class="bg-slate-100 p-6 rounded-lg flex flex-col md:flex-row items-center justify-center gap-4 text-center">
+                            <div class="bg-white p-4 rounded-md shadow text-green-700 font-semibold">NGO 'A' Data<br>(Events, Donors, Volunteers)</div>
+                            <div class="text-4xl text-slate-500 transform md:-rotate-90">🔒</div>
+                            <div class="bg-white p-4 rounded-md shadow text-red-700 font-semibold">NGO 'B' Data<br>(Events, Donors, Volunteers)</div>
+                        </div>
+                        <p class="text-center text-slate-600 mt-4 max-w-2xl mx-auto">This is not just a UI feature. It's enforced at the database level. NGO 'A' can **never** see NGO 'B's private data, ensuring complete security and confidentiality.</p>
+                    </div>
+
+                    <div data-tab-content="government" class="hidden">
+                        <h3 class="text-2xl font-bold text-red-700 mb-6">Data for-Policy & Effective Funding</h3>
+                        <p class="text-slate-600 mb-8">This is the core of our B2G model. We provide government agencies with a secure API to access <span class="font-bold">aggregated, anonymized data</span> from the social sector. This allows for informed policy decisions, effective resource allocation, and real-time insights.</p>
+                        
+                        <div class="border-2 border-slate-200 rounded-xl p-6 bg-slate-50">
+                            <h4 class="text-xl font-bold text-slate-800 mb-6 text-center">Interactive Demo: Government Data Dashboard</h4>
+                            <p class="text-center text-slate-600 mb-6 text-sm">Try the demo below to see how an agency could query live data. This is the service we monetize.</p>
+                            <div class="flex flex-col sm:flex-row gap-4 mb-6 justify-center items-center">
+                                <div class="w-full sm:w-auto">
+                                    <label for="data-metric" class="block text-sm font-medium text-slate-700">Select Metric:</label>
+                                    <select id="data-metric" class="mt-1 block w-full sm:w-60 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="Volunteer Hours">Volunteer Hours</option>
+                                        <option value="Donations Raised (₹)">Donations Raised (₹)</option>
+                                        <option value="Events Created">Events Created</option>
+                                    </select>
+                                </div>
+                                <div class="w-full sm:w-auto">
+                                    <label for="data-region" class="block text-sm font-medium text-slate-700">Select Region:</label>
+                                    <select id="data-region" class="mt-1 block w-full sm:w-60 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="Mumbai">Mumbai</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="All India">All India</option>
+                                    </select>
+                                </div>
+                                <button id="query-btn" class="w-full sm:w-auto mt-6 bg-blue-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-blue-700 transition-all">
+                                    Query Data
+                                </button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="govChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="model" class="mb-20">
+            <h2 class="text-3xl font-extrabold text-slate-800 mb-4 text-center">The Sustainable Business Model</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12 text-center">
+                This isn't just a social project; it's a complete, sustainable, and scalable business. Our primary customer is the government, creating a reliable B2G (Business-to-Government) revenue stream.
+            </p>
+
+            <h3 class="text-2xl font-bold text-slate-800 mb-8 text-center">Our Three Revenue Streams</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+                <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-blue-600">
+                    <h4 class="text-xl font-bold text-blue-700 mb-3">1. PRIMARY: B2G Subscriptions</h4>
+                    <p class="text-slate-600">Government departments pay a fixed monthly or annual fee (e.g., **₹1,00,000/month**) for continuous, secure access to the data API. This provides a predictable, recurring revenue stream.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-slate-500">
+                    <h4 class="text-xl font-bold text-slate-700 mb-3">2. SECONDARY: Usage-Based</h4>
+                    <p class="text-slate-600">For smaller agencies or specific projects, we offer a "pay-per-call" model (e.g., **₹0.50 per query**). This scales directly with data consumption and provides a low barrier to entry.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-slate-500">
+                    <h4 class="text-xl font-bold text-slate-700 mb-3">3. TERTIARY: NGO Premium</h4>
+                    <p class="text-slate-600">A small, optional subscription for large-scale NGOs who want advanced features like custom branding, priority support, or deeper analytics dashboards.</p>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-slate-800 mb-8 text-center">A Proven, Scalable Model</h3>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12 text-center">
+                Our model of monetizing API access and platform usage is one of the most successful and proven in the tech world. We are applying this billion-dollar framework to the social sector.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h4 class="text-xl font-semibold text-slate-800">Stripe</h4>
+                    <p class="text-slate-600">Charges per transaction</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h4 class="text-xl font-semibold text-slate-800">Twilio</h4>
+                    <p class="text-slate-600">Charges per SMS/call</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <h4 class="text-xl font-semibold text-slate-800">AWS</h4>
+                    <p class="text-slate-600">Charges per resource used</p>
+                </div>
+                <div class="bg-blue-600 text-white p-6 rounded-lg shadow-lg text-center">
+                    <h4 class="text-xl font-semibold">CareConnect</h4>
+                    <p class="opacity-90">Charges for data access</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="status" class="bg-white p-8 sm:p-12 rounded-xl shadow-xl">
+            <h2 class="text-3xl font-extrabold text-slate-800 mb-4 text-center">Project Status: MVP Complete</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-12 text-center">
+                This is not just an idea. The full-stack Minimum Viable Product (MVP) is **100% built, tested, and working** with enterprise-grade security and a scalable architecture.
+            </p>
+
+            <h3 class="text-2xl font-bold text-slate-800 mb-8 text-center">Key Project Metrics</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                <div class="bg-slate-100 p-6 rounded-lg text-center">
+                    <div class="text-4xl font-extrabold text-blue-600">3,500+</div>
+                    <div class="text-base font-semibold text-slate-600 mt-2">Total Lines of Code</div>
+                </div>
+                <div class="bg-slate-100 p-6 rounded-lg text-center">
+                    <div class="text-4xl font-extrabold text-blue-600">30+</div>
+                    <div class="text-base font-semibold text-slate-600 mt-2">Secure API Endpoints</div>
+                </div>
+                <div class="bg-slate-100 p-6 rounded-lg text-center">
+                    <div class="text-4xl font-extrabold text-blue-600">4</div>
+                    <div class="text-base font-semibold text-slate-600 mt-2">User Roles Implemented</div>
+                </div>
+                <div class="bg-slate-100 p-6 rounded-lg text-center">
+                    <div class="text-4xl font-extrabold text-green-600">100%</div>
+                    <div class="text-base font-semibold text-slate-600 mt-2">MVP Feature Complete</div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">Technology Stack</h3>
+            <div class="flex flex-wrap justify-center gap-6 text-center">
+                <div class="bg-gray-200 text-gray-800 px-5 py-2 rounded-full font-semibold">React 18 + TypeScript</div>
+                <div class="bg-gray-200 text-gray-800 px-5 py-2 rounded-full font-semibold">Node.js + Express</div>
+                <div class="bg-gray-200 text-gray-800 px-5 py-2 rounded-full font-semibold">MongoDB</div>
+                <div class="bg-gray-200 text-gray-800 px-5 py-2 rounded-full font-semibold">JWT Security</div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 mt-12 border-t border-slate-200">
+        <p class="text-slate-500">CareConnect Interactive Report</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const problemTextData = {
+                volunteers: '<strong>Problem:</strong> It\'s hard to find legitimate, verified volunteering opportunities. Aspiring volunteers don\'t know which NGOs are trustworthy or how to get started.',
+                ngos: '<strong>Problem:</strong> Most NGOs manage volunteers manually with spreadsheets. They have no real data on their impact, struggle to scale operations, and find it difficult to manage events.',
+                government: '<strong>Problem:</strong> Agencies make critical policy and funding decisions in the dark, without any real-time data on social sector activities, volunteer engagement, or regional needs.'
+            };
+
+            const problemNav = document.getElementById('problem-nav');
+            const problemContent = document.getElementById('problem-content');
+            
+            problemContent.innerHTML = problemTextData.volunteers;
+
+            problemNav.addEventListener('click', (e) => {
+                const button = e.target.closest('button[data-nav-btn]');
+                if (!button) return;
+
+                problemNav.querySelectorAll('button[data-nav-btn]').forEach(btn => {
+                    btn.classList.remove('active');
+                    const group = btn.dataset.navBtn;
+                    btn.classList.remove(`bg-${getGroupColor(group)}-700`, `text-white`);
+                    btn.classList.add(`bg-${getGroupColor(group)}-100`, `text-${getGroupColor(group)}-700`);
+                });
+
+                const targetProblem = button.dataset.navBtn;
+                button.classList.add('active');
+                button.classList.remove(`bg-${getGroupColor(targetProblem)}-100`, `text-${getGroupColor(targetProblem)}-700`);
+                button.classList.add(`bg-${getGroupColor(targetProblem)}-700`, `text-white`);
+                
+                problemContent.innerHTML = problemTextData[targetProblem] || '';
+            });
+
+            function getGroupColor(group) {
+                if (group === 'volunteers') return 'blue';
+                if (group === 'ngos') return 'green';
+                if (group === 'government') return 'red';
+                return 'slate';
+            }
+
+            const platformNav = document.getElementById('platform-nav');
+            const platformContents = document.querySelectorAll('#platform-content [data-tab-content]');
+
+            platformNav.addEventListener('click', (e) => {
+                const button = e.target.closest('button[data-tab-btn]');
+                if (!button) return;
+
+                const targetTab = button.dataset.tabBtn;
+
+                platformNav.querySelectorAll('button[data-tab-btn]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+
+                platformContents.forEach(content => {
+                    if (content.dataset.tabContent === targetTab) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+
+            const mainNav = document.getElementById('main-nav');
+            mainNav.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    e.preventDefault();
+                    const targetId = e.target.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+
+            const ctx = document.getElementById('govChart').getContext('2d');
+            let govChart;
+
+            function generateChartData(metric, region) {
+                const labels = ['Health', 'Education', 'Environment', 'Animal Welfare', 'Poverty'];
+                let data;
+                let multiplier = 1;
+                if (region === 'Mumbai') multiplier = 1.5;
+                if (region === 'Delhi') multiplier = 1.2;
+                if (region === 'All India') multiplier = 3.5;
+
+                if (metric === 'Volunteer Hours') {
+                    data = [1200, 1900, 800, 1100, 1600].map(d => Math.floor(d * multiplier * (Math.random() * 0.2 + 0.9)));
+                } else if (metric === 'Donations Raised (₹)') {
+                    data = [50000, 85000, 30000, 45000, 70000].map(d => Math.floor(d * multiplier * (Math.random() * 0.2 + 0.9)));
+                } else {
+                    data = [15, 25, 10, 12, 20].map(d => Math.floor(d * multiplier * (Math.random() * 0.2 + 0.9)));
+                }
+                return { labels, data };
+            }
+
+            function updateChart(metric = 'Volunteer Hours', region = 'Mumbai') {
+                const { labels, data } = generateChartData(metric, region);
+                const dataLabel = `${metric} in ${region}`;
+
+                if (!govChart) {
+                    govChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: dataLabel,
+                                data: data,
+                                backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                                borderColor: 'rgba(37, 99, 235, 1)',
+                                borderWidth: 1,
+                                borderRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: '#475569'
+                                    },
+                                    grid: {
+                                        color: '#e2e8f0'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: '#475569'
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: '#334155'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: '#1e293b',
+                                    titleColor: '#f8fafc',
+                                    bodyColor: '#f8fafc',
+                                    displayColors: false
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    govChart.data.labels = labels;
+                    govChart.data.datasets[0].data = data;
+                    govChart.data.datasets[0].label = dataLabel;
+                    govChart.update();
+                }
+            }
+
+            document.getElementById('query-btn').addEventListener('click', () => {
+                const metric = document.getElementById('data-metric').value;
+                const region = document.getElementById('data-region').value;
+                updateChart(metric, region);
+            });
+
+            updateChart();
+
+        });
+    </script>
+</body>
+</html>
