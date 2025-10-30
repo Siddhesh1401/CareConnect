@@ -279,19 +279,19 @@ app.use('/api/v1/communities', communityRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
 // Legacy routes (redirect to v1) - for backward compatibility during transition
-app.use('/api/auth', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/admin', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/api-admin', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/access-requests', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/government', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/messages', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/events', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/dashboard', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/ngos', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/campaigns', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/stories', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/communities', (req, res) => res.redirect(301, `/api/v1${req.path}`));
-app.use('/api/reports', (req, res) => res.redirect(301, `/api/v1${req.path}`));
+app.use('/api/auth', (req, res) => res.redirect(301, `/api/v1/auth${req.path}`));
+app.use('/api/admin', (req, res) => res.redirect(301, `/api/v1/admin${req.path}`));
+app.use('/api/api-admin', (req, res) => res.redirect(301, `/api/v1/api-admin${req.path}`));
+app.use('/api/access-requests', (req, res) => res.redirect(301, `/api/v1/access-requests${req.path}`));
+app.use('/api/government', (req, res) => res.redirect(301, `/api/v1/government${req.path}`));
+app.use('/api/messages', (req, res) => res.redirect(301, `/api/v1/messages${req.path}`));
+app.use('/api/events', (req, res) => res.redirect(301, `/api/v1/events${req.path}`));
+app.use('/api/dashboard', (req, res) => res.redirect(301, `/api/v1/dashboard${req.path}`));
+app.use('/api/ngos', (req, res) => res.redirect(301, `/api/v1/ngos${req.path}`));
+app.use('/api/campaigns', (req, res) => res.redirect(301, `/api/v1/campaigns${req.path}`));
+app.use('/api/stories', (req, res) => res.redirect(301, `/api/v1/stories${req.path}`));
+app.use('/api/communities', (req, res) => res.redirect(301, `/api/v1/communities${req.path}`));
+app.use('/api/reports', (req, res) => res.redirect(301, `/api/v1/reports${req.path}`));
 
 // Serve uploaded files with CORS headers
 app.use('/uploads', (req, res, next) => {
