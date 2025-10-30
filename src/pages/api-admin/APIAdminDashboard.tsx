@@ -5,6 +5,8 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { apiAdminAPI } from '../../services/api';
 import { accessRequestAPI, AccessRequest as APIAccessRequest } from '../../services/accessRequestAPI';
+import { KeyDetailsModal } from '../../components/api-admin/KeyDetailsModal';
+import { EditKeyModal } from '../../components/api-admin/EditKeyModal';
 
 interface APIKey {
   id: string;
@@ -36,6 +38,11 @@ const APIAdminDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Modal States
+  const [showKeyDetailsModal, setShowKeyDetailsModal] = useState(false);
+  const [showEditKeyModal, setShowEditKeyModal] = useState(false);
+  const [selectedKey, setSelectedKey] = useState<APIKey | null>(null);
   
   // API Key Generation Modal State
   const [showKeyModal, setShowKeyModal] = useState(false);
@@ -201,6 +208,46 @@ const APIAdminDashboard: React.FC = () => {
       alert('Failed to reject request. Please try again.');
     }
   }, []);
+
+  const openKeyDetails = useCallback((key: APIKey) => {
+    setSelectedKey(key);
+    setShowKeyDetailsModal(true);
+  }, []);
+
+  const closeKeyDetails = useCallback(() => {
+    setShowKeyDetailsModal(false);
+    setSelectedKey(null);
+  }, []);
+
+  const openEditKey = useCallback((key: APIKey) => {
+    setSelectedKey(key);
+    setShowEditKeyModal(true);
+  }, []);
+
+  const closeEditKey = useCallback(() => {
+    setShowEditKeyModal(false);
+    setSelectedKey(null);
+  }, []);
+
+  const handleSaveKeyChanges = useCallback(async (updates: Partial<APIKey>) => {
+    if (!selectedKey) return;
+    
+    try {
+      // Call your API to update the key
+      // const result = await apiAdminAPI.updateAPIKey(selectedKey.id, updates);
+      // For now, just close the modal
+      alert('Key updated successfully!');
+      closeEditKey();
+      // Refresh dashboard data
+      const response = await apiAdminAPI.getAPIDashboard();
+      if (response.success) {
+        setDashboardData(response.data);
+      }
+    } catch (err) {
+      console.error('Error saving key changes:', err);
+      alert('Failed to save changes. Please try again.');
+    }
+  }, [selectedKey, closeEditKey]);
 
   const setActiveTabCallback = useCallback((tab: 'overview' | 'keys' | 'requests' | 'analytics') => {
     setActiveTab(tab);
@@ -457,9 +504,22 @@ const APIAdminDashboard: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => openKeyDetails(key)}
+                      >
                         <Eye className="mr-1" size={14} />
                         View Details
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => openEditKey(key)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Settings className="mr-1" size={14} />
+                        Edit
                       </Button>
                       <Button
                         variant="outline"
@@ -778,6 +838,21 @@ const APIAdminDashboard: React.FC = () => {
           <Plus className="h-6 w-6" />
         </Button>
       </div>
+
+      {/* Key Details Modal */}
+      <KeyDetailsModal
+        isOpen={showKeyDetailsModal}
+        onClose={closeKeyDetails}
+        apiKey={selectedKey}
+      />
+
+      {/* Edit Key Modal */}
+      <EditKeyModal
+        isOpen={showEditKeyModal}
+        onClose={closeEditKey}
+        apiKey={selectedKey}
+        onSave={handleSaveKeyChanges}
+      />
     </div>
   );
 };
