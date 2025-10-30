@@ -21,9 +21,7 @@ import MapsButton from '../../components/ui/MapsButton';
 import { ChatBot } from '../../components/ChatBot';
 import ReportForm from '../../components/ReportForm';
 import { getFullImageUrl } from '../../services/api';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { eventAPI } from '../../services/api';
 
 interface Event {
   _id: string;
@@ -94,20 +92,17 @@ export const EventsPage: React.FC = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString()
+      const filters: any = {};
+
+      if (searchTerm) filters.search = searchTerm;
+      if (selectedCategory !== 'all') filters.category = selectedCategory;
+      if (selectedLocation !== 'all') filters.location = selectedLocation;
+
+      const response = await eventAPI.getAllEvents({
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit
       });
-
-      if (searchTerm) params.append('search', searchTerm);
-      if (selectedCategory !== 'all') params.append('category', selectedCategory);
-      if (selectedLocation !== 'all') params.append('city', selectedLocation);
-
-      // Include auth token if available to get registration status
-      const token = localStorage.getItem('careconnect_token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await axios.get(`${API_BASE_URL}/events?${params}`, { headers });
       
       if (response.data.success) {
         setEvents(response.data.data.events);
@@ -308,7 +303,7 @@ export const EventsPage: React.FC = () => {
                 <div className="relative">
                   {event.images && event.images.length > 0 ? (
                     <img
-                      src={getFullImageUrl(event.image)}
+                      src={getFullImageUrl(event.images[0])}
                       alt={event.title}
                       className="w-full h-48 object-cover"
                       onError={(e) => {

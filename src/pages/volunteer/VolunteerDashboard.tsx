@@ -14,9 +14,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { api } from '../../services/api';
 
 interface DashboardData {
   stats: {
@@ -64,18 +62,8 @@ export const VolunteerDashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('careconnect_token');
 
-        if (!token) {
-          setError('Authentication required');
-          return;
-        }
-
-        const response = await axios.get(`${API_BASE_URL}/dashboard/volunteer`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await api.get('/volunteer');
 
         if (response.data.success) {
           setDashboardData(response.data.data);
@@ -211,16 +199,10 @@ export const VolunteerDashboard: React.FC = () => {
             );
 
             return (
-              <Card key={index} className={`p-6 bg-white border-primary-200 ${stat.link ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}`}>
-                {stat.link ? (
-                  <Link to={stat.link} className="block">
-                    {content}
-                  </Link>
-                ) : (
-                  <div className="block">
-                    {content}
-                  </div>
-                )}
+              <Card key={index} className="p-6 bg-white border-primary-200">
+                <div className="block">
+                  {content}
+                </div>
               </Card>
             );
           })}

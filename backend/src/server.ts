@@ -29,7 +29,7 @@ import { cacheMiddleware, getCacheStats } from './middleware/responseCache.js';
 import { requestLogger, errorLogger, apiMonitor } from './middleware/apiMonitor.js';
 import { getStatusPage, createIncident, updateIncident, getIncidents, statusPage } from './middleware/statusPage.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { getNGODashboard } from './controllers/dashboardController.js';
+import { getNGODashboard, getVolunteerDashboard } from './controllers/dashboardController.js';
 import { swaggerUi, specs } from './swagger.js';
 import './scripts/emailMonitor.js'; // Start email monitoring
 
@@ -272,6 +272,7 @@ app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.get('/api/v1/ngo', authenticate, getNGODashboard);
+app.get('/api/v1/volunteer', authenticate, getVolunteerDashboard);
 app.use('/api/v1/ngos', ngoRoutes);
 app.use('/api/v1/campaigns', campaignRoutes);
 app.use('/api/v1/stories', storyRoutes);
